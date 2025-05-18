@@ -40,17 +40,17 @@
         .intro-box {
             justify-content: center;
             text-align: center;
-    background: #fff;
-    border-radius: 18px;
-    box-shadow: 0 4px 24px 0 rgba(198,40,40,0.08);
-    padding: 24px 32px;
-    margin-bottom: 24px;
-    width: 100%;
-    max-width: 800px;
-    border-left: 6px solid #c62828;
-    border-right: 6px solid #c62828;
-    background: #fae1e1;
-}
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px 0 rgba(198,40,40,0.08);
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            width: 100%;
+            max-width: 800px;
+            border-left: 6px solid #c62828;
+            border-right: 6px solid #c62828;
+            background: #fae1e1;
+        }
         .intro-box.highlight {
             border-left: 6px solid #c62828;
             background: #fff8f8;
@@ -73,6 +73,30 @@
             margin-bottom: 8px;
             font-size: 1rem;
         }
+        .jaf-btn {
+            background: #fff;
+            border: 2px solid #c62828;
+            color: #c62828;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s, color 0.2s;
+        }
+        .jaf-btn:hover, .jaf-btn.active {
+            background: #c62828;
+            color: #fff;
+        }
+        @media (max-width: 700px) {
+            #jaf-nav {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .jaf-btn {
+                width: 100%;
+            }
+        }
         @media (max-width: 700px) {
             .intro-box, .intro-header {
                 max-width: 95vw;
@@ -89,5 +113,244 @@
     </style>
 </head>
 <body>
+    <div class="intro-section">
+        <div class="intro-header">
+            <img src="https://i.imgur.com/0yKXy1j.png" alt="Logo" class="intro-logo">
+            <h1>Ghid Jafuri - Departamentul Medical</h1>
+            <img src="https://i.imgur.com/6QwQ5Qv.png" alt="Caduceu" class="intro-logo">
+        </div>
+
+        <div id="jaf-nav" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:32px;">
+            <button class="jaf-btn" onclick="showJaf('general')">Ghid General</button>
+            <button class="jaf-btn" onclick="showJaf('pacific')">Pacific</button>
+<button class="jaf-btn" onclick="showJaf('cazino')">Cazino</button>
+<button class="jaf-btn" onclick="showJaf('tunel')">Tunel</button>
+            <button class="jaf-btn" onclick="showJaf('highway')">Highway</button>
+            <button class="jaf-btn" onclick="showJaf('paleto')">Paleto</button>
+            <button class="jaf-btn" onclick="showJaf('dusty')">Dusty</button>
+            <button class="jaf-btn" onclick="showJaf('humane')">Humane</button>
+            <button class="jaf-btn" onclick="showJaf('biju')">Biju</button>
+            <button class="jaf-btn" onclick="showJaf('rapire')">Răpire</button>
+            <button class="jaf-btn" onclick="showJaf('depozit')">Depozit</button>
+        </div>
+
+        <div id="jaf-content">
+            <div id="jaf-general" class="jaf-section intro-box" style="display:block;">
+                <h2 style="text-align:center; margin-bottom:24px;">Ghid General Jafuri</h2>
+                <div style="border:2px solid #c62828; border-radius:18px; background:#fff8f8; padding:18px 18px 8px 18px; margin-bottom:18px;">
+                    <b>1. Desfășurarea unui jaf</b>
+                    <ul style="text-align:left;">
+                        <li><b>Anunțarea jafului</b> se face de către Poliție.</li>
+                        <li>Coordonarea jafului este preluată de un <b>Coordonator Jaf</b> sau, în lipsă, de cel mai mare grad ISU prezent.</li>
+                        <li>Coordonatorul menționează că <b>NU se folosesc semnalele acustice și luminoase</b> spre zona de regrupare.</li>
+                        <li>Se specifică faptul că pe parcursul jafului <b>NU se folosesc callsign-uri și coduri</b>.</li>
+                        <li>Se menționează zona de regrupare.</li>
+                        <li>Toate cadrele medicale care se deplasează anunță cu <b>"."</b> pe /m.</li>
+                        <li>Se solicită <b>două unități aeriene</b> la jaf.</li>
+                        <li>Deplasarea se face către zona de regrupare.</li>
+                        <li>Odată anunțat COD 6, coordonatorul anunță unitățile să înceapă deplasarea către bancă.</li>
+                        <li>La final, coordonatorul anunță încheierea acțiunii și reluarea activităților normale.</li>
+                    </ul>
+                </div>
+                <div style="border:2px solid #c62828; border-radius:18px; background:#fff8f8; padding:18px 18px 8px 18px;">
+                    <b>2. Reguli Jaf</b>
+                    <ul style="text-align:left;">
+                        <li>Ordinea de intervenție: <b>trupele speciale TAT</b>, gradele mari din poliție, restul polițiștilor, <b>infractorii</b>, restul persoanelor.</li>
+                        <li><b style="color:#c62828;">Dacă un medic este în comă, se va resuscita medicul.</b></li>
+                        <li>Infractorii trebuie să fie încătușați înainte de a fi resuscitați. Dacă nu ești sigur, întreabă un polițist.</li>
+                        <li>Ai dreptul să rogi un polițist să asigure protecția.</li>
+                        <li><b>ISULS</b> are prioritate la heli.</li>
+                        <li><b style="color:#c62828;">NU AVEȚI VOIE SĂ OFERIȚI INFORMAȚII POLIȚIEI LA JAF.</b></li>
+                        <li><b>Ambulanțierii vor sta de fiecare dată ultimii.</b></li>
+                        <li>Deplasarea până la zona de regrupare și la jaf se face <b>FĂRĂ semnale acustice și luminoase</b>.</li>
+                        <li>La jafuri și BK-uri se acordă doar primul ajutor (<i>/me acordă primul ajutor</i>). Nu faceți acțiuni complexe!</li>
+                        <li>Nu aveți voie să mutați suspecți și polițiști.</li>
+                        <li>Este <b>obligatoriu</b> să aveți asupra voastră minim 5 truse la jaf.</li>
+                        <li>Unitățile pot interveni la jaf doar dacă au minim gradul de <b>Medic Specialist (200+)</b>.</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="jaf-pacific" class="jaf-section intro-box" style="display:none;">
+    <h2>Jaf Pacific</h2>
+    <ol style="text-align:left;">
+        <li>
+            <b>Prezentare locație:</b>
+            <ul>
+                <li>Intervenția la Banca Pacific cuprinde clădirile principale (A, B, C, D, E, F, G) și zona hotelului.</li>
+                <li>Clădirile A, B, C, D, F pot fi accesate, fiind prioritare pentru intervenție medicală.</li>
+            </ul>
+        </li>
+        <li>
+            <b>Zona de regrupare:</b>
+            <ul>
+                <li>Parcarea de la Vinewood Bowl (Nordul Los Santos).</li>
+                <li>Deplasarea până la zona de regrupare se face fără semnale acustice și luminoase.</li>
+            </ul>
+        </li>
+        <li>
+            <b>Traseu recomandat:</b>
+            <ul>
+                <li>Spital Viceroy &rarr; Zona de regrupare &rarr; Pacific.</li>
+                <li>Se folosește traseul rapid, fără semnale acustice/luminoase.</li>
+                <li>Timpul optim este obținut cu Ambulanța Vapid Speedo.</li>
+            </ul>
+        </li>
+        <li>
+            <b>Protocol intervenție:</b>
+            <ul>
+                <li>Se intervine doar la semnalul poliției (COD 6).</li>
+                <li>Ambulanțierii rămân în stand-by în zona de regrupare până la semnal.</li>
+                <li>Se acordă doar primul ajutor, fără acțiuni complexe.</li>
+                <li>Pericol de a se trage asupra medicilor pe străzile adiacente sau portocalii.</li>
+            </ul>
+        </li>
+    </ol>
+</div>
+            <div id="jaf-cazino" class="jaf-section intro-box" style="display:none;">
+    <h2>Jaf Cazino</h2>
+    <ol style="text-align:left;">
+        <li>
+            <b>Prezentare locație:</b>
+            <ul>
+                <li>Zona de intervenție cuprinde clădirea Casino-ului, mesele, parcarea și zona interioară.</li>
+                <li>Accesul este permis doar unităților aeriene.</li>
+            </ul>
+        </li>
+        <li>
+            <b>Zona de regrupare:</b>
+            <ul>
+                <li>Parcarea de la Vinewood Bowl.</li>
+                <li>Deplasarea până la zona de regrupare se face fără semnale acustice și luminoase.</li>
+            </ul>
+        </li>
+        <li>
+            <b>Traseu recomandat:</b>
+            <ul>
+                <li>Spital Viceroy &rarr; Zona de regrupare &rarr; Casino.</li>
+                <li>Se folosește traseul rapid, fără semnale acustice/luminoase.</li>
+                <li>Timpul optim este obținut cu Ambulanța Vapid Speedo.</li>
+            </ul>
+        </li>
+        <li>
+            <b>Protocol intervenție:</b>
+            <ul>
+                <li>Se intervine doar la semnalul poliției (COD 6).</li>
+                <li>Minim două unități aeriene trebuie să fie prezente.</li>
+                <li>Ambulanțierii rămân în stand-by în zona de regrupare până la semnal.</li>
+                <li>Se acordă doar primul ajutor, fără acțiuni complexe.</li>
+            </ul>
+        </li>
+    </ol>
+</div>
+            <div id="jaf-tunel" class="jaf-section intro-box" style="display:none;">
+    <h2>Jaf Tunel</h2>
+    <ol style="text-align:left;">
+        <li>
+            <b>Prezentare locație:</b>
+            <ul>
+                <li>Zona de intervenție este la intrarea din zona Mirror Park, cu acces pe scări și tunel.</li>
+                <li>Accesul tunelului se face doar pe jos sau cu ajutorul poliției.</li>
+            </ul>
+        </li>
+        <li>
+            <b>Zona de regrupare:</b>
+            <ul>
+                <li>Parcarea de la Vinewood Bowl.</li>
+                <li>Deplasarea până la zona de regrupare se face fără semnale acustice și luminoase.</li>
+            </ul>
+        </li>
+        <li>
+            <b>Traseu recomandat:</b>
+            <ul>
+                <li>Spital Viceroy &rarr; Zona de regrupare &rarr; Tunel.</li>
+                <li>Se folosește traseul rapid, fără semnale acustice/luminoase.</li>
+                <li>Timpul optim este obținut cu Ambulanța Vapid Speedo.</li>
+            </ul>
+        </li>
+        <li>
+            <b>Protocol intervenție:</b>
+            <ul>
+                <li>Se intervine doar la semnalul poliției (COD 6).</li>
+                <li>Ambulanțierii rămân în stand-by în zona de regrupare până la semnal.</li>
+                <li>Se acordă doar primul ajutor, fără acțiuni complexe.</li>
+                <li>Pericol de a se trage asupra medicilor în zonele accentuate cu portocaliu.</li>
+            </ul>
+        </li>
+    </ol>
+</div>
+            <div id="jaf-highway" class="jaf-section intro-box" style="display:none;">
+                <h2>Jaf Highway</h2>
+                <ul>
+                    <li>Exemplu: Ambulanța pe banda de urgență.</li>
+                    <!-- Completează cu detalii specifice -->
+                </ul>
+            </div>
+            <div id="jaf-paleto" class="jaf-section intro-box" style="display:none;">
+                <h2>Jaf Paleto</h2>
+                <ul>
+                    <li>Exemplu: Poziționare lângă banca Paleto.</li>
+                    <!-- Completează cu detalii specifice -->
+                </ul>
+            </div>
+            <div id="jaf-dusty" class="jaf-section intro-box" style="display:none;">
+                <h2>Jaf Dusty</h2>
+                <ul>
+                    <li>Exemplu: Poziționare la depozitul Dusty.</li>
+                    <!-- Completează cu detalii specifice -->
+                </ul>
+            </div>
+            <div id="jaf-humane" class="jaf-section intro-box" style="display:none;">
+                <h2>Jaf Humane</h2>
+                <ul>
+                    <li>Exemplu: Poziționare la intrarea principală Humane Labs.</li>
+                    <!-- Completează cu detalii specifice -->
+                </ul>
+            </div>
+            <div id="jaf-biju" class="jaf-section intro-box" style="display:none;">
+                <h2>Jaf Biju</h2>
+                <ul>
+                    <li>Exemplu: Poziționare la bijuterie.</li>
+                    <!-- Completează cu detalii specifice -->
+                </ul>
+            </div>
+            <div id="jaf-rapire" class="jaf-section intro-box" style="display:none;">
+                <h2>Jaf Răpire</h2>
+                <ul>
+                    <li>Exemplu: Protocol special pentru răpiri.</li>
+                    <!-- Completează cu detalii specifice -->
+                </ul>
+            </div>
+            <div id="jaf-depozit" class="jaf-section intro-box" style="display:none;">
+                <h2>Jaf Depozit</h2>
+                <ul>
+                    <li>Exemplu: Poziționare la depozit.</li>
+                    <!-- Completează cu detalii specifice -->
+                </ul>
+            </div>
+        </div>
+    </div>
+<script>
+    function showJaf(jaf) {
+        const ids = [
+            'general','pacific','cazino','tunel','highway','paleto','dusty','humane','biju','rapire','depozit'
+        ];
+        ids.forEach(id => {
+            const el = document.getElementById('jaf-' + id);
+            if (el) el.style.display = (id === jaf) ? 'block' : 'none';
+        });
+        // Active button highlight
+        document.querySelectorAll('.jaf-btn').forEach(btn => btn.classList.remove('active'));
+        // Găsește butonul exact după textul din buton (fără diacritice)
+        const btn = Array.from(document.querySelectorAll('.jaf-btn')).find(b => 
+            b.textContent.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === jaf
+        );
+        if(btn) btn.classList.add('active');
+    }
+    // Expune funcția global
+    window.showJaf = showJaf;
+
+    // Show general by default
+    showJaf('general');
+</script>
 </body>
 </html>

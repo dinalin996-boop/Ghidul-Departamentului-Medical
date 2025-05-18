@@ -2,7 +2,7 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <title>Medicamente/Echipamente</title>
+    <title>Medicamente și Echipamente</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         html, body {
@@ -12,7 +12,7 @@
             background: #fff5f5;
             font-family: 'Segoe UI', Arial, sans-serif;
         }
-        .intro-section {
+        .main-section {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -20,74 +20,123 @@
             align-items: center;
             padding: 32px 0;
         }
-        .intro-header {
+        .main-header {
             display: flex;
             align-items: center;
             gap: 24px;
-            margin-bottom: 32px;
+            margin-bottom: 25px;
         }
-        .intro-logo {
-            width: 64px;
-            height: 64px;
-            object-fit: contain;
-        }
-        .intro-header h1 {
-            font-size: 2.2rem;
+        .main-header h1 {
+            font-size: 2.5rem;
             color: #c62828;
             letter-spacing: 2px;
             margin: 0;
         }
-        .intro-box {
-            justify-content: center;
-            text-align: center;
-    background: #fff;
-    border-radius: 18px;
-    box-shadow: 0 4px 24px 0 rgba(198,40,40,0.08);
-    padding: 24px 32px;
-    margin-bottom: 24px;
-    width: 100%;
-    max-width: 800px;
-    border-left: 6px solid #c62828;
-    border-right: 6px solid #c62828;
-    background: #fae1e1;
-}
-        .intro-box.highlight {
+        .main-box {
+            background: #fae1e1;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px 0 rgba(198,40,40,0.08);
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            width: 100%;
+            max-width: 1000px;
             border-left: 6px solid #c62828;
-            background: #fff8f8;
+            border-right: 6px solid #c62828;
+            text-align: left;
         }
-        .intro-box.extra {
-            background: #fffbe9;
-            border-left: 6px solid #ffb300;
-            border-right: 6px solid #ffb300;
-        }
-        .intro-box h2 {
+        .main-box h2 {
             margin-top: 0;
             color: #c62828;
             font-size: 1.3rem;
+            text-align: center;
         }
-        .intro-box ul {
-            padding-left: 20px;
-            margin: 0;
+        .main-box ul {
+            padding-left: 18px;
+            margin: 0 0 12px 0;
         }
-        .intro-box li {
+        .main-box li {
             margin-bottom: 8px;
             font-size: 1rem;
         }
+        .list-label {
+            color: #b71c1c;
+            font-weight: bold;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            font-size: 1.08rem;
+        }
         @media (max-width: 700px) {
-            .intro-box, .intro-header {
+            .main-box, .main-header {
                 max-width: 95vw;
                 padding: 16px 8px;
             }
-            .intro-logo {
-                width: 48px;
-                height: 48px;
-            }
-            .intro-header h1 {
+            .main-header h1 {
                 font-size: 1.3rem;
             }
         }
     </style>
 </head>
 <body>
+    <div class="main-section">
+        <div class="main-header">
+            <h1>MEDICAMENTE ȘI ECHIPAMENTE</h1>
+        </div>
+
+<div class="main-box">
+    <h2>MEDICAMENTE 💊</h2>
+    <ul>
+        <li><b>Nurofen, Antinevralgic, Parasinus, Analgezice:</b> Dureri de cap</li>
+        <li><b>No-Spa, Dicarbocalm:</b> Dureri de burtă</li>
+        <li><b>Nurofen răceală și gripă, Parasinus, Paracetamol:</b> Răceală</li>
+        <li><b>Strepsils, Decasept:</b> Dureri de gât</li>
+        <li><b>Voltaren, Antiinflamatoare:</b> Inflamații</li>
+        <li><b>Pastilă cu vitamina lipsă a pacientului (fiolă de 10 comprimate cu 50mg calciu/magneziu etc.):</b> Deficit de vitamine/minerale</li>
+        <li><b>Dermazin - cremă. <i>*pe durata transportului se folosește PĂTURA DE ARȘI/ARSURI*</i>, Regen agen - cremă:</b> Arsuri</li>
+        <li><b>Morfina - injectabil intravenos (0,25-0,5ml):</b> Dureri puternice/insuportabile</li>
+        <li><b>Augmentin, Tetraciclină:</b> Post operator/Prevenirea infecțiilor/Antibiotic</li>
+        <li><b>Atropina-intravenos (3mg), Adrenalina-intravenos (1ml soluție injectabilă în 10 ml ser fiziologic):</b> Stop cardio-respirator</li>
+        <li><b>Maltofer - masticabil:</b> Anemie</li>
+        <li><b>Vitamine: A,B,C...etc. <i>*Vitaminele sunt substanțe necesare organismului pentru ca acesta să fie sănătos.*</i>:</b> Vitamine</li>
+        <li><b>Hidrocortizon injectabil intra-venos între 100-500mg dizolvat în perfuzie/ Adrenalina-intravenos (1ml soluție injectabilă în 10 ml ser fiziologic):</b> Alergii/Șoc anafilactic</li>
+        <li><b>Betadină, Apă oxigenată:</b> Curățarea rănii</li>
+        <li><b>Diclofenac Sodic:</b> Boli articulare reumatice</li>
+        <li><b>Xilina-(anestezic local), Tetracaină-(anestezic rahie), Propofol, Ketamina (anestezie generală sau totală):</b> Anestezie</li>
+    </ul>
+</div>
+        <div class="main-box">
+            <h2>ECHIPAMENT PRIM-AJUTOR 🩺</h2>
+            <ul>
+                <li><b>Guler cervical:</b> Imobilizarea zonei cervicale (gâtului)</li>
+                <li><b>Corset Medicinal:</b> Imobilizarea coloanei vertebrale</li>
+                <li><b>Mască oxigen:</b> Administrarea oxigenului victimei</li>
+                <li><b>Tuburi de oxigen:</b> Utilizate la concentratorul de oxigen</li>
+                <li><b>Targa de salvare:</b> Transportul victimei</li>
+                <li><b>Targa mobilă (căruță):</b> Transportul victimei</li>
+                <li><b>Trusa de prim-ajutor:</b> Conține toate instrumentele și ustensilele necesare pentru acordarea primului ajutor</li>
+                <li><b>Atela ghipsată:</b> Imobilizarea unei luxații/fracturi la nivelul membrelor</li>
+                <li><b>Defibrilator:</b> Se utilizează în caz de stop cardio-respirator</li>
+                <li><b>Comprese sterile:</b> Curățarea rănilor</li>
+                <li><b>Folie pentru arsuri:</b> Se utilizează și în timpul transportului pentru a acoperi pacienții care au suferit arsuri</li>
+            </ul>
+        </div>
+
+        <div class="main-box">
+            <h2>ECHIPAMENTE PENTRU S.M.U.L.S 🚑</h2>
+            <ul>
+                <li><b>Clește hidraulic:</b> Depărtarea a 2 părți de caroserie la o lungime mică + tăierea caroseriei</li>
+                <li><b>Foarfecă hidraulică:</b> Strângerea caroseriei pentru a fi mai ușor de depărtat</li>
+                <li><b>Gheara mecanică:</b> Legarea unei părți de caroserie de un obiect fix pentru a o desprinde</li>
+                <li><b>Fierăstrău pneumatic:</b> Tăierea parbrizului/lunetei</li>
+                <li><b>Ked de extracție:</b> Imobilizarea coloanei vertebrale (are formă de vestă)</li>
+                <li><b>Compresor:</b> Comprimarea aerului pentru echipament pneumatic</li>
+                <li><b>Furtun de aer comprimat:</b> Conectarea echipamentului pneumatic la compresor</li>
+                <li><b>Triunghiuri de blocare:</b> Se pun sub roți pentru imobilizarea vehiculului</li>
+                <li><b>Proiectorare:</b> Iluminare</li>
+                <li><b>Extinctor:</b> Stingerea focului</li>
+                <li><b>Lanturi:</b> Asigurarea vehiculului</li>
+                <li><b>Patent:</b> Se folosește pentru a tăia cablurile bateriei auto</li>
+            </ul>
+        </div>
+    </div>
 </body>
 </html>
