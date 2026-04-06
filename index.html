@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
@@ -16,7 +16,8 @@ html, body {
     padding: 0;
     box-sizing: border-box;
     font-family: 'Segoe UI', Arial, sans-serif;
-    background: #e0e0e0;
+    background: linear-gradient(135deg, #f8fbfd 0%, #f0f7fb 50%, #e8f3f9 100%);
+    background-attachment: fixed;
     color: #222;
 }
 *, *::before, *::after { box-sizing: inherit; }
@@ -24,9 +25,10 @@ html, body {
 /* ======= STRUCTURA ======= */
 body {
     min-height: 100vh;
-    background: #e0e0e0;
+    background: linear-gradient(135deg, #f8fbfd 0%, #f0f7fb 50%, #e8f3f9 100%);
+    background-attachment: fixed;
     transition: background 0.3s, color 0.3s;
-}
+}}
         
 .container-bg {
     background: #d3d3d3;
@@ -69,7 +71,7 @@ body {
     padding: 8px 32px;
     font-size: 2rem;
     font-weight: bold;
-    color: #d32f2f;
+    color: #245ab1;
     margin-bottom: 0.2rem;
     display: flex;
     align-items: center;
@@ -103,15 +105,18 @@ body {
     width: 8px;
 }
 .sidebar::-webkit-scrollbar-thumb {
-    background: #d32f2f;
+    background: #245ab1;
     border-radius: 8px;
+}
+.sidebar::-webkit-scrollbar-track {
+    background: #f0f0f0;
 }
 body.dark-mode .sidebar {
     background: #1c1c1c;
     box-shadow: 2px 0 16px #000;
 }
 .nav-btn {
-    background: #ff6f6f;
+    background: #245ab1;
     border: none;
     border-radius: 24px;
     padding: 12px 16px;
@@ -126,15 +131,15 @@ body.dark-mode .sidebar {
     display: block;
 }
 .nav-btn.active, .nav-btn:hover {
-    background: #d32f2f;
+    background: #1a4080;
     color: #fff;
 }
 body.dark-mode .nav-btn {
-    background: #ff6f6f !important;
+    background: #245ab1 !important;
 }
 body.dark-mode .nav-btn.active,
 body.dark-mode .nav-btn:hover {
-    background: #d32f2f !important;
+    background: #1a4080 !important;
     color: #fff !important;
 }
 .content-wrapper {
@@ -156,7 +161,7 @@ body.dark-mode .nav-btn:hover {
 .section { display: none; }
 .section.active { display: block; }
 .jaf-btn {
-    background: #ff6f6f;
+    background: #245ab1;
     color: #fff;
     font-size: 1.08rem;
     font-weight: 700;
@@ -170,9 +175,9 @@ body.dark-mode .nav-btn:hover {
     outline: none;
 }
 .jaf-btn:hover, .jaf-btn:focus, .jaf-btn.active {
-    background: #245ab1;
+    background: #1a4080;
     color: #fff;
-    box-shadow: 0 4px 16px #d32f2f55;
+    box-shadow: 0 4px 16px #245ab155;
     transform: translateY(-2px) scale(1.04);
 }
 
@@ -181,7 +186,7 @@ body.dark-mode .nav-btn:hover {
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: thin;
-    scrollbar-color: #d32f2f #f5f5f5;
+    scrollbar-color: #245ab1 #f5f5f5;
     border-radius: 24px;
 }
 .scroll-x::-webkit-scrollbar {
@@ -189,8 +194,11 @@ body.dark-mode .nav-btn:hover {
     background: #f5f5f5;
 }
 .scroll-x::-webkit-scrollbar-thumb {
-    background: #d32f2f;
+    background: #245ab1;
     border-radius: 8px;
+}
+.scroll-x::-webkit-scrollbar-thumb:hover {
+    background: #1a4080;
 }
 
 /* ======= DARK MODE ======= */
@@ -261,13 +269,16 @@ body.dark-mode .scroll-x::-webkit-scrollbar {
     background: #181818 !important;
 }
 body.dark-mode .scroll-x::-webkit-scrollbar-thumb {
-    background: #d32f2f !important;
+    background: #245ab1 !important;
 }
 body.dark-mode ::-webkit-scrollbar {
     background: #1c1c1c;
 }
 body.dark-mode ::-webkit-scrollbar-thumb {
-    background: #555;
+    background: #245ab1;
+}
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #1a4080;
 }
 
 /* ======= SUPRASCRIE FUNDALURI INLINE ALBE/ROZ/GRI ======= */
@@ -283,7 +294,7 @@ body.dark-mode [style*="background:#fffbe7"],
 body.dark-mode [style*='background:#fff8f8'],
 body.dark-mode [style*='background:#f8f8f8'],
 body.dark-mode [style*='background:#fff0f0'],
-body.dark-mode [style*='background:#fff7f7'],
+body.dark-mode [style*='background:#f9f9ff'],
 body.dark-mode [style*='background:#f9f9ff'] {
     background: #232323 !important;
     color: #f0f0f0 !important;
@@ -316,7 +327,7 @@ body.dark-mode [style*="color:#444"] {
     transition: background 0.3s, transform 0.2s;
 }
 #darkModeToggle:hover {
-    background: #d32f2f;
+    background: #245ab1;
     transform: scale(1.1);
 }
 body.dark-mode #darkModeToggle {
@@ -351,7 +362,7 @@ body.dark-mode #darkModeToggle {
 
 /* ======= ALTE ELEMENTE ======= */
 button[onclick^="showSection"]:hover {
-    background: #b71c1c !important;
+    background: #245ab1 !important;
     transition: background 0.2s;
 }
         
@@ -388,7 +399,7 @@ body.dark-mode [style*="background:#fffbe7"],
 body.dark-mode [style*="background:#ffeaea"],
 body.dark-mode [style*="background:#f9f9ff"],
 body.dark-mode [style*="background:#fff0f0"],
-body.dark-mode [style*="background:#fff7f7"],
+body.dark-mode [style*="background:#f9f9ff"],
 body.dark-mode [style*="background:#fff8f8"] {
     background: #232323 !important;
     color: #f0f0f0 !important;
@@ -417,7 +428,7 @@ body.dark-mode [style*="background:#fffbe7"],
 body.dark-mode [style*="background:#ffeaea"],
 body.dark-mode [style*="background:#f9f9ff"],
 body.dark-mode [style*="background:#fff0f0"],
-body.dark-mode [style*="background:#fff7f7"],
+body.dark-mode [style*="background:#f9f9ff"],
 body.dark-mode [style*="background:#fff8f8"],
 body.dark-mode [style*="background:rgba(255,255,255"] {
     background: #232323 !important;
@@ -425,8 +436,8 @@ body.dark-mode [style*="background:rgba(255,255,255"] {
 }
 body.dark-mode [style*="background:#e3f2fd"],
 body.dark-mode [style*="background: #e3f2fd"],
-body.dark-mode [style*="background:#fff7f7"],
-body.dark-mode [style*="background: #fff7f7"],
+body.dark-mode [style*="background:#f9f9ff"],
+body.dark-mode [style*="background: #f9f9ff"],
 body.dark-mode [style*="background:#ffeaea"],
 body.dark-mode [style*="background: #ffeaea"],
 body.dark-mode [style*="background:#f9f9ff"],
@@ -610,6 +621,9 @@ a[style*="color:#ff9800"]:hover {
     <button class="nav-btn" onclick="showSection('rp-operatii')">
     <i class="fa-solid fa-syringe"></i> Rp Operatii.
 </button>
+    <button class="nav-btn" onclick="showSection('animatii-utile')">
+        <i class="fa-solid fa-person-running"></i> Animații Utile
+    </button>
     <button class="nav-btn" onclick="showSection('rezidentiat')">
         <i class="fa-solid fa-user-graduate"></i> Rezidentiat
     </button>
@@ -647,9 +661,9 @@ a[style*="color:#ff9800"]:hover {
         <div class="main-card" id="main-content">
             <div id="introducere" class="section active">
     <div style="
-        background: radial-gradient(ellipse at 50% 0%, #fff3f3 60%, #e0e7ff 100%);
+        background: radial-gradient(ellipse at 50% 0%, #f3f5ff 54%, #e0e7ff 100%);
         border-radius: 48px;
-        box-shadow: 0 8px 40px #d32f2f22;
+        box-shadow: 0 8px 40px #89CFF0;
         padding: 3em 2em 2.5em 2em;
         max-width: 1100px;
         margin: 0 auto 2.5em auto;
@@ -675,10 +689,10 @@ a[style*="color:#ff9800"]:hover {
                     color:#444;
                     font-weight:600;
                     display:inline-block;
-                    background:linear-gradient(90deg,#fff,#ffeaea 80%);
+                    background:linear-gradient(90deg,#ffffff,#f3f7ff 80%);
                     border-radius:22px;
                     padding:0.4em 2em;
-                    box-shadow:0 2px 12px #d32f2f22;
+                    box-shadow:0 2px 12px #89CFF0;
                     ">
                     Spitalul Județean <span style="color:#245ab1;">Eclipse Medical Tower</span>
                 </div>
@@ -691,7 +705,7 @@ a[style*="color:#ff9800"]:hover {
             background:rgba(255,255,255,0.97);
             border-radius: 36px;
             padding: 2.2em 2.5em 2em 2.5em;
-            box-shadow: 0 4px 32px #d32f2f18;
+            box-shadow: 0 4px 32px #89CFF0;
             margin-bottom:2.2em;
             width:100%;
             max-width:900px;
@@ -718,10 +732,10 @@ a[style*="color:#ff9800"]:hover {
 
         <!-- VICEROY -->
         <div style="
-            background:linear-gradient(90deg,#ffeaea 80%,#fff);
+            background:linear-gradient(90deg,#eaf1ff 26%,#fff);
             border-radius: 32px;
             padding: 1.5em 2.5em;
-            box-shadow: 0 2px 16px #d32f2f11;
+            box-shadow: 0 2px 16px #89CFF0;
             margin-bottom:2em;
             width:100%;
             max-width:900px;
@@ -737,10 +751,10 @@ a[style*="color:#ff9800"]:hover {
 
         <!-- SPITALE RURALE -->
         <div style="
-            background:linear-gradient(90deg,#fff3f3 80%,#f9f9f9);
+            background:linear-gradient(90deg,#f3f5ff 80%,#fff);
             border-radius: 32px;
             padding: 1.5em 2.5em;
-            box-shadow: 0 2px 16px #d32f2f11;
+            box-shadow: 0 2px 16px #89CFF0;
             margin-bottom:2em;
             width:100%;
             max-width:900px;
@@ -759,10 +773,10 @@ a[style*="color:#ff9800"]:hover {
 
         <!-- UNIFORME & ROLURI -->
         <div style="
-            background:linear-gradient(90deg,#f3f3ff 80%,#fff);
+            background:linear-gradient(90deg,#f3f6ff 80%,#fff);
             border-radius: 32px;
             padding: 1.5em 2.5em;
-            box-shadow: 0 2px 16px #2222d322;
+            box-shadow: 0 2px 16px #89CFF0;
             margin-bottom:2em;
             width:100%;
             max-width:900px;
@@ -784,7 +798,7 @@ a[style*="color:#ff9800"]:hover {
             background:linear-gradient(90deg,#e0e0e0 80%,#fff);
             border-radius: 32px;
             padding: 1.3em 2.5em;
-            box-shadow: 0 2px 16px #2222d322;
+            box-shadow: 0 2px 16px #89CFF0;
             width:100%;
             max-width:900px;
             text-align:center;
@@ -802,13 +816,13 @@ a[style*="color:#ff9800"]:hover {
 </div>
 
 <div id="regulament" class="section">
-    <div style="background: radial-gradient(ellipse at 50% 0%, #fff3f3 60%, #e0e7ff 100%); border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 3em 2em 2.5em 2em; max-width: 1100px; margin: 0 auto 2.5em auto; display: flex; flex-direction: column; align-items: center;">
+    <div style="background: radial-gradient(ellipse at 50% 0%, #f3f3ff 70%, #fff 100%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 3em 2em 2.5em 2em; max-width: 1100px; margin: 0 auto 2.5em auto; display: flex; flex-direction: column; align-items: center;">
         <div style="flex:1; text-align:center; margin-bottom:2em;">
             <h2 style="color:#245ab1; font-size:2.3rem; font-weight:900; letter-spacing:2.5px; margin:0;">
                 <i class="fa-solid fa-file-contract"></i> Regulament intern Spitalul Județean de Urgență Eclipse Medical Tower - IC
             </h2>
         </div>
-        <div style="background:rgba(255,255,255,0.97); border-radius: 36px; padding: 2.2em 2.5em 2em 2.5em; box-shadow: 0 4px 32px #d32f2f18; width:100%; max-width:900px; text-align:left;">
+        <div style="background:rgba(255,255,255,0.97); border-radius: 36px; padding: 2.2em 2.5em 2em 2.5em; box-shadow: 0 4px 32px #89CFF0; width:100%; max-width:900px; text-align:left;">
             <h3 style="color:#245ab1; text-align:center; font-size:1.5rem; font-weight:900; margin-bottom:1.3em; letter-spacing:1px;">
                 <i class="fa-solid fa-circle-info"></i> Regulament General
             </h3>
@@ -939,7 +953,7 @@ a[style*="color:#ff9800"]:hover {
                     <b>Atunci când preluați un apel</b>, este obligația voastră de a vă prezenta în felul următor: <b>Grad+Nume</b>. Exemplu: <i>Director-Adjunct Antonio Shades, ce urgență aveți?</i>
                 </li>
             </ol>
-            <div style="margin:2em 0; border-top:2px dashed #d32f2f22;"></div>
+            <div style="margin:2em 0; border-top:2px dashed #89CFF0;"></div>
             <div style="font-size:1.13rem; color:#222; font-weight:500; margin-bottom:1.5em;">
                 <b style="color:#245ab1;">Nu uitați că sunteți medici, evitați Corupția, nu plecați cu insigna (ON DUTY-ul), evitați zonele rau famate, nu folosiți arme albe sau de foc nici cand sunteți off duty (aveți voie doar SNS, dacă dețineți permis de port armă și puteți folosi EXCLUSIV off duty) și alte acțiuni care pot atrage corupția. Menționez ca se sancționează cu BAN + Blacklist în Departamentul medical. <span style="color:#245ab1;">(Sanctiunea XXVI)</span></b>
             </div>
@@ -968,7 +982,7 @@ a[style*="color:#ff9800"]:hover {
 
 
 <div id="repartizare" class="section">
-    <div style="background: radial-gradient(ellipse at 50% 0%, #fff3f3 60%, #e0e7ff 100%); border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 3em 2em 2.5em 2em; max-width: 1100px; margin: 0 auto 2.5em auto; display: flex; flex-direction: column; align-items: center;">
+    <div style="background: radial-gradient(ellipse at 50% 0%, #f3f7ff 60%, #e0e7ff 100%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 3em 2em 2.5em 2em; max-width: 1100px; margin: 0 auto 2.5em auto; display: flex; flex-direction: column; align-items: center;">
        <h2 style="color:#245ab1; font-size:2.3rem; font-weight:900; letter-spacing:2.5px; margin:0;">
                 <i class="fa-solid fa-file-contract"></i> Zonele de repartizare.
         </h2>
@@ -998,7 +1012,7 @@ a[style*="color:#ff9800"]:hover {
     <div style="
         background: #e0e0e0;
         border-radius: 48px;
-        box-shadow: 0 8px 40px #d32f2f22;
+        box-shadow: 0 8px 40px #89CFF0;
         padding: 2.5em 1.5em 2em 1.5em;
         max-width: 1100px;
         margin: 0 auto 2.5em auto;
@@ -1861,7 +1875,7 @@ a[style*="color:#ff9800"]:hover {
 </div>
 
         <!-- Mesaj Concediu de Civil - stil Info Utile -->
-<div style="background:#fffbe7; border-radius:18px; box-shadow:0 2px 8px #d32f2f22; padding:1.5em; margin-bottom:2em;">
+<div style="background:#C5D6E6; border-radius:18px; box-shadow:0 2px 8px #89CFF0; padding:1.5em; margin-bottom:2em;">
     <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:0.7em; text-align:center;">
         <i class="fa-solid fa-person-walking-arrow-right"></i> Concediu de Civil – Reguli și ATENȚIONĂRI
     </h3>
@@ -1871,7 +1885,7 @@ a[style*="color:#ff9800"]:hover {
         <li>❗ <b>ATENȚIE!</b> Dacă revii mai devreme, <b>pierzi zilele rămase</b>.</li>
         <li>❗ <b>Maxim 5 persoane</b> pot fi simultan în concediu de civil.</li>
     </ul>
-    <div style="background:#ffeaea; color:#2000ff; font-weight:900; border-radius:12px; padding:1em; margin-top:1.2em; text-align:center;">
+    <div style="background:#DCE3F2; color:#2000ff; font-weight:900; border-radius:12px; padding:1em; margin-top:1.2em; text-align:center;">
         ❗❗ <b>MARE ATENȚIE</b> ❗❗<br>
         În a 6-a zi trebuie să faci <b>ticket</b> pentru a-ți recupera gradul!<br>
         Dacă nu faci ticket până în a 7-a zi ➝ <span style="color:#245ab1;">CORUPȚIE</span>.<br>
@@ -1886,19 +1900,19 @@ a[style*="color:#ff9800"]:hover {
             <li style="background:#f0f0ff; padding:2px; margin-bottom:8px;">
                 <b>Brancardier → Asistent</b> Vei avea nevoie de certificatele: BLS, RADIO + ALS(sustinut dupa 3 zile de la ultimul certificat).
             </li>
-            <li style="background:#ffeaea; padding:2px; margin-bottom:8px;">
+            <li style="background:#f0f0ff; padding:2px; margin-bottom:8px;">
                 <b>Asistent Medical → UP:</b> Ca si Asistent Medical pentru UP vei avea nevoie de UN Antrenament JAF. MINIM 120 de minute pe zi timp de o saptamana(minutele se contorizeaza de la intrarea in departament)
             </li>
             <li style="background:#f0f0ff; padding:2px; margin-bottom:8px;">
                 <b>Double-UP:</b> Vei avea nevoie de 2100 de minute + toate Certificatele de mai sus.
             </li>
-            <li style="background:#ffeaea; padding:2px; margin-bottom:8px;">
+            <li style="background:#f0f0ff; padding:2px; margin-bottom:8px;">
                 <b>Medic Stagiar → Rezident:</b> Pentru avansare de la Medic Stagiar la Medic Rezident aveti nevoie de 2 saptamani cu pontaj pe verde + certificatul S.M.U.L.S si 2 Controale la M.M.L.S
             </li>
             <li style="background:#f0f0ff; padding:2px; margin-bottom:8px;">
                 <b>Medic Rezident → Specialist:</b> Pentru avansare de la Medic Rezident la Medic Specialist aveti nevoie de 3 Saptamani cu pontaj pe verde si certificatul de Rezidentiat ADMIS
             </li>
-            <li style="background:#ffeaea; padding:2px;">
+            <li style="background:#f0f0ff; padding:2px;">
                 <b>Medic Specialist → Primar:</b> Pentru avansare de la Medic Specialist la Medic Primar aveti nevoie de 6 saptamani cu pontaj pe verde si jumatate + 1 din voturile conducerii
             </li>
         </ul>
@@ -1917,7 +1931,7 @@ a[style*="color:#ff9800"]:hover {
                        <li>Cei care vin prin reintegrare si transfer au obligatia de a obtine cert RADIO / BLS / ALS in primele doua zile si cert SMULS / Rezidentiat in 3 zile.</li>
                 </ul>
             </div>
-            <div style="background:#fff3f3; padding:1rem; border-radius:8px;">
+            <div style="background:#f0f0ff; padding:1rem; border-radius:8px;">
                 <center><h4 style="color:#1565c0; margin:0 0 1rem 0;">Transferuri</h4></center>
                 <ul style="padding-left:1.2rem;">
                     <li>Agent Paza+ [AGP+] - va primi in urma transferului, gradul de BRANCARDIER.</li>
@@ -2590,7 +2604,7 @@ a[style*="color:#ff9800"]:hover {
         <center><h3 style="color:#245ab1; font-size:1.25rem; font-weight:800; margin-bottom:1em;">
             <i class="fa-solid fa-warning"></i> Avertismente Importante
         </h3>
-        <div style="background:#fff0f0; padding:1.5rem; border-radius:12px;">
+        <div style="background:#f0f0ff; padding:1.5rem; border-radius:12px;">
             <p style="color:#245ab1; margin:0; font-size:20px;">
                 ♦ Pentru a putea lua up aveti de nevoie in medie de minim 5 zile din 7 de activitate.<br>
                 ♦ Ca <b>ASISTENT MEDICAL</b>   aveti nevoie de minim 6 zile in departament (Obligatoriu de a fi sustinut admiterea <b>LUNI</b> sau <b>MARTI</b>).<br>
@@ -2608,7 +2622,7 @@ a[style*="color:#ff9800"]:hover {
     <div style="
         background: #fff;
         border-radius: 48px;
-        box-shadow: 0 8px 40px #d32f2f22;
+        box-shadow: 0 8px 40px #89CFF0;
         padding: 2.5em 1.5em 2em 1.5em;
         max-width: 1100px;
         margin: 0 auto 2.5em auto;
@@ -2634,10 +2648,10 @@ a[style*="color:#ff9800"]:hover {
                     color:#444;
                     font-weight:600;
                     display:inline-block;
-                    background:linear-gradient(90deg,#fff,#ffeaea 80%);
+                    background:linear-gradient(90deg,#fff,#F0F6FF 80%);
                     border-radius:22px;
                     padding:0.4em 2em;
-                    box-shadow:0 2px 12px #245ab122;
+                    box-shadow:0 2px 12px #89CFF0;
                 ">
                     Ghid rapid pentru roleplay medical în spital
                 </div>
@@ -2649,7 +2663,7 @@ a[style*="color:#ff9800"]:hover {
             background:rgba(255,255,255,0.97);
             border-radius: 36px;
             padding: 2.2em 2.5em 2em 2.5em;
-            box-shadow: 0 4px 32px #d32f2f18;
+            box-shadow: 0 4px 32px #89CFF0;
             margin-bottom:2.2em;
             width:100%;
             max-width:900px;
@@ -2661,7 +2675,7 @@ a[style*="color:#ff9800"]:hover {
             </h3>
 
             <!-- CARD: RP de Internare -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-file-medical"></i> RP de Internare
                 </h3>
@@ -2679,7 +2693,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: RP de Salon -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-bed-pulse"></i> RP de Salon
                 </h3>
@@ -2700,7 +2714,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: RP Dureri de Spate -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-person-cane"></i> RP Dureri de Spate
                 </h3>
@@ -2716,7 +2730,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: RP Antitetanos -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-syringe"></i> RP Antitetanos
                 </h3>
@@ -2735,7 +2749,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: RP Arsuri Spital -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-fire"></i> RP Arsuri Spital
                 </h3>
@@ -2752,7 +2766,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: RP Radiografie -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-x-ray"></i> RP Radiografie
                 </h3>
@@ -2771,7 +2785,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: RP Verificare Temperatură -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-temperature-high"></i> RP Verificare Temperatură
                 </h3>
@@ -2785,7 +2799,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: RP Verificare Tensiune -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-heart-pulse"></i> RP Verificare Tensiune
                 </h3>
@@ -2801,7 +2815,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: RP Analize de Sânge -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-vial"></i> RP Analize de Sânge
                 </h3>
@@ -2820,7 +2834,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: RP Recoltare de Sânge -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-droplet"></i> RP Recoltare de Sânge
                 </h3>
@@ -2838,14 +2852,14 @@ a[style*="color:#ff9800"]:hover {
     </div>
 </div>
             <div id="coduri-radio" class="section">
-    <div style="background: linear-gradient(120deg, #fff3f3 60%, #e3f2fd 100%); border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto;">
+    <div style="background: linear-gradient(120deg, #F3F8FF 60%, #e3f2fd 100%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto;">
         <h2 style="color:#245ab1; font-size:2.7rem; font-weight:900; text-align:center; margin-bottom:1.5em; letter-spacing:2px; text-shadow:0 0px 0px">
             <i class="fa-solid fa-walkie-talkie"></i> CODURI RADIO
         </h2>
 
         <!-- Coduri de Comunicare -->
         <div style="display:flex; flex-wrap:wrap; gap:32px; justify-content:center; margin-bottom:2.5em;">
-            <div style="flex:1; min-width:320px; background:rgba(255,255,255,0.97); border-radius:32px; box-shadow:0 2px 16px #d32f2f18; padding:2em;">
+            <div style="flex:1; min-width:320px; background:rgba(255,255,255,0.97); border-radius:32px; box-shadow:0 2px 16px #89CFF0; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                     <i class="fa-solid fa-headset"></i> Coduri de Comunicare
                 </h3>
@@ -2857,27 +2871,27 @@ a[style*="color:#ff9800"]:hover {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="background:#fff7f7;"><td>FOCURI ARME / PERICOL</td><td><b style="color:#245ab1;">10-0</b></td></tr>
+                        <tr style="background:#f9f9ff;"><td>FOCURI ARME / PERICOL</td><td><b style="color:#245ab1;">10-0</b></td></tr>
                         <tr style="background:#f9f9ff;"><td>AM PRELUAT APELUL PRECEDENT</td><td><b style="color:#245ab1;">10-1</b></td></tr>
-                        <tr style="background:#fff7f7;"><td>RECEPTIONAT</td><td><b style="color:#245ab1;">10-4</b></td></tr>
+                        <tr style="background:#f9f9ff;"><td>RECEPTIONAT</td><td><b style="color:#245ab1;">10-4</b></td></tr>
                         <tr style="background:#f9f9ff;"><td>REPETA</td><td><b style="color:#245ab1;">10-9</b></td></tr>
-                        <tr style="background:#fff7f7;"><td>APEL FALS</td><td><b style="color:#245ab1;">10-11</b></td></tr>
+                        <tr style="background:#f9f9ff;"><td>APEL FALS</td><td><b style="color:#245ab1;">10-11</b></td></tr>
                         <tr style="background:#f9f9ff;"><td>PRELUARE BK / COD 4</td><td><b style="color:#245ab1;">10-13</b></td></tr>
-                        <tr style="background:#fff7f7;"><td>LOCATIE CURENTA</td><td><b style="color:#245ab1;">10-20</b></td></tr>
+                        <tr style="background:#f9f9ff;"><td>LOCATIE CURENTA</td><td><b style="color:#245ab1;">10-20</b></td></tr>
                         <tr style="background:#f9f9ff;"><td>LINISTE PE STATIE</td><td><b style="color:#245ab1;">10-33</b></td></tr>
-                        <tr style="background:#fff7f7;"><td>REGRUPARE (CAND SE ANUNTA O REGRUPARE)</td><td><b style="color:#245ab1;">10-39</b></td></tr>
+                        <tr style="background:#f9f9ff;"><td>REGRUPARE (CAND SE ANUNTA O REGRUPARE)</td><td><b style="color:#245ab1;">10-39</b></td></tr>
                         <tr style="background:#f9f9ff;"><td>ON-DUTY</td><td><b style="color:#245ab1;">10-41</b></td></tr>
-                        <tr style="background:#fff7f7;"><td>OFF-DUTY</td><td><b style="color:#245ab1;">10-42</b></td></tr>
+                        <tr style="background:#f9f9ff;"><td>OFF-DUTY</td><td><b style="color:#245ab1;">10-42</b></td></tr>
                         <tr style="background:#f9f9ff;"><td>ACCIDENT</td><td><b style="color:#245ab1;">10-50</b></td></tr>
-                        <tr style="background:#fff7f7;"><td>APEL SOLUTIONAT</td><td><b style="color:#245ab1;">10-55</b></td></tr>
+                        <tr style="background:#f9f9ff;"><td>APEL SOLUTIONAT</td><td><b style="color:#245ab1;">10-55</b></td></tr>
                         <tr style="background:#f9f9ff;"><td>IN DRUM SPRE</td><td><b style="color:#245ab1;">10-76</b></td></tr>
-                        <tr style="background:#fff7f7;"><td>AM NEVOIE DE ECHIPAJ ADITIONAL</td><td><b style="color:#245ab1;">10-78</b></td></tr>
+                        <tr style="background:#f9f9ff;"><td>AM NEVOIE DE ECHIPAJ ADITIONAL</td><td><b style="color:#245ab1;">10-78</b></td></tr>
                         <tr style="background:#f9f9ff;"><td>PACIENT IN CUSTODIE (CONSENTIENT/INCONSENTIENT)</td><td><b style="color:#245ab1;">10-95</b></td></tr>
-                        <tr style="background:#fff7f7;"><td>INCHID STATIA</td><td><b style="color:#245ab1;">10-100</b></td></tr>
+                        <tr style="background:#f9f9ff;"><td>INCHID STATIA</td><td><b style="color:#245ab1;">10-100</b></td></tr>
                     </tbody>
                 </table>
             </div>
-            <div style="flex:1; min-width:320px; background:rgba(255,255,255,0.97); border-radius:32px; box-shadow:0 2px 16px #d32f2f18; padding:2em;">
+            <div style="flex:1; min-width:320px; background:rgba(255,255,255,0.97); border-radius:32px; box-shadow:0 2px 16px #89CFF0; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                     <i class="fa-solid fa-truck-medical"></i> Coduri de Asistență
                 </h3>
@@ -2889,19 +2903,19 @@ a[style*="color:#ff9800"]:hover {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="background:#fff7f7;"><td><b style="color:#245ab1;">0</b></td><td>TOATE UNITATILE SA SE PREZINTE LA LOCATIA DATA</td></tr>
+                        <tr style="background:#f9f9ff;"><td><b style="color:#245ab1;">0</b></td><td>TOATE UNITATILE SA SE PREZINTE LA LOCATIA DATA</td></tr>
                         <tr style="background:#f9f9ff;"><td><b style="color:#245ab1;">4</b></td><td>DOAR O UNITATE SA SE PREZINTE LA LOCATIA DATA</td></tr>
                         <tr style="background:#f9f9ff;"><td><b style="color:#245ab1;">5</b></td><td>PENTRU A SOLICITA UN ECHIPAJ de POLITIE(DANDU-SE DETALII PE DISPECER); POATE FI FOLOSIT DE 400+</td></tr>
-                        <tr style="background:#fff7f7;"><td><b style="color:#245ab1;">6</b></td><td>ZONA LIBERA, PUTETI INTERVENI</td></tr>
+                        <tr style="background:#f9f9ff;"><td><b style="color:#245ab1;">6</b></td><td>ZONA LIBERA, PUTETI INTERVENI</td></tr>
                         <tr style="background:#f9f9ff;"><td><b style="color:#245ab1;">7</b></td><td>PENTRU A SOLICITA UN MECANIC(INTRATI PE FRECVENTA 7, VA PREZENTATI CU CALLSIGN + GRAD + NUME SI DATI DETALII)</td></tr>
-                        <tr style="background:#fff7f7;"><td><b style="color:#245ab1;">78</b></td><td>NEVOIE DE ASISTENTA SUPLIMENTARA</td></tr>
+                        <tr style="background:#f9f9ff;"><td><b style="color:#245ab1;">78</b></td><td>NEVOIE DE ASISTENTA SUPLIMENTARA</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
         <!-- Exemple de Situații -->
-        <div style="background:linear-gradient(90deg,#ffeaea 80%,#fff); border-radius:32px; box-shadow:0 2px 16px #d32f2f11; padding:2em; margin-bottom:2.5em;">
+        <div style="background:linear-gradient(90deg,#F0F6FF 80%,#fff); border-radius:32px; box-shadow:0 2px 16px #89CFF0; padding:2em; margin-bottom:2.5em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1.2em;">
                 <i class="fa-solid fa-list-check"></i> Exemple de Situații
             </h3>
@@ -2914,12 +2928,12 @@ a[style*="color:#ff9800"]:hover {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="background:#fff7f7; box-shadow:0 2px 8px #d32f2f22;">
+                        <tr style="background:#f9f9ff; box-shadow:0 2px 8px #89CFF0;">
                             <td style="font-weight:700; color:#245ab1; font-size:1.15rem;">10-0</td>
                             <td>
                                 <span style="font-weight:600;">Focuri de armă, pericol major.</span><br>
                                 <span style="color:#245ab1;">Exemplu:</span>
-                                <span style="background:#ffeaea; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-0, 10-20 &lt;locatia&gt;</span>
+                                <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-0, 10-20 &lt;locatia&gt;</span>
                             </td>
                         </tr>
                         <tr style="background:#f9f9ff;">
@@ -2930,12 +2944,12 @@ a[style*="color:#ff9800"]:hover {
                                 <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-1</span>
                             </td>
                         </tr>
-                        <tr style="background:#fff7f7;">
+                        <tr style="background:#f9f9ff;">
                             <td style="font-weight:700; color:#245ab1;">10-4</td>
                             <td>
                                 <span style="font-weight:600;">Confirmare recepție mesaj.</span><br>
                                 <span style="color:#245ab1;">Exemplu:</span>
-                                <span style="background:#ffeaea; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-4</span>
+                                <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-4</span>
                             </td>
                         </tr>
                         <tr style="background:#f9f9ff;">
@@ -2946,12 +2960,12 @@ a[style*="color:#ff9800"]:hover {
                                 <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-9 te rog</span>
                             </td>
                         </tr>
-                        <tr style="background:#fff7f7;">
+                        <tr style="background:#f9f9ff;">
                             <td style="font-weight:700; color:#245ab1;">10-11</td>
                             <td>
                                 <span style="font-weight:600;">Apel fals, nu este nimeni la fața locului.</span><br>
                                 <span style="color:#245ab1;">Exemplu:</span>
-                                <span style="background:#ffeaea; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-11</span>
+                                <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-11</span>
                             </td>
                         </tr>
                         <tr style="background:#f9f9ff;">
@@ -2962,12 +2976,12 @@ a[style*="color:#ff9800"]:hover {
                                 <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-13</span>
                             </td>
                         </tr>
-                        <tr style="background:#fff7f7;">
+                        <tr style="background:#f9f9ff;">
                             <td style="font-weight:700; color:#245ab1;">10-20</td>
                             <td>
                                 <span style="font-weight:600;">Anunți locația ta curentă.</span><br>
                                 <span style="color:#245ab1;">Exemplu:</span>
-                                <span style="background:#ffeaea; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-20 &lt;locatia&gt;</span>
+                                <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-20 &lt;locatia&gt;</span>
                             </td>
                         </tr>
                         <tr style="background:#f9f9ff;">
@@ -2978,12 +2992,12 @@ a[style*="color:#ff9800"]:hover {
                                 <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-33</span>
                             </td>
                         </tr>
-                        <tr style="background:#fff7f7;">
+                        <tr style="background:#f9f9ff;">
                             <td style="font-weight:700; color:#245ab1;">10-39</td>
                             <td>
                                 <span style="font-weight:600;">Regrupare anunțată de Dispecer.</span><br>
                                 <span style="color:#245ab1;">Exemplu:</span>
-                                <span style="background:#ffeaea; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-39 10-20 helipad</span>
+                                <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-39 10-20 helipad</span>
                             </td>
                         </tr>
                         <tr style="background:#f9f9ff;">
@@ -2994,12 +3008,12 @@ a[style*="color:#ff9800"]:hover {
                                 <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-41 (doar pe dispecer)</span>
                             </td>
                         </tr>
-                        <tr style="background:#fff7f7;">
+                        <tr style="background:#f9f9ff;">
                             <td style="font-weight:700; color:#245ab1;">10-42</td>
                             <td>
                                 <span style="font-weight:600;">Ieșire din tură (doar pe Dispecer).</span><br>
                                 <span style="color:#245ab1;">Exemplu:</span>
-                                <span style="background:#ffeaea; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-42 (doar pe dispecer)</span>
+                                <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-42 (doar pe dispecer)</span>
                             </td>
                         </tr>
                         <tr style="background:#f9f9ff;">
@@ -3010,12 +3024,12 @@ a[style*="color:#ff9800"]:hover {
                                 <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, am facut un 10-50 major/minor si nu mai pot ajunge la ultimul apel</span>
                             </td>
                         </tr>
-                        <tr style="background:#fff7f7;">
+                        <tr style="background:#f9f9ff;">
                             <td style="font-weight:700; color:#245ab1;">10-55</td>
                             <td>
                                 <span style="font-weight:600;">Apel soluționat.</span><br>
                                 <span style="color:#245ab1;">Exemplu:</span>
-                                <span style="background:#ffeaea; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-55</span>
+                                <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-55</span>
                             </td>
                         </tr>
                         <tr style="background:#f9f9ff;">
@@ -3026,12 +3040,12 @@ a[style*="color:#ff9800"]:hover {
                                 <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-76 ultima solicitare de 10-78</span>
                             </td>
                         </tr>
-                        <tr style="background:#fff7f7;">
+                        <tr style="background:#f9f9ff;">
                             <td style="font-weight:700; color:#245ab1;">10-78</td>
                             <td>
                                 <span style="font-weight:600;">Ai nevoie de echipaj suplimentar urgent.</span><br>
                                 <span style="color:#245ab1;">Exemplu:</span>
-                                <span style="background:#ffeaea; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, am nevoie de un 10-78 la urmatorul cod BK</span>
+                                <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, am nevoie de un 10-78 la urmatorul cod BK</span>
                             </td>
                         </tr>
                         <tr style="background:#f9f9ff;">
@@ -3042,12 +3056,12 @@ a[style*="color:#ff9800"]:hover {
                                 <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-95 consenti/inconsenti, 10-76 Spitalul Eclipse Medical Tower</span>
                             </td>
                         </tr>
-                        <tr style="background:#fff7f7;">
+                        <tr style="background:#f9f9ff;">
                             <td style="font-weight:700; color:#245ab1;">10-100</td>
                             <td>
                                 <span style="font-weight:600;">Ieși de pe stație pentru control Medicina Muncii.</span><br>
                                 <span style="color:#245ab1;">Exemplu:</span>
-                                <span style="background:#ffeaea; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-100 Medicina Muncii motivul (doar pe dispecer)</span>
+                                <span style="background:#e3f2fd; border-radius:8px; padding:2px 10px; font-weight:700;">M-009, 10-100 Medicina Muncii motivul (doar pe dispecer)</span>
                             </td>
                         </tr>
                     </tbody>
@@ -3056,7 +3070,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- Răspunderea unui Polițist -->
-        <div style="background:linear-gradient(90deg,#fff3f3 80%,#f9f9f9); border-radius:24px; padding:1.5em 2em; margin-bottom:2em; box-shadow:0 2px 8px #d32f2f11;">
+        <div style="background:linear-gradient(90deg,#e3f2fd 35%,#f9f9f9); border-radius:24px; padding:1.5em 2em; margin-bottom:2em; box-shadow:0 2px 8px #89CFF0;">
             <h3 style="color:#245ab1; font-size:1.18rem; font-weight:800; margin-bottom:0.7em;">
                 <i class="fa-solid fa-user-shield"></i> Răspunderea unui Polițist
             </h3>
@@ -3067,7 +3081,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- Important -->
-        <div style="background:linear-gradient(90deg,#ffeaea 80%,#fff); border-radius:24px; padding:1.5em 2em; margin-bottom:2em; box-shadow:0 2px 8px #d32f2f11;">
+        <div style="background:linear-gradient(90deg,#e3f2fd 35%,#fff); border-radius:24px; padding:1.5em 2em; margin-bottom:2em; box-shadow:0 2px 8px #89CFF0;">
             <h3 style="color:#245ab1; font-size:1.18rem; font-weight:800; margin-bottom:0.7em;">
                 <i class="fa-solid fa-triangle-exclamation"></i> Important
             </h3>
@@ -3081,7 +3095,7 @@ a[style*="color:#ff9800"]:hover {
     </div>
 </div>
 <div id="medicamente" class="section">
-    <div style="background: linear-gradient(120deg, #fff3f3 60%, #e3f2fd 100%); border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto;">
+    <div style="background: linear-gradient(157deg, #E6EFF5 64%, #e3f2fd 36%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5em;">
             <img src="hr.png" alt="Logo stânga" style="height:60px; border-radius:16px; background:#fff; box-shadow:0 2px 8px #bbb;">
             <h2 style="color:#245ab1; font-size:2.5rem; font-weight:900; letter-spacing:2px; margin:0; text-align:center;">
@@ -3091,7 +3105,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
 <!-- CARD MEDICAMENTE -->
-<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
     <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em; text-align:center;">
         <i class="fa-solid fa-capsules"></i> MEDICAMENTE 💊
     </h3>
@@ -3116,7 +3130,7 @@ a[style*="color:#ff9800"]:hover {
 </div>
 
 <!-- CARD PRIM AJUTOR -->
-<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
     <h3 style="color:#245ab1; font-size:1.4rem; font-weight:900; margin-bottom:1em; text-align:center;">
         <i class="fa-solid fa-briefcase-medical"></i> MEDICAMENTE IC 🩹
     </h3>
@@ -3131,7 +3145,7 @@ a[style*="color:#ff9800"]:hover {
     </div>
 </div>
             <div id="rp-teren" class="section">
-    <div style="background: linear-gradient(120deg, #fff3f3 60%, #e3f2fd 100%); border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto;">
+    <div style="background: linear-gradient(120deg, #F0F6FF 20%, #e3f2fd 30%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5em;">
             <img src="hr.png" alt="Logo stânga" style="height:60px; border-radius:16px; background:#fff; box-shadow:0 2px 8px #bbb;">
             <h2 style="color:#245ab1; font-size:2.5rem; font-weight:900; letter-spacing:2px; margin:0; text-align:center;">
@@ -3141,7 +3155,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- RP LA FATA LOCULUI -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                 <center><i class="fa-solid fa-location-dot"></i> RP LA FAȚA LOCULUI
             </h3></center>
@@ -3156,7 +3170,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- MANA/PICIOR LUXAT -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                 <center><i class="fa-solid fa-bone"></i> MÂNĂ/PICIOR LUXAT
             </h3></center>
@@ -3172,7 +3186,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- ACCIDENT DE MAȘINĂ/MOTOCICLETĂ *puls stabil* -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                 <center><i class="fa-solid fa-car-crash"></i> ACCIDENT DE MAȘINĂ/MOTOCICLETĂ <span style="font-size:1rem;">*puls stabil*</span>
             </h3></center>
@@ -3192,7 +3206,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- ACCIDENT DE MAȘINĂ/MOTOCICLETĂ *stop cardio-respirator* -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                 <center><i class="fa-solid fa-car-burst"></i> ACCIDENT DE MAȘINĂ/MOTOCICLETĂ <span style="font-size:1rem;">*stop cardio-respirator*</span>
             </h3></center>
@@ -3234,7 +3248,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- EXPLOZIE BENZINĂRIE/MAȘINĂ -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                 <center><i class="fa-solid fa-burst"></i> EXPLOZIE BENZINĂRIE/MAȘINĂ
             </h3></center>
@@ -3250,7 +3264,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- CAI RESPIRATORII BLOCATE -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                 <center><i class="fa-solid fa-lungs"></i> CĂI RESPIRATORII BLOCATE
             </h3></center>
@@ -3269,7 +3283,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- STARE DE ȘOC ANAFILACTIC *alergii* -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                 <center><i class="fa-solid fa-triangle-exclamation"></i> STARE DE ȘOC ANAFILACTIC <span style="font-size:1rem;">*alergii*</span>
             </h3></center>
@@ -3287,7 +3301,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- DURERI INSUPORTABILE DUPĂ ACCIDENT -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                 <center><i class="fa-solid fa-face-dizzy"></i> DURERI INSUPORTABILE DUPĂ ACCIDENT
             </h3></center>
@@ -3303,7 +3317,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- PACIENT ÎNECAT *stop cardio-respirator* -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                 <center><i class="fa-solid fa-water"></i> PACIENT ÎNECAT <span style="font-size:1rem;">*stop cardio-respirator*</span>
             </h3></center>
@@ -3321,27 +3335,27 @@ a[style*="color:#ff9800"]:hover {
     </div>
 </div>
             <div id="rp-smuls" class="section">
-    <div style="background: #fff; border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto; display: flex; flex-direction: column; align-items: center;">
+    <div style="background: #fff; border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto; display: flex; flex-direction: column; align-items: center;">
         <div style="display: flex; justify-content: center; align-items: center; gap: 3vw; width: 100%; margin-bottom: 2em;">
             <img src="hr.png" alt="Logo stânga" style="height:90px; border-radius: 32px; background: #fff; box-shadow: 0 4px 24px #bbb;">
             <div style="flex:1; text-align:center;">
                 <h2 style="color:#245ab1; font-size:2.7rem; font-weight:900; letter-spacing:2.5px; margin:0;">
                     <i class="fa-solid fa-truck-medical"></i> RP S.M.U.L.S. / Cert. S.M.U.L.S.
                 </h2>
-                <div style="margin-top:0.8em; font-size:1.25rem; color:#444; font-weight:600; display:inline-block; background:linear-gradient(90deg,#fff,#ffeaea 80%); border-radius:22px; padding:0.4em 2em; box-shadow:0 2px 12px #d32f2f22;">
+                <div style="margin-top:0.8em; font-size:1.25rem; color:#444; font-weight:600; display:inline-block; background:linear-gradient(90deg,#fff,#F0F6FA 80%); border-radius:22px; padding:0.4em 2em; box-shadow:0 2px 12px #89CFF0;">
                     Ghid complet pentru roleplay descarcerare și echipamente S.M.U.L.S.
                 </div>
             </div>
             <img src="logo-fivem.png" alt="Logo dreapta" style="height:90px; border-radius: 32px; background: #fff; box-shadow: 0 4px 24px #bbb;">
         </div>
 
-        <div style="background:rgba(255,255,255,0.97); border-radius: 36px; padding: 2.2em 2.5em 2em 2.5em; box-shadow: 0 4px 32px #d32f2f18; margin-bottom:2.2em; width:100%; max-width:900px; text-align:center; font-family:'Segoe UI', Arial, sans-serif;">
+        <div style="background:rgba(255,255,255,0.97); border-radius: 36px; padding: 2.2em 2.5em 2em 2.5em; box-shadow: 0 4px 32px #89CFF0; margin-bottom:2.2em; width:100%; max-width:900px; text-align:center; font-family:'Segoe UI', Arial, sans-serif;">
             <h3 style="color:#245ab1; text-align:center; font-size:1.4rem; font-weight:900; margin-bottom:1.2em;">
                 <i class="fa-solid fa-book-medical"></i> GHID S.M.U.L.S. - Echipamente și Proceduri
             </h3>
 
             <!-- CARD: Cuprins -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-list"></i> CUPRINS GHID S.M.U.L.S.
                 </h3>
@@ -3353,7 +3367,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: Echipamente de prim-ajutor -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-briefcase-medical"></i> Echipamente de prim-ajutor
                 </h3>
@@ -3381,7 +3395,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
 
             <!-- CARD: Echipamente S.M.U.L.S. de Descarcerare -->
-            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+            <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
                 <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:1em; text-align:center;">
                     <i class="fa-solid fa-screwdriver-wrench"></i> Echipamente S.M.U.L.S. de Descarcerare
                 </h3>
@@ -3413,7 +3427,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
         </div>
         <!-- CARD: 1. Descarcerare simplă -->
-<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
     <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:1em; text-align:center;">
         <i class="fa-solid fa-scissors"></i> 1. Descarcerare simplă
     </h3>
@@ -3457,7 +3471,7 @@ a[style*="color:#ff9800"]:hover {
 </div>
 
 <!-- CARD: 2. Descarcerare complexă -->
-<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
     <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:1em; text-align:center;">
         <i class="fa-solid fa-screwdriver-wrench"></i> 2. Descarcerare complexă
     </h3>
@@ -3519,7 +3533,7 @@ a[style*="color:#ff9800"]:hover {
 </div>
 
 <!-- CARD: 3. Descarcerare de urgență -->
-<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
     <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:1em; text-align:center;">
         <i class="fa-solid fa-triangle-exclamation"></i> 3. Descarcerare de urgență
     </h3>
@@ -3590,7 +3604,7 @@ a[style*="color:#ff9800"]:hover {
     </div>
 </div>
 <!-- CARD: 4. Descarcerare controlată (standard, echipaj de doi medici) -->
-<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
     <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:1em; text-align:center;">
         <i class="fa-solid fa-user-doctor"></i> 4. Descarcerare controlată (standard, echipaj de doi medici)
     </h3>
@@ -3653,7 +3667,7 @@ a[style*="color:#ff9800"]:hover {
 </div>
 
 <!-- CARD: 5. Descarcerare verticală (prin plafonul mașinii) -->
-<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
     <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:1em; text-align:center;">
         <i class="fa-solid fa-arrow-down-up-across-line"></i> 5. Descarcerare verticală (prin plafonul mașinii)
     </h3>
@@ -3713,7 +3727,7 @@ a[style*="color:#ff9800"]:hover {
 </div>
 
 <!-- CARD: 6. Descarcerare laterală -->
-<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
     <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:1em; text-align:center;">
         <i class="fa-solid fa-car-side"></i> 6. Descarcerare laterală
     </h3>
@@ -3770,7 +3784,7 @@ a[style*="color:#ff9800"]:hover {
 </div>
 
 <!-- CARD: 7. Descarcerare posterioară -->
-<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+<div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
     <h3 style="color:#245ab1; font-size:1.18rem; font-weight:900; margin-bottom:1em; text-align:center;">
         <i class="fa-solid fa-car-rear"></i> 7. Descarcerare posterioară
     </h3>
@@ -3831,11 +3845,11 @@ a[style*="color:#ff9800"]:hover {
 </div>
 
             <div id="rp-operatii" class="section">
-    <div style="background: #fff; border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto; display: flex; flex-direction: column; align-items: center;">
+    <div style="background: #fff; border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto; display: flex; flex-direction: column; align-items: center;">
         <h2 style="color:#245ab1; font-size:2.7rem; font-weight:900; letter-spacing:2.5px; margin-bottom:1em;">
             <i class="fa-solid fa-user-doctor"></i> RP OPERAȚII
         </h2>
-        <div style="background:rgba(255,255,255,0.97); border-radius: 36px; padding: 2.2em 2.5em 2em 2.5em; box-shadow: 0 4px 32px #d32f2f18; margin-bottom:2.2em; width:100%; max-width:900px; text-align:left; font-family:'Segoe UI', Arial, sans-serif;">
+        <div style="background:rgba(255,255,255,0.97); border-radius: 36px; padding: 2.2em 2.5em 2em 2.5em; box-shadow: 0 4px 32px #89CFF0; margin-bottom:2.2em; width:100%; max-width:900px; text-align:left; font-family:'Segoe UI', Arial, sans-serif;">
             
                         <!-- OPERATIE CHIRURGIE PLASTICĂ -->
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:0.7em; text-align:center;">
@@ -4051,8 +4065,79 @@ a[style*="color:#ff9800"]:hover {
         </div>
     </div>
 </div>
+            <div id="animatii-utile" class="section">
+    <div style="background: radial-gradient(ellipse at 50% 0%, #f3f7ff 60%, #e0e7ff 100%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto; display: flex; flex-direction: column; align-items: center;">
+        <h2 style="color:#245ab1; font-size:2.3rem; font-weight:900; letter-spacing:2px; margin:0 0 1.5em 0; text-align:center;">
+            <i class="fa-solid fa-person-running"></i> Animații Utile
+        </h2>
+
+        <!-- OBIECTE MEDICALE -->
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; padding:2em; width:100%; max-width:900px; margin-bottom:2em;">
+            <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
+                <i class="fa-solid fa-kit-medical"></i> Obiecte Medicale
+            </h3>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e xray1 <span style="font-weight:400; color:#555;">— radiografie picior</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e xray2 <span style="font-weight:400; color:#555;">— radiografie piept</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e xray3 <span style="font-weight:400; color:#555;">— radiografie mână</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e xray4 <span style="font-weight:400; color:#555;">— radiografie cap</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e medicbox <span style="font-weight:400; color:#555;">— cutie medicală</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e drip <span style="font-weight:400; color:#555;">— stativ de perfuzie</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e thermometer <span style="font-weight:400; color:#555;">— termometru</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e thermometer2 <span style="font-weight:400; color:#555;">— termometru</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e medictorch <span style="font-weight:400; color:#555;">— lanterna roșie</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e tube1 <span style="font-weight:400; color:#555;">— tub gol</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e tube2 <span style="font-weight:400; color:#555;">— tub cu pipi</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e tube3 <span style="font-weight:400; color:#555;">— tub cu sânge</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e medikit <span style="font-weight:400; color:#555;">— medkit micuț</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e medicmask <span style="font-weight:400; color:#555;">— mașcă oxigen + animație pacient</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e pressure <span style="font-weight:400; color:#555;">— aparat tensiune / semne vitale</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e medbag <span style="font-weight:400; color:#555;">— geanță mare prim-ajutor</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e clipboard <span style="font-weight:400; color:#555;">— fișă medicală</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e clipboard2 <span style="font-weight:400; color:#555;">— fișă medicală</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e tablet <span style="font-weight:400; color:#555;">— tabletă</span></span>
+                <span style="background:#e8f4fd; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e tablet2 <span style="font-weight:400; color:#555;">— tabletă</span></span>
+            </div>
+        </div>
+
+        <!-- ANIMATII MEDIC -->
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; padding:2em; width:100%; max-width:900px;">
+            <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
+                <i class="fa-solid fa-user-doctor"></i> Animații Medic
+            </h3>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e medic <span style="font-weight:400; color:#555;">— poziție ghemuit/ghemuita + acțiuni</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e medic2 <span style="font-weight:400; color:#555;">— poziție ghemuit/ghemuita fără acțiuni</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e mechanic <span style="font-weight:400; color:#555;">— control de sus</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e mechanic3 <span style="font-weight:400; color:#555;">— control ghemuit/ghemuita, dat trusa</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e mechanic4 <span style="font-weight:400; color:#555;">— simplu, mechanic</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e check <span style="font-weight:400; color:#555;">— verificare pacient jos</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e check2 <span style="font-weight:400; color:#555;">— verificare + ridicare + loop</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e check3 <span style="font-weight:400; color:#555;">— ca check</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e cpr <span style="font-weight:400; color:#555;">— resuscitare de jos</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e cpr2 <span style="font-weight:400; color:#555;">— resuscitare de sus</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e cpr3 <span style="font-weight:400; color:#555;">— resuscitare rapidă de jos</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e inspect <span style="font-weight:400; color:#555;">— inspectare obiect</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e inspect2 <span style="font-weight:400; color:#555;">— inspectare cu mâini încrucișate</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e notepad <span style="font-weight:400; color:#555;">— scris rețete</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e notepad2 <span style="font-weight:400; color:#555;">— scris rețete</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e kneel <span style="font-weight:400; color:#555;">— medic avansat jos</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e kneel2 <span style="font-weight:400; color:#555;">— medic jos direct</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e kneel3 <span style="font-weight:400; color:#555;">— ca medic2, ghemuit/ghemuita fără acțiuni</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e type <span style="font-weight:400; color:#555;">— asistent ghiseu</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e type2 <span style="font-weight:400; color:#555;">— asistent ghiseu</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e type3 <span style="font-weight:400; color:#555;">— asistent ghiseu</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e type4 <span style="font-weight:400; color:#555;">— asistent ghiseu</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e passout1 <span style="font-weight:400; color:#555;">— animatie intins</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e passout2 <span style="font-weight:400; color:#555;">— animatie intins</span></span>
+                <span style="background:#f0f8ff; border-radius:12px; padding:8px 16px; font-weight:700; color:#245ab1; font-size:1rem;">/e passout3 <span style="font-weight:400; color:#555;">— animatie intins</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
             <div id="rezidentiat" class="section">
-    <div style="background: linear-gradient(120deg, #fff3f3 60%, #e3f2fd 100%); border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto;">
+    <div style="background: linear-gradient(120deg, #f3f7ff 60%, #e0e7ff 100%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5em;">
             <img src="hr.png" alt="Logo stânga" style="height:60px; border-radius:16px; background:#fff; box-shadow:0 2px 8px #bbb;">
             <h2 style="color:#245ab1; font-size:2.5rem; font-weight:900; letter-spacing:2px; margin:0; text-align:center;">
@@ -4062,7 +4147,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- Ce este Rezidențiatul -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em;">
                 <center><i class="fa-solid fa-circle-info"></i> Ce este Rezidențiatul?
             </h3></center>
@@ -4072,7 +4157,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- Criterii de acces -->
-        <div style="background:#f8f8f8; border-radius:18px; box-shadow:0 2px 8px #d32f2f11; margin-bottom:2em; padding:1.5em;">
+        <div style="background:#f8f8f8; border-radius:18px; box-shadow:0 2px 8px #89CFF0; margin-bottom:2em; padding:1.5em;">
             <h3 style="color:#1976d2; font-size:1.18rem; font-weight:800; margin-bottom:0.7em;">
                <center> <i class="fa-solid fa-check-double"></i> Criterii de Acces la Test
             </h3></center>
@@ -4084,7 +4169,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
     </div>
     <div id="rp-cert-moto" class="section">
-    <div style="background: linear-gradient(120deg, #fff3f3 60%, #e3f2fd 100%); border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 2.5em 1.5em 2em 1.5em; max-width: 900px; margin: 0 auto 2.5em auto;">
+    <div style="background: linear-gradient(120deg, #f3f7ff 60%, #e0e7ff 100%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 900px; margin: 0 auto 2.5em auto;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5em;">
             <img src="hr.png" alt="Logo stânga" style="height:60px; border-radius:16px; background:#fff; box-shadow:0 2px 8px #bbb;">
             <h2 style="color:#245ab1; font-size:2.2rem; font-weight:900; letter-spacing:2px; margin:0; text-align:center;">
@@ -4093,7 +4178,7 @@ a[style*="color:#ff9800"]:hover {
             <img src="logo-fivem.png" alt="Logo dreapta" style="height:60px; border-radius:16px; background:#fff; box-shadow:0 2px 8px #bbb;">
         </div>
 
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                 <i class="fa-solid fa-id-card"></i> Certificat Moto
             </h3>
@@ -4102,7 +4187,7 @@ a[style*="color:#ff9800"]:hover {
             </div>
         </div>
 
-        <div style="background:#f8f8f8; border-radius:18px; box-shadow:0 2px 8px #d32f2f11; margin-bottom:2em; padding:1.5em;">
+        <div style="background:#f8f8f8; border-radius:18px; box-shadow:0 2px 8px #89CFF0; margin-bottom:2em; padding:1.5em;">
             <h3 style="color:#1976d2; font-size:1.18rem; font-weight:800; margin-bottom:0.7em; text-align:center;">
                 <i class="fa-solid fa-circle-info"></i> Ce trebuie să știi pentru testul Moto?
             </h3>
@@ -4117,11 +4202,11 @@ a[style*="color:#ff9800"]:hover {
             <li>In cazuri extreme gradele de Medic-Rezident pot cere aprobare CONDUCERII pentru a prelua unitatea moto la <b style="color: #245ab1;">JAF / BK 0.</b></li>
             <li>Unitatea ATV poate fi condusa de persoanele cu gradul de Medic-Specialist cu certificatul moto.</li>
             <li>Unitatea ATV poate fi condusa doar pe zona 4.</li>
-            <li>!!! Calificarea <b style="color: #245ab1;">MOTO</b> a departamentului consta intr-un <b>test practic</b> !!!</li>
+            <li>!!! Calificarea <b style="color: #245ab1;">MOTO</b> a departamentului consta intr-un <b>test practic si teoretic</b> !!!</li>
             </ul>
         </div>
 
-        <div style="background:#fff8f8; border-radius:18px; box-shadow:0 2px 8px #d32f2f11; padding:1.5em; margin-bottom:2em;">
+        <div style="background:#f8f8f8; border-radius:18px; box-shadow:0 2px 8px #89CFF0; padding:1.5em; margin-bottom:2em;">
             <h3 style="color:#245ab1; font-size:1.18rem; font-weight:800; margin-bottom:0.7em; text-align:center;">
                 <i class="fa-solid fa-triangle-exclamation"></i> Reguli stricte de utilizare Moto
             </h3>
@@ -4137,7 +4222,7 @@ a[style*="color:#ff9800"]:hover {
             </ul>
         </div>
 
-        <div style="background:#fff8f8; border-radius:18px; box-shadow:0 2px 8px #d32f2f11; padding:1.5em; margin-bottom:2em;">
+        <div style="background:#f8f8f8; border-radius:18px; box-shadow:0 2px 8px #89CFF0; padding:1.5em; margin-bottom:2em;">
             <h3 style="color:#245ab1; font-size:1.18rem; font-weight:800; margin-bottom:0.7em; text-align:center;">
                 <i class="fa-regular fa-eye"></i> Rp Certificat Moto
             </h3>
@@ -4157,7 +4242,7 @@ a[style*="color:#ff9800"]:hover {
     </div>
 </div>
         <div id="cert-pilot" class="section">
-    <div style="background: linear-gradient(120deg, #fff3f3 60%, #e3f2fd 100%); border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 2.5em 1.5em 2em 1.5em; max-width: 900px; margin: 0 auto 2.5em auto;">
+    <div style="background: linear-gradient(120deg, #f3f7ff 60%, #e0e7ff 100%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 900px; margin: 0 auto 2.5em auto;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5em;">
             <img src="hr.png" alt="Logo stânga" style="height:60px; border-radius:16px; background:#fff; box-shadow:0 2px 8px #bbb;">
             <h2 style="color:#245ab1; font-size:2.2rem; font-weight:900; letter-spacing:2px; margin:0; text-align:center;">
@@ -4166,7 +4251,7 @@ a[style*="color:#ff9800"]:hover {
             <img src="logo-fivem.png" alt="Logo dreapta" style="height:60px; border-radius:16px; background:#fff; box-shadow:0 2px 8px #bbb;">
         </div>
 
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
                 <i class="fa-solid fa-id-card"></i> Obligatoriu pentru susținerea certificatului
             </h3>
@@ -4185,7 +4270,7 @@ a[style*="color:#ff9800"]:hover {
             </ul>
         </div>
 
-        <div style="background:#fff8f8; border-radius:18px; box-shadow:0 2px 8px #d32f2f11; padding:1.5em; margin-bottom:2em;">
+        <div style="background:#f8f8f8; border-radius:18px; box-shadow:0 2px 8px #89CFF0; padding:1.5em; margin-bottom:2em;">
             <h3 style="color:#245ab1; font-size:1.18rem; font-weight:800; margin-bottom:0.7em; text-align:center;">
                 <i class="fa-solid fa-person-arrow-up-from-line"></i> Urcare pacient în elicopter
             </h3>
@@ -4203,7 +4288,7 @@ a[style*="color:#ff9800"]:hover {
     </div>
     </div>
             <div id="isuls" class="section">
-    <div style="background: linear-gradient(120deg, #fff3f3 60%, #e3f2fd 100%); border-radius: 48px; box-shadow: 0 8px 40px #d32f2f22; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto;">
+    <div style="background: linear-gradient(120deg, #f3f7ff 60%, #e0e7ff 100%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 1100px; margin: 0 auto 2.5em auto;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5em;">
             <img src="hr.png" alt="Logo stânga" style="height:60px; border-radius:16px; background:#fff; box-shadow:0 2px 8px #bbb;">
             <h2 style="color:#245ab1; font-size:2.5rem; font-weight:900; letter-spacing:2px; margin:0; text-align:center;">
@@ -4213,7 +4298,7 @@ a[style*="color:#ff9800"]:hover {
         </div>
 
         <!-- INSTRUCTIUNI -->
-        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #d32f2f22; margin-bottom:2em; padding:2em;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
             <h3 style="color:#245ab1; font-size:1.35rem; font-weight:900; margin-bottom:1em; text-align:center;">
                 <i class="fa-solid fa-list-check"></i> INSTRUCȚIUNI
             </h3>
@@ -4236,13 +4321,13 @@ a[style*="color:#ff9800"]:hover {
                 <li>Aveți <b style="color:#245ab1;">OBLIGAȚIA</b> de a sta în subdepartament minim 1 lună, în caz contrar veți primi <b style="color:#245ab1;">BLACKLIST ISULS</b>.</li>
                 <li>Foști membri ISULS care sunt excluși pe baza sancțiunilor vor primi interdicție o singură tură. Totodată, aceștia vor putea alege să plătească acea interdicție cu 700.000$, astfel vor putea susține testele ISULS fără să mai aștepte.</li>
             </ul>
-            <div style="background:#ffeaea; color:#245ab1; font-weight:900; border-radius:12px; padding:1em; margin-top:1.5em; text-align:center;">
+            <div style="background:#f8f8f8; color:#245ab1; font-weight:900; border-radius:12px; padding:1em; margin-top:1.5em; text-align:center;">
                 ORICE ACT DE INDISCIPLINĂ VA FI SANCȚIONAT CU EXCLUDEREA DIN ISULS!
             </div>
         </div>
 
         <!-- EXTRA -->
-        <div style="background:#fffbe7; border-radius:18px; box-shadow:0 2px 8px #d32f2f11; padding:1.5em; margin-bottom:2em;">
+        <div style="background:#fffbe7; border-radius:18px; box-shadow:0 2px 8px #89CFF0; padding:1.5em; margin-bottom:2em;">
             <h3 style="color:#245ab1; font-size:1.18rem; font-weight:800; margin-bottom:0.7em; text-align:center;">
                 <i class="fa-solid fa-star"></i> EXTRA
             </h3>
@@ -4263,7 +4348,7 @@ a[style*="color:#ff9800"]:hover {
         <div style="
         background: #e0e0e0;
         border-radius: 48px;
-        box-shadow: 0 8px 40px #d32f2f22;
+        box-shadow: 0 8px 40px #89CFF0;
         padding: 2.5em 1.5em 2em 1.5em;
         max-width: 1100px;
         margin: 0 auto 2.5em auto;
@@ -4318,7 +4403,7 @@ a[style*="color:#ff9800"]:hover {
         <i class="fa-solid"></i> Asistent de garda
       </h3>
       <div style="text-align:center;">
-        <img src="poze uniforme barbati/img_asistent_b.png" style="height:470px; object-fit:cover; width:100%; border-radius:16px; box-shadow:0 2px 8px #bbb;">
+        <img src="poze uniforme barbati/img_asistent_b.png" style="height:470px; object-fit:cover; width:100%; border-radius:16px; box-shadow:0 2px 8px #89CFF0;">
       </div>
     </div>
 
@@ -4785,7 +4870,6 @@ document.getElementById('rp-smuls').addEventListener('contextmenu', function(e) 
 </script>
 </body>
 </html>
-
 
 
 
