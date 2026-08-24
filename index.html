@@ -6743,10 +6743,14 @@ async function rpFlushDiscordLogs() {
             if (res.ok) {
                 // Curățăm coada doar dacă s-a trimis cu succes
                 localStorage.setItem(RP_CONFIG.STORAGE_KEY_LOGS, JSON.stringify([]));
+            } else {
+                // Dacă serverul returnează un status error, logăm dar nu curățăm coada
+                console.warn(`Worker return status ${res.status}: ${res.statusText}`);
             }
         }
     } catch (e) {
         console.warn('Eroare trimitere loguri batch pe Discord:', e);
+        // Nu curățăm coada în caz de eroare - se va reîncerca la următoarea sesiune
     }
 }
 
