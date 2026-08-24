@@ -7338,28 +7338,113 @@ async function rpRemoveSpecificMember(zoneName, callSign) {
     }
 }
 
-        function rpLeaveCurrentZone() {
-            if (!rpUser) return;
-            RP_CONFIG.ZONES.forEach(z => {
-                rpState[z] = (rpState[z] || []).filter(m => m.callSign !== rpUser.callSign);
+        async function rpLeaveCurrentZone() {
+    if (!rpUser) return;
+
+    let leftZone = '';
+    let partnerVal = '';
+
+    // Căutăm flexibil medicul în toate zonele (verificăm callSign sau nume)
+    RP_CONFIG.ZONES.forEach(z => {
+        const list = rpState[z] || [];
+        const foundIndex = list.findIndex(m => 
+            (m.callSign && rpUser.callSign && m.callSign.trim().toLowerCase() === rpUser.callSign.trim().toLowerCase()) ||
+            (m.name && rpUser.name && m.name.trim().toLowerCase() === rpUser.name.trim().toLowerCase())
+        );
+
+        if (foundIndex !== -1) {
+            leftZone = z;
+            partnerVal = list[foundIndex].partner || '';
+            // Eliminăm medicul din zonă
+            list.splice(foundIndex, 1);
+        }
+    });
+
+    // Actualizăm starea și interfața locală IMEDIAT
+    rpSaveState();
+    rpRenderGrid();
+
+    // Trimitem logurile chiar dacă nu am identificat zona (fallback)
+    if (RP_CONFIG.WORKER_URL) {
+        try {
+            // 1. Actualizăm repartizarea echipajelor (Discord + Realtime)
+            await fetch(RP_CONFIG.WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    type: 'assign', 
+                    state: rpState 
+                })
             });
-            rpSaveState();
-            rpRenderGrid();
-        }
 
-        function rpRemoveSpecificMember(zoneName, callSign) {
-            if (!rpUser) return;
-            const isSelf = callSign === rpUser.callSign;
-            if (!rpUser.isConducere && !isSelf) return;
-
-            if (confirm(`Sigur dorești să scoți ${callSign} din ${zoneName}?`)) {
-                if (rpState[zoneName]) {
-                    rpState[zoneName] = rpState[zoneName].filter(m => m.callSign !== callSign);
-                }
-                rpSaveState();
-                rpRenderGrid();
+            // 2. Trimitem logul de ieșire (Embed Roșu)
+            if (leftZone) {
+                await fetch(RP_CONFIG.WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'log',
+                        action: 'leave',
+                        callSign: rpUser.callSign,
+                        name: rpUser.name,
+                        zone: leftZone,
+                        partner: partnerVal
+                    })
+                });
             }
+        } catch (err) {
+            console.error('Eroare la trimiterea logului de ieșire:', err);
         }
+    }
+}
+
+async function rpRemoveSpecificMember(zoneName, callSign) {
+    if (!rpState[zoneName]) return;
+
+    // Găsim membrul de eliminat
+    const index = rpState[zoneName].findIndex(m => m.callSign === callSign);
+    if (index === -1) return;
+
+    const removedMember = rpState[zoneName][index];
+    rpState[zoneName].splice(index, 1);
+
+    // Salvăm și actualizăm interfața locală
+    rpSaveState();
+    rpRenderGrid();
+
+    if (RP_CONFIG.WORKER_URL) {
+        try {
+            await fetch(RP_CONFIG.WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    type: 'assign', 
+                    state: rpState 
+                })
+            });
+
+            await fetch(RP_CONFIG.WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'log',
+                    action: 'leave',
+                    callSign: removedMember.callSign,
+                    name: removedMember.name,
+                    zone: zoneName,
+                    partner: removedMember.partner || ''
+                })
+            });
+        } catch (err) {
+            console.error('Eroare la eliminarea membrului:', err);
+        }
+    }
+}
+
+// Expunere globală explicită pentru atributul onclick din HTML
+window.rpLeaveCurrentZone = rpLeaveCurrentZone;
+window.rpLeaveZone = rpLeaveCurrentZone;
+window.rpRemoveSpecificMember = rpRemoveSpecificMember;
 
         function rpAdminKickMember() {
             if (!rpUser || !rpUser.isConducere) return;
@@ -7475,6 +7560,26 @@ setInterval(rpFetchRealtimeState, 3000);
                 showSection('repartizare-zone');
             }
         });
+
+        async function rpSyncRealtimeState() {
+    if (!RP_CONFIG.WORKER_URL) return;
+    try {
+        const res = await fetch(RP_CONFIG.WORKER_URL, { method: 'GET' });
+        if (res.ok) {
+            const serverState = await res.json();
+            if (JSON.stringify(serverState) !== JSON.stringify(rpState)) {
+                rpState = serverState;
+                localStorage.setItem('rpState', JSON.stringify(rpState));
+                rpRenderGrid();
+            }
+        }
+    } catch (e) {
+        // Ignorăm erorile temporare de rețea la polling
+    }
+}
+
+// Verifică starea nouă de pe server la fiecare 3 secunde
+setInterval(rpSyncRealtimeState, 3000);
     </script>
 </body>
 
