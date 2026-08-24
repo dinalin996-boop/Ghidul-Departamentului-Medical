@@ -6653,371 +6653,404 @@
 
     <script>
         // SISTEM REPARTIZARE ZONE & ECHIPAJE MEDICALE
-        const RP_CONFIG = {
-            CLIENT_ID: '1541376656718037042',
-            REDIRECT_URI: 'https://ghidul-departamentului-medical-eight.vercel.app/',
-            SHEET_ID: '1uaXnzKcNeOOXrQB2TU2aGrq9ZTie4AeFlAUX_FhH06M',
-            API_KEY: 'AIzaSyCLhcTP6xh1EglshVQ78kIkPxzBZOUE-eI',
-            API_KEY_FALLBACK: 'AIzaSyCr3WttB34swwmlYYcVJtHdU30hKJWm51s',
-            WORKER_URL: 'https://hrmedici.dodolea-10.workers.dev/',
-            SHEET_NAME: 'LISTA DEPARTAMENT',
-            ZONES: ['Zona 1', 'Zona 2', 'Zona 3', 'Zona 4', 'Spital'],
-            STORAGE_KEY_STATE: 'medical_repartizare_state_v3',
-            STORAGE_KEY_USER: 'repartizareUser'
-        };
+const RP_CONFIG = {
+    CLIENT_ID: '1541376656718037042',
+    REDIRECT_URI: 'https://ghidul-departamentului-medical-eight.vercel.app/',
+    SHEET_ID: '1uaXnzKcNeOOXrQB2TU2aGrq9ZTie4AeFlAUX_FhH06M',
+    API_KEY: 'AIzaSyCLhcTP6xh1EglshVQ78kIkPxzBZOUE-eI',
+    API_KEY_FALLBACK: 'AIzaSyCr3WttB34swwmlYYcVJtHdU30hKJWm51s',
+    WORKER_URL: 'https://hrmedici.dodolea-10.workers.dev/',
+    SHEET_NAME: 'LISTA DEPARTAMENT',
+    ZONES: ['Zona 1', 'Zona 2', 'Zona 3', 'Zona 4', 'Spital'],
+    STORAGE_KEY_STATE: 'medical_repartizare_state_v3',
+    STORAGE_KEY_USER: 'repartizareUser',
+    STORAGE_KEY_LOGS: 'rp_pending_logs_queue_v1'
+};
 
-        const RP_ZONE_META = {
-            'Zona 1': { name: 'Zona 1 (Port / Aeroport)', icon: 'fa-solid fa-plane-departure', color: '#0284c7' },
-            'Zona 2': { name: 'Zona 2 (Zona Centrală / Amarrilo)', icon: 'fa-solid fa-city', color: '#7c3aed' },
-            'Zona 3': { name: 'Zona 3 (Vinewood + Highway)', icon: 'fa-solid fa-road', color: '#d97706' },
-            'Zona 4': { name: 'Zona 4 (Sandy - Paleto - Roxwood)', icon: 'fa-solid fa-mountain-sun', color: '#b91c1c' },
-            'Spital': { name: 'Spitalul Județean Eclipse (Garda Spital)', icon: 'fa-solid fa-hospital', color: '#059669' }
-        };
+const RP_ZONE_META = {
+    'Zona 1': { name: 'Zona 1 (Port / Aeroport)', icon: 'fa-solid fa-plane-departure', color: '#0284c7' },
+    'Zona 2': { name: 'Zona 2 (Zona Centrală / Amarrilo)', icon: 'fa-solid fa-city', color: '#7c3aed' },
+    'Zona 3': { name: 'Zona 3 (Vinewood + Highway)', icon: 'fa-solid fa-road', color: '#d97706' },
+    'Zona 4': { name: 'Zona 4 (Sandy - Paleto - Roxwood)', icon: 'fa-solid fa-mountain-sun', color: '#b91c1c' },
+    'Spital': { name: 'Spitalul Județean Eclipse (Garda Spital)', icon: 'fa-solid fa-hospital', color: '#059669' }
+};
 
-        // State global
-        let rpUser = null;
-        let rpState = { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], 'Spital': [] };
-        let rpBroadcastChannel = null;
+// State global
+let rpUser = null;
+let rpState = { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], 'Spital': [] };
+let rpBroadcastChannel = null;
 
-        try {
-            if (typeof BroadcastChannel !== 'undefined') {
-                rpBroadcastChannel = new BroadcastChannel('rp_sync_channel');
-                rpBroadcastChannel.onmessage = function (e) {
-                    if (e.data && e.data.type === 'SYNC_STATE') {
-                        rpLoadState();
-                        rpRenderGrid();
-                    }
-                };
-            }
-        } catch (e) { }
-
-        window.addEventListener('storage', function (e) {
-            if (e.key === RP_CONFIG.STORAGE_KEY_STATE) {
+try {
+    if (typeof BroadcastChannel !== 'undefined') {
+        rpBroadcastChannel = new BroadcastChannel('rp_sync_channel');
+        rpBroadcastChannel.onmessage = function (e) {
+            if (e.data && e.data.type === 'SYNC_STATE') {
                 rpLoadState();
                 rpRenderGrid();
             }
+        };
+    }
+} catch (e) { }
+
+window.addEventListener('storage', function (e) {
+    if (e.key === RP_CONFIG.STORAGE_KEY_STATE) {
+        rpLoadState();
+        rpRenderGrid();
+    }
+});
+
+function rpLoadState() {
+    try {
+        const s = localStorage.getItem(RP_CONFIG.STORAGE_KEY_STATE);
+        if (s) {
+            const parsed = JSON.parse(s);
+            RP_CONFIG.ZONES.forEach(z => {
+                rpState[z] = Array.isArray(parsed[z]) ? parsed[z] : [];
+            });
+        }
+    } catch (e) { }
+}
+
+function rpSaveState() {
+    try {
+        localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
+        if (rpBroadcastChannel) {
+            rpBroadcastChannel.postMessage({ type: 'SYNC_STATE', timestamp: Date.now() });
+        }
+    } catch (e) { }
+}
+
+// MANAGEMENT COADĂ LOGURI (Discord)
+function rpQueueLogAction(logData) {
+    try {
+        const currentLogs = JSON.parse(localStorage.getItem(RP_CONFIG.STORAGE_KEY_LOGS) || '[]');
+        currentLogs.push({
+            ...logData,
+            time: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
         });
+        localStorage.setItem(RP_CONFIG.STORAGE_KEY_LOGS, JSON.stringify(currentLogs));
+    } catch (e) { }
+}
 
-        function rpLoadState() {
-            try {
-                const s = localStorage.getItem(RP_CONFIG.STORAGE_KEY_STATE);
-                if (s) {
-                    const parsed = JSON.parse(s);
-                    RP_CONFIG.ZONES.forEach(z => {
-                        rpState[z] = Array.isArray(parsed[z]) ? parsed[z] : [];
-                    });
-                }
-            } catch (e) { }
+async function rpFlushDiscordLogs() {
+    try {
+        const currentLogs = JSON.parse(localStorage.getItem(RP_CONFIG.STORAGE_KEY_LOGS) || '[]');
+        
+        // Dacă nu s-a schimbat nimic în ultimele 3 minute, NU trimitem nimic pe Discord
+        if (!currentLogs || currentLogs.length === 0) return;
+
+        if (RP_CONFIG.WORKER_URL) {
+            // Trimitem pachetul de loguri către Worker pentru Discord Webhook
+            const res = await fetch(RP_CONFIG.WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'batch_log',
+                    logs: currentLogs,
+                    state: rpState
+                })
+            });
+
+            if (res.ok) {
+                // Curățăm coada doar dacă s-a trimis cu succes
+                localStorage.setItem(RP_CONFIG.STORAGE_KEY_LOGS, JSON.stringify([]));
+            }
+        }
+    } catch (e) {
+        console.warn('Eroare trimitere loguri batch pe Discord:', e);
+    }
+}
+
+function rpLoginDiscord() {
+    const redirect = encodeURIComponent(RP_CONFIG.REDIRECT_URI);
+    const url = `https://discord.com/api/oauth2/authorize?client_id=${RP_CONFIG.CLIENT_ID}&redirect_uri=${redirect}&response_type=token&scope=identify`;
+    window.location.href = url;
+}
+
+// Extragere si mapare utilizator din Google Sheets
+function rpExtractUser(row, discordUser) {
+    const csRaw = (row[2] || '').toString().trim();
+    const csNum = parseInt(csRaw.replace(/\D/g, ''), 10) || 0;
+    let cs = csRaw;
+    if (cs && !cs.toUpperCase().startsWith('M-')) cs = 'M-' + cs;
+    if (!cs && csNum) cs = 'M-' + csNum;
+
+    const name = (row[3] || (discordUser ? discordUser.username : 'Medic')).toString().trim();
+    const rank = (row[4] || 'Medic').toString().trim();
+    const dept = (row[5] || '').toString().trim();
+    const radioVal = (row[11] || '').toString().trim().toUpperCase();
+    const blsVal = (row[12] || '').toString().trim().toUpperCase();
+
+    const isRadioFromSheet = radioVal === 'TRUE' || radioVal === '1' || radioVal === 'DA' || radioVal === 'YES';
+    const isBLSFromSheet = blsVal === 'TRUE' || blsVal === '1' || blsVal === 'DA' || blsVal === 'YES';
+
+    const isConducere = (csNum >= 1 && csNum <= 13) ||
+        rank.toUpperCase().includes('DIRECTOR') ||
+        rank.toUpperCase().includes('INSPECTOR') ||
+        rank.toUpperCase().includes('CONDUCERE') ||
+        dept.toUpperCase().includes('CONDUCERE');
+
+    const isSuperiorRank = isConducere || (csNum >= 100 && csNum <= 599);
+
+    const isRadio = isSuperiorRank ? true : isRadioFromSheet;
+    const isBLS = isSuperiorRank ? true : isBLSFromSheet;
+
+    let tier = 'other';
+    if (isConducere) tier = 'conducere';
+    else if (csNum >= 100 && csNum <= 199) tier = '100';
+    else if (csNum >= 200 && csNum <= 299) tier = '200';
+    else if (csNum >= 300 && csNum <= 399) tier = '300';
+    else if (csNum >= 400 && csNum <= 499) tier = '400';
+    else if (csNum >= 500 && csNum <= 599) tier = '500';
+    else if (csNum >= 600 && csNum <= 699) tier = '600';
+
+    const avatarUrl = discordUser && discordUser.avatar
+        ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
+        : null;
+
+    return {
+        id: (row[1] || '').toString().trim(),
+        name: name || 'Medic Departamental',
+        callSign: cs || 'M-???',
+        csNum: csNum,
+        rank: rank,
+        dept: dept,
+        tier: tier,
+        isConducere: isConducere,
+        radio: isRadio,
+        bls: isBLS,
+        discordId: (row[19] || (discordUser ? discordUser.id : '')).toString().trim(),
+        avatar: avatarUrl
+    };
+}
+
+async function rpFetchSheetRows() {
+    const range = encodeURIComponent(RP_CONFIG.SHEET_NAME + '!A1:T300');
+    let res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${RP_CONFIG.SHEET_ID}/values/${range}?key=${RP_CONFIG.API_KEY}`);
+    if (!res.ok) {
+        res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${RP_CONFIG.SHEET_ID}/values/${range}?key=${RP_CONFIG.API_KEY_FALLBACK}`);
+    }
+    if (!res.ok) throw new Error('Eroare la conexiunea cu baza de date Google Sheets.');
+    const data = await res.json();
+    return data.values || [];
+}
+
+async function rpHandleToken(accessToken) {
+    const statusEl = document.getElementById('rpLoginStatus');
+    if (statusEl) statusEl.textContent = 'Se verifică identitatea Discord și datele departamentale...';
+    try {
+        const uRes = await fetch('https://discord.com/api/users/@me', {
+            headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (!uRes.ok) throw new Error('Token Discord invalid.');
+        const discordUser = await uRes.json();
+        const discordId = discordUser.id;
+
+        const rows = await rpFetchSheetRows();
+        let foundRow = null;
+        for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (r[19] && r[19].toString().trim() === discordId.toString().trim()) {
+                foundRow = r;
+                break;
+            }
         }
 
-        function rpSaveState() {
-            try {
-                localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
-                if (rpBroadcastChannel) {
-                    rpBroadcastChannel.postMessage({ type: 'SYNC_STATE', timestamp: Date.now() });
-                }
-            } catch (e) { }
+        if (!foundRow) {
+            if (statusEl) statusEl.textContent = `Contul tău Discord (ID: ${discordId}) nu a fost găsit în LISTA DEPARTAMENT.`;
+            return;
         }
 
-        function rpLoginDiscord() {
-            const redirect = encodeURIComponent(RP_CONFIG.REDIRECT_URI);
-            const url = `https://discord.com/api/oauth2/authorize?client_id=${RP_CONFIG.CLIENT_ID}&redirect_uri=${redirect}&response_type=token&scope=identify`;
-            window.location.href = url;
+        const userObj = rpExtractUser(foundRow, discordUser);
+        sessionStorage.setItem(RP_CONFIG.STORAGE_KEY_USER, JSON.stringify(userObj));
+        if (statusEl) statusEl.textContent = '';
+        rpShowUser(userObj);
+    } catch (err) {
+        if (statusEl) statusEl.textContent = err.message || 'Eroare la autentificare. Încearcă din nou.';
+    }
+}
+
+async function rpLoginManual() {
+    const input = document.getElementById('rpManualDiscordId');
+    const statusEl = document.getElementById('rpLoginStatus');
+    const query = (input ? input.value : '').trim();
+    if (!query) {
+        if (statusEl) statusEl.textContent = 'Introdu un Discord ID sau un Callsign valid.';
+        return;
+    }
+    if (statusEl) statusEl.textContent = 'Se caută în baza de date a departamentului...';
+
+    try {
+        const rows = await rpFetchSheetRows();
+        let foundRow = null;
+        for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            const discId = (r[19] || '').toString().trim();
+            const csVal = (r[2] || '').toString().trim();
+            const csDigits = csVal.replace(/\D/g, '');
+            const qDigits = query.replace(/\D/g, '');
+
+            if (discId === query || (qDigits && (csDigits === qDigits || csVal.toLowerCase() === query.toLowerCase()))) {
+                foundRow = r;
+                break;
+            }
         }
 
-        // Extragere si mapare utilizator din Google Sheets
-        function rpExtractUser(row, discordUser) {
-            const csRaw = (row[2] || '').toString().trim();
-            const csNum = parseInt(csRaw.replace(/\D/g, ''), 10) || 0;
-            let cs = csRaw;
-            if (cs && !cs.toUpperCase().startsWith('M-')) cs = 'M-' + cs;
-            if (!cs && csNum) cs = 'M-' + csNum;
+        if (!foundRow) {
+            if (statusEl) statusEl.textContent = `Nu s-a găsit niciun medic cu Discord ID / Callsign: ${query}`;
+            return;
+        }
 
-            const name = (row[3] || (discordUser ? discordUser.username : 'Medic')).toString().trim();
-            const rank = (row[4] || 'Medic').toString().trim();
-            const dept = (row[5] || '').toString().trim();
-            const radioVal = (row[11] || '').toString().trim().toUpperCase();
-            const blsVal = (row[12] || '').toString().trim().toUpperCase();
+        const userObj = rpExtractUser(foundRow, null);
+        sessionStorage.setItem(RP_CONFIG.STORAGE_KEY_USER, JSON.stringify(userObj));
+        if (statusEl) statusEl.textContent = '';
+        rpShowUser(userObj);
+    } catch (err) {
+        if (statusEl) statusEl.textContent = err.message || 'Eroare la căutare. Reîncearcă.';
+    }
+}
 
-            const isRadioFromSheet = radioVal === 'TRUE' || radioVal === '1' || radioVal === 'DA' || radioVal === 'YES';
-            const isBLSFromSheet = blsVal === 'TRUE' || blsVal === '1' || blsVal === 'DA' || blsVal === 'YES';
+function rpLogout() {
+    sessionStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
+    rpUser = null;
+    document.getElementById('rpLoginContainer').style.display = 'block';
+    document.getElementById('rpDashboard').style.display = 'none';
+    const statusEl = document.getElementById('rpLoginStatus');
+    if (statusEl) statusEl.textContent = '';
+}
 
-            const isConducere = (csNum >= 1 && csNum <= 13) ||
-                rank.toUpperCase().includes('DIRECTOR') ||
-                rank.toUpperCase().includes('INSPECTOR') ||
-                rank.toUpperCase().includes('CONDUCERE') ||
-                dept.toUpperCase().includes('CONDUCERE');
+function rpGetMediaTeren(excludeUserCallsign = null) {
+    const fieldZones = ['Zona 1', 'Zona 2', 'Zona 3', 'Zona 4'];
+    let count = 0;
+    fieldZones.forEach(z => {
+        const list = rpState[z] || [];
+        list.forEach(m => {
+            if (!excludeUserCallsign || m.callSign !== excludeUserCallsign) {
+                count++;
+            }
+        });
+    });
+    return count / 4;
+}
 
-            // Gradele superioare: Conducere (1-13) și intervalul 100 - 599
-            const isSuperiorRank = isConducere || (csNum >= 100 && csNum <= 599);
+function rpCanAssignZone(user, targetZone, partnerInput = '') {
+    if (!user) return { ok: false, reason: 'Utilizator neautentificat' };
+    if (user.isConducere) {
+        return { ok: true, isConducere: true, reason: 'Acces Conducere (Ignoră limitele)' };
+    }
 
-            // Dacă e grad superior => DA automat. Dacă e 600+ => depinde EXCLUSIV de sheet.
-            const isRadio = isSuperiorRank ? true : isRadioFromSheet;
-            const isBLS = isSuperiorRank ? true : isBLSFromSheet;
+    const is500or600 = user.tier === '500' || user.tier === '600' || (user.csNum >= 500 && user.csNum <= 699);
+    if (targetZone === 'Zona 4' && is500or600) {
+        return { ok: false, reason: 'Gradele 500 și 600 nu au acces în Zona 4 (Sandy / Paleto / Roxwood)' };
+    }
 
-            let tier = 'other';
-            if (isConducere) tier = 'conducere';
-            else if (csNum >= 100 && csNum <= 199) tier = '100';
-            else if (csNum >= 200 && csNum <= 299) tier = '200';
-            else if (csNum >= 300 && csNum <= 399) tier = '300';
-            else if (csNum >= 400 && csNum <= 499) tier = '400';
-            else if (csNum >= 500 && csNum <= 599) tier = '500';
-            else if (csNum >= 600 && csNum <= 699) tier = '600';
+    const is600 = user.tier === '600' || (user.csNum >= 600 && user.csNum <= 699);
+    let isJoiningPartnerZone = false;
 
-            const avatarUrl = discordUser && discordUser.avatar
-                ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
-                : null;
+    if (is600 && targetZone !== 'Spital') {
+        const partner = (partnerInput || '').trim().toUpperCase();
+        if (!partner) {
+            return { ok: false, needsPartner: true, reason: 'Introdu callsign-ul colegului de patrulă.' };
+        }
+        const partnerEntry = Object.values(rpState).flat().find(m => {
+            const memberCallSign = (m.callSign || '').toUpperCase();
+            return memberCallSign === partner || memberCallSign === ('M-' + partner);
+        });
+        if (!partnerEntry) {
+            return { ok: false, needsPartner: true, reason: 'Colegul trebuie să fie deja arondat pe o zonă de teren.' };
+        }
+        if (partnerEntry.zone && partnerEntry.zone !== targetZone) {
+            return { ok: false, needsPartner: true, reason: `Colegul ${partnerEntry.callSign} este arondat pe ${partnerEntry.zone}. Alege aceeași zonă.` };
+        }
+        if (!rpState[targetZone].some(m => {
+            const memberCallSign = (m.callSign || '').toUpperCase();
+            return memberCallSign === partner || memberCallSign === ('M-' + partner);
+        })) {
+            return { ok: false, needsPartner: true, reason: `Alege zona pe care este arondat colegul ${partnerEntry.callSign}.` };
+        }
+        
+        isJoiningPartnerZone = true;
+    }
 
+    if (targetZone === 'Spital') {
+        const spitalCount = (rpState['Spital'] || []).filter(m => m.callSign !== user.callSign).length;
+        if (spitalCount >= 15) {
+            return { ok: false, reason: 'Spitalul a atins capacitatea maximă' };
+        }
+    } else if (!isJoiningPartnerZone) {
+        const media = rpGetMediaTeren(user.callSign);
+        const currentZoneMembers = (rpState[targetZone] || []).filter(m => m.callSign !== user.callSign);
+        const currentZoneCount = currentZoneMembers.length;
+
+        if (currentZoneCount > media) {
             return {
-                id: (row[1] || '').toString().trim(),
-                name: name || 'Medic Departamental',
-                callSign: cs || 'M-???',
-                csNum: csNum,
-                rank: rank,
-                dept: dept,
-                tier: tier,
-                isConducere: isConducere,
-                radio: isRadio,
-                bls: isBLS,
-                discordId: (row[19] || (discordUser ? discordUser.id : '')).toString().trim(),
-                avatar: avatarUrl
+                ok: false,
+                reason: `Zonă supra-aglomerată! Numărul curent (${currentZoneCount}) depășește media pe tură.`
             };
         }
-        
-        async function rpFetchSheetRows() {
-            const range = encodeURIComponent(RP_CONFIG.SHEET_NAME + '!A1:T300');
-            let res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${RP_CONFIG.SHEET_ID}/values/${range}?key=${RP_CONFIG.API_KEY}`);
-            if (!res.ok) {
-                res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${RP_CONFIG.SHEET_ID}/values/${range}?key=${RP_CONFIG.API_KEY_FALLBACK}`);
-            }
-            if (!res.ok) throw new Error('Eroare la conexiunea cu baza de date Google Sheets.');
-            const data = await res.json();
-            return data.values || [];
+    }
+
+    return { ok: true, reason: 'Disponibil' };
+}
+
+function rpShowUser(user) {
+    rpUser = user;
+    document.getElementById('rpLoginContainer').style.display = 'none';
+    document.getElementById('rpDashboard').style.display = 'block';
+
+    document.getElementById('rpProfileName').textContent = user.name;
+    document.getElementById('rpProfileCallsign').textContent = user.callSign;
+
+    const avatarEl = document.getElementById('rpUserAvatar');
+    if (user.avatar) {
+        avatarEl.innerHTML = `<img src="${user.avatar}" alt="Avatar" style="width:100%; height:100%; object-fit:cover;">`;
+    } else {
+        avatarEl.innerHTML = `<i class="fa-solid fa-user-doctor"></i>`;
+    }
+
+    const hasRadio = Boolean(user.radio);
+    const hasBLS = Boolean(user.bls);
+
+    const radioBadge = document.getElementById('rpBadgeRadio');
+    if (radioBadge) {
+        if (hasRadio) {
+            radioBadge.style.background = '#dcfce7';
+            radioBadge.style.color = '#15803d';
+            radioBadge.innerHTML = '<i class="fa-solid fa-walkie-talkie"></i> Radio: DA';
+        } else {
+            radioBadge.style.background = '#fee2e2';
+            radioBadge.style.color = '#b91c1c';
+            radioBadge.innerHTML = '<i class="fa-solid fa-walkie-talkie"></i> Radio: FĂRĂ';
         }
+    }
 
-        async function rpHandleToken(accessToken) {
-            const statusEl = document.getElementById('rpLoginStatus');
-            if (statusEl) statusEl.textContent = 'Se verifică identitatea Discord și datele departamentale...';
-            try {
-                const uRes = await fetch('https://discord.com/api/users/@me', {
-                    headers: { Authorization: `Bearer ${accessToken}` }
-                });
-                if (!uRes.ok) throw new Error('Token Discord invalid.');
-                const discordUser = await uRes.json();
-                const discordId = discordUser.id;
-
-                const rows = await rpFetchSheetRows();
-                let foundRow = null;
-                for (let i = 1; i < rows.length; i++) {
-                    const r = rows[i];
-                    if (r[19] && r[19].toString().trim() === discordId.toString().trim()) {
-                        foundRow = r;
-                        break;
-                    }
-                }
-
-                if (!foundRow) {
-                    if (statusEl) statusEl.textContent = `Contul tău Discord (ID: ${discordId}) nu a fost găsit în LISTA DEPARTAMENT.`;
-                    return;
-                }
-
-                const userObj = rpExtractUser(foundRow, discordUser);
-                sessionStorage.setItem(RP_CONFIG.STORAGE_KEY_USER, JSON.stringify(userObj));
-                if (statusEl) statusEl.textContent = '';
-                rpShowUser(userObj);
-            } catch (err) {
-                if (statusEl) statusEl.textContent = err.message || 'Eroare la autentificare. Încearcă din nou.';
-            }
+    const blsBadge = document.getElementById('rpBadgeBLS');
+    if (blsBadge) {
+        if (hasBLS) {
+            blsBadge.style.background = '#dcfce7';
+            blsBadge.style.color = '#15803d';
+            blsBadge.innerHTML = '<i class="fa-solid fa-heart-pulse"></i> BLS: DA';
+        } else {
+            blsBadge.style.background = '#fee2e2';
+            blsBadge.style.color = '#b91c1c';
+            blsBadge.innerHTML = '<i class="fa-solid fa-heart-pulse"></i> BLS: FĂRĂ';
         }
+    }
 
-        async function rpLoginManual() {
-            const input = document.getElementById('rpManualDiscordId');
-            const statusEl = document.getElementById('rpLoginStatus');
-            const query = (input ? input.value : '').trim();
-            if (!query) {
-                if (statusEl) statusEl.textContent = 'Introdu un Discord ID sau un Callsign valid.';
-                return;
-            }
-            if (statusEl) statusEl.textContent = 'Se caută în baza de date a departamentului...';
+    const is600WithCerts = (user.tier === '600' || (user.csNum >= 600 && user.csNum <= 699)) && hasRadio && hasBLS;
+    document.getElementById('rpPartnerBox').style.display = is600WithCerts ? 'block' : 'none';
+    document.getElementById('rpAdminPanel').style.display = user.isConducere ? 'block' : 'none';
 
-            try {
-                const rows = await rpFetchSheetRows();
-                let foundRow = null;
-                for (let i = 1; i < rows.length; i++) {
-                    const r = rows[i];
-                    const discId = (r[19] || '').toString().trim();
-                    const csVal = (r[2] || '').toString().trim();
-                    const csDigits = csVal.replace(/\D/g, '');
-                    const qDigits = query.replace(/\D/g, '');
+    rpLoadState();
+    rpRenderGrid();
+}
 
-                    if (discId === query || (qDigits && (csDigits === qDigits || csVal.toLowerCase() === query.toLowerCase()))) {
-                        foundRow = r;
-                        break;
-                    }
-                }
-
-                if (!foundRow) {
-                    if (statusEl) statusEl.textContent = `Nu s-a găsit niciun medic cu Discord ID / Callsign: ${query}`;
-                    return;
-                }
-
-                const userObj = rpExtractUser(foundRow, null);
-                sessionStorage.setItem(RP_CONFIG.STORAGE_KEY_USER, JSON.stringify(userObj));
-                if (statusEl) statusEl.textContent = '';
-                rpShowUser(userObj);
-            } catch (err) {
-                if (statusEl) statusEl.textContent = err.message || 'Eroare la căutare. Reîncearcă.';
-            }
-        }
-
-        function rpLogout() {
-            sessionStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
-            rpUser = null;
-            document.getElementById('rpLoginContainer').style.display = 'block';
-            document.getElementById('rpDashboard').style.display = 'none';
-            const statusEl = document.getElementById('rpLoginStatus');
-            if (statusEl) statusEl.textContent = '';
-        }
-
-        function rpGetMediaTeren(excludeUserCallsign = null) {
-            const fieldZones = ['Zona 1', 'Zona 2', 'Zona 3', 'Zona 4'];
-            let count = 0;
-            fieldZones.forEach(z => {
-                const list = rpState[z] || [];
-                list.forEach(m => {
-                    if (!excludeUserCallsign || m.callSign !== excludeUserCallsign) {
-                        count++;
-                    }
-                });
-            });
-            return count / 4;
-        }
-
-        function rpCanAssignZone(user, targetZone, partnerInput = '') {
-            if (!user) return { ok: false, reason: 'Utilizator neautentificat' };
-            if (user.isConducere) {
-                return { ok: true, isConducere: true, reason: 'Acces Conducere (Ignoră limitele)' };
-            }
-
-            // 1. Restricție Zona 4: 500 și 600 nu au acces
-            const is500or600 = user.tier === '500' || user.tier === '600' || (user.csNum >= 500 && user.csNum <= 699);
-            if (targetZone === 'Zona 4' && is500or600) {
-                return { ok: false, reason: 'Gradele 500 și 600 nu au acces în Zona 4 (Sandy / Paleto / Roxwood)' };
-            }
-
-            // 2. Regulă Gradul 600 cu partener
-            const is600 = user.tier === '600' || (user.csNum >= 600 && user.csNum <= 699);
-            let isJoiningPartnerZone = false;
-
-            if (is600 && targetZone !== 'Spital') {
-                const partner = (partnerInput || '').trim().toUpperCase();
-                if (!partner) {
-                    return { ok: false, needsPartner: true, reason: 'Introdu callsign-ul colegului de patrulă.' };
-                }
-                const partnerEntry = Object.values(rpState).flat().find(m => {
-                    const memberCallSign = (m.callSign || '').toUpperCase();
-                    return memberCallSign === partner || memberCallSign === ('M-' + partner);
-                });
-                if (!partnerEntry) {
-                    return { ok: false, needsPartner: true, reason: 'Colegul trebuie să fie deja arondat pe o zonă de teren.' };
-                }
-                if (partnerEntry.zone && partnerEntry.zone !== targetZone) {
-                    return { ok: false, needsPartner: true, reason: `Colegul ${partnerEntry.callSign} este arondat pe ${partnerEntry.zone}. Alege aceeași zonă.` };
-                }
-                if (!rpState[targetZone].some(m => {
-                    const memberCallSign = (m.callSign || '').toUpperCase();
-                    return memberCallSign === partner || memberCallSign === ('M-' + partner);
-                })) {
-                    return { ok: false, needsPartner: true, reason: `Alege zona pe care este arondat colegul ${partnerEntry.callSign}.` };
-                }
-                
-                // Dacă este gradul 600 și intră pe zona unde este partenerul, ignorăm limita de medie
-                isJoiningPartnerZone = true;
-            }
-
-            // 3. Limită capacitate Spital vs Teren (Media aritmetică)
-            if (targetZone === 'Spital') {
-                const spitalCount = (rpState['Spital'] || []).filter(m => m.callSign !== user.callSign).length;
-                if (spitalCount >= 15) {
-                    return { ok: false, reason: 'Spitalul a atins capacitatea maximă' };
-                }
-            } else if (!isJoiningPartnerZone) {
-                // Verificăm media doar dacă NU este un 600 care se alătură partenerului său
-                const media = rpGetMediaTeren(user.callSign);
-                const currentZoneMembers = (rpState[targetZone] || []).filter(m => m.callSign !== user.callSign);
-                const currentZoneCount = currentZoneMembers.length;
-
-                if (currentZoneCount > media) {
-                    return {
-                        ok: false,
-                        reason: `Zonă supra-aglomerată! Numărul curent (${currentZoneCount}) depășește media pe tură .`
-                    };
-                }
-            }
-
-            return { ok: true, reason: 'Disponibil' };
-        }
-
-        function rpShowUser(user) {
-            rpUser = user;
-            document.getElementById('rpLoginContainer').style.display = 'none';
-            document.getElementById('rpDashboard').style.display = 'block';
-
-            document.getElementById('rpProfileName').textContent = user.name;
-            document.getElementById('rpProfileCallsign').textContent = user.callSign;
-
-            const avatarEl = document.getElementById('rpUserAvatar');
-            if (user.avatar) {
-                avatarEl.innerHTML = `<img src="${user.avatar}" alt="Avatar" style="width:100%; height:100%; object-fit:cover;">`;
-            } else {
-                avatarEl.innerHTML = `<i class="fa-solid fa-user-doctor"></i>`;
-            }
-
-            // Citim exact valorile calculate în rpExtractUser (fără forțări)
-            const hasRadio = Boolean(user.radio);
-            const hasBLS = Boolean(user.bls);
-
-            const radioBadge = document.getElementById('rpBadgeRadio');
-            if (radioBadge) {
-                if (hasRadio) {
-                    radioBadge.style.background = '#dcfce7';
-                    radioBadge.style.color = '#15803d';
-                    radioBadge.innerHTML = '<i class="fa-solid fa-walkie-talkie"></i> Radio: DA';
-                } else {
-                    radioBadge.style.background = '#fee2e2';
-                    radioBadge.style.color = '#b91c1c';
-                    radioBadge.innerHTML = '<i class="fa-solid fa-walkie-talkie"></i> Radio: FĂRĂ';
-                }
-            }
-
-            const blsBadge = document.getElementById('rpBadgeBLS');
-            if (blsBadge) {
-                if (hasBLS) {
-                    blsBadge.style.background = '#dcfce7';
-                    blsBadge.style.color = '#15803d';
-                    blsBadge.innerHTML = '<i class="fa-solid fa-heart-pulse"></i> BLS: DA';
-                } else {
-                    blsBadge.style.background = '#fee2e2';
-                    blsBadge.style.color = '#b91c1c';
-                    blsBadge.innerHTML = '<i class="fa-solid fa-heart-pulse"></i> BLS: FĂRĂ';
-                }
-            }
-
-            const is600WithCerts = (user.tier === '600' || (user.csNum >= 600 && user.csNum <= 699)) && hasRadio && hasBLS;
-            document.getElementById('rpPartnerBox').style.display = is600WithCerts ? 'block' : 'none';
-            document.getElementById('rpAdminPanel').style.display = user.isConducere ? 'block' : 'none';
-
-            rpLoadState();
-            rpRenderGrid();
-        }
-        
-        function rpRenderGrid() {
+function rpRenderGrid() {
     if (!rpUser) return;
 
     const partnerInputEl = document.getElementById('rpPartnerInput');
     const partnerVal = partnerInputEl ? partnerInputEl.value.trim() : '';
 
-    // Căutăm zona curentă a utilizatorului
     let currentUserZone = null;
     let currentUserEntry = null;
     RP_CONFIG.ZONES.forEach(z => {
@@ -7028,7 +7061,6 @@
         }
     });
 
-    // Actualizare badge zonă utilizator
     const userZoneBadge = document.getElementById('rpBadgeZone');
     const btnLeaveCurrent = document.getElementById('rpBtnLeaveCurrent');
     if (currentUserZone) {
@@ -7043,19 +7075,6 @@
         if (btnLeaveCurrent) btnLeaveCurrent.style.display = 'none';
     }
 
-    let totalTura = 0;
-    let totalTeren = 0;
-    RP_CONFIG.ZONES.forEach(z => {
-        const count = (rpState[z] || []).length;
-        totalTura += count;
-        if (z !== 'Spital') totalTeren += count;
-    });
-    const mediaTeren = totalTeren / 4;
-
-    void totalTura;
-    void totalTeren;
-    void mediaTeren;
-
     const gridEl = document.getElementById('rpZonesGrid');
     gridEl.innerHTML = '';
 
@@ -7068,7 +7087,6 @@
         const card = document.createElement('div');
         card.style.cssText = `background:#fff; border-radius:22px; padding:1.4em; box-shadow:0 4px 18px rgba(0,0,0,0.06); border:2px solid ${isUserInThisZone ? '#10b981' : (check.ok ? '#e2e8f0' : '#fecaca')}; display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.2s, box-shadow 0.2s;`;
 
-        // Header zonă
         let headerHtml = `
             <div style="border-bottom:1px solid #f1f5f9; padding-bottom:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
@@ -7083,7 +7101,6 @@
             </div>
         `;
 
-        // Listă membri
         let membersHtml = '<div style="flex:1; min-height:80px; margin-bottom:14px;">';
         if (members.length === 0) {
             membersHtml += '<div style="color:#94a3b8; font-size:0.88rem; font-style:italic; padding:12px 0; text-align:center;">— Niciun medic arondat —</div>';
@@ -7115,7 +7132,6 @@
         }
         membersHtml += '</div>';
 
-        // Buton acțiune / Status zonă
         let actionHtml = '';
         if (isUserInThisZone) {
             actionHtml = `
@@ -7142,16 +7158,28 @@
     });
 }
 
-        async function rpJoinZone(zoneName) {
+// ARONDARE PE ZONĂ - Sincronizare IMEDIATĂ pe site, log pus în coadă pt Discord
+async function rpJoinZone(zoneName) {
     if (!rpUser) return;
+
+    const cooldownKey = `rpLastAssign_${rpUser.callSign}`;
+    const lastAssign = parseInt(sessionStorage.getItem(cooldownKey) || '0', 10);
+    const now = Date.now();
+    const timePassed = (now - lastAssign) / 1000;
+
+    if (timePassed < 10) {
+        const remaining = Math.ceil(10 - timePassed);
+        alert(`Așteaptă încă ${remaining} secunde înainte de a te aronda din nou!`);
+        return;
+    }
+    sessionStorage.setItem(cooldownKey, now.toString());
+
     const partnerVal = document.getElementById('rpPartnerInput') ? document.getElementById('rpPartnerInput').value.trim() : '';
 
-    // Eliminăm medicul din alte zone
     RP_CONFIG.ZONES.forEach(z => {
         rpState[z] = (rpState[z] || []).filter(m => m.callSign !== rpUser.callSign);
     });
 
-    // Îl adăugăm în noua zonă
     if (!rpState[zoneName]) rpState[zoneName] = [];
     rpState[zoneName].push({
         callSign: rpUser.callSign,
@@ -7163,188 +7191,34 @@
     rpSaveState();
     rpRenderGrid();
 
-    // Loguri pe Discord
+    // Adăugăm în coada de Discord (se va trimite la intervalul de 3 minute)
+    rpQueueLogAction({
+        action: 'join',
+        callSign: rpUser.callSign,
+        name: rpUser.name,
+        zone: zoneName,
+        partner: partnerVal
+    });
+
+    // Sincronizare IMEDIATĂ pe server (KV) pentru ca ceilalți colegi de pe site să vadă pe loc
     if (RP_CONFIG.WORKER_URL) {
         try {
-            // Trimitem lista actualizată
             await fetch(RP_CONFIG.WORKER_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'assign', state: rpState })
             });
-
-            // Trimitem logul individual de INTRARE (verde)
-            await fetch(RP_CONFIG.WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'log',
-                    action: 'join',
-                    callSign: rpUser.callSign,
-                    name: rpUser.name,
-                    zone: zoneName,
-                    partner: partnerVal
-                })
-            });
-        } catch (e) {
-            console.warn('Eroare la trimiterea logurilor:', e);
-        }
+        } catch (e) { }
     }
 }
+
+// PĂRĂSIRE ZONĂ - Sincronizare IMEDIATĂ pe site, log pus în coadă pt Discord
 async function rpLeaveCurrentZone() {
     if (!rpUser) return;
 
     let leftZone = '';
     let partnerVal = '';
 
-    // 1. Identificăm zona înainte de ștergere
-    RP_CONFIG.ZONES.forEach(z => {
-        const found = (rpState[z] || []).find(m => m.callSign === rpUser.callSign);
-        if (found) {
-            leftZone = z;
-            partnerVal = found.partner || '';
-        }
-        // Eliminăm utilizatorul din toate zonele
-        rpState[z] = (rpState[z] || []).filter(m => m.callSign !== rpUser.callSign);
-    });
-
-    // 2. Salvăm și actualizăm UI-ul local IMEDIAT
-    rpSaveState();
-    rpRenderGrid();
-
-    // 3. Dacă nu era în nicio zonă, ne oprim
-    if (!leftZone) return;
-
-    // 4. Trimitem datele către Worker
-    if (RP_CONFIG.WORKER_URL) {
-        try {
-            // Logul 1: Actualizare repartizare echipaje pe canalul principal
-            await fetch(RP_CONFIG.WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    type: 'assign', 
-                    state: rpState 
-                })
-            });
-
-            // Logul 2: Logul de ieșire (Embed Roșu)
-            await fetch(RP_CONFIG.WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'log',
-                    action: 'leave',
-                    callSign: rpUser.callSign,
-                    name: rpUser.name,
-                    zone: leftZone,
-                    partner: partnerVal
-                })
-            });
-        } catch (err) {
-            console.error('Eroare la trimiterea logurilor de ieșire pe Discord:', err);
-        }
-    }
-}
-
-async function rpRemoveSpecificMember(zoneName, callSign) {
-    if (!rpState[zoneName]) return;
-
-    const removedMember = rpState[zoneName].find(m => m.callSign === callSign);
-    
-    // Eliminăm membrul din zonă
-    rpState[zoneName] = rpState[zoneName].filter(m => m.callSign !== callSign);
-
-    // Salvăm și actualizăm UI-ul local
-    rpSaveState();
-    rpRenderGrid();
-
-    if (!removedMember) return;
-
-    if (RP_CONFIG.WORKER_URL) {
-        try {
-            await fetch(RP_CONFIG.WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    type: 'assign', 
-                    state: rpState 
-                })
-            });
-
-            await fetch(RP_CONFIG.WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'log',
-                    action: 'leave',
-                    callSign: removedMember.callSign,
-                    name: removedMember.name,
-                    zone: zoneName,
-                    partner: removedMember.partner || ''
-                })
-            });
-        } catch (err) {
-            console.error('Eroare la eliminarea membrului de către admin:', err);
-        }
-    }
-}
-
-        async function rpSendAssignmentLogs(user, zoneName, partner) {
-    if (!RP_CONFIG.WORKER_URL) return;
-
-    // 1. Asigurăm că rpState conține medicul actualizat înainte de a trimite datele
-    if (!rpState[zoneName]) rpState[zoneName] = [];
-    
-    // Eliminăm medicul din alte zone dacă era deja arondat
-    RP_CONFIG.ZONES.forEach(z => {
-        rpState[z] = (rpState[z] || []).filter(m => m.callSign !== user.callSign);
-    });
-
-    // Adăugăm medicul în noua zonă
-    rpState[zoneName].push({
-        callSign: user.callSign,
-        name: user.name,
-        partner: partner || '',
-        timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
-    });
-
-    try {
-        // 2. Trimitem rpState-ul complet actualizat
-        await fetch(RP_CONFIG.WORKER_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({
-                type: 'assign',
-                state: rpState
-            }) 
-        });
-
-        // 3. Trimitem logul individual
-        await fetch(RP_CONFIG.WORKER_URL, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ 
-                type: 'log',
-                callSign: user.callSign,
-                name: user.name,
-                discordId: user.discordId,
-                zone: zoneName,
-                partner: partner || ''
-            }) 
-        });
-    } catch (e) {
-        console.warn('Logurile Discord nu au putut fi trimise:', e);
-    }
-}
-
-        async function rpLeaveCurrentZone() {
-    if (!rpUser) return;
-
-    let leftZone = '';
-    let partnerVal = '';
-
-    // Căutăm flexibil medicul în toate zonele (verificăm callSign sau nume)
     RP_CONFIG.ZONES.forEach(z => {
         const list = rpState[z] || [];
         const foundIndex = list.findIndex(m => 
@@ -7355,215 +7229,152 @@ async function rpRemoveSpecificMember(zoneName, callSign) {
         if (foundIndex !== -1) {
             leftZone = z;
             partnerVal = list[foundIndex].partner || '';
-            // Eliminăm medicul din zonă
             list.splice(foundIndex, 1);
         }
     });
 
-    // Actualizăm starea și interfața locală IMEDIAT
     rpSaveState();
     rpRenderGrid();
 
-    // Trimitem logurile chiar dacă nu am identificat zona (fallback)
+    if (leftZone) {
+        rpQueueLogAction({
+            action: 'leave',
+            callSign: rpUser.callSign,
+            name: rpUser.name,
+            zone: leftZone,
+            partner: partnerVal
+        });
+    }
+
     if (RP_CONFIG.WORKER_URL) {
         try {
-            // 1. Actualizăm repartizarea echipajelor (Discord + Realtime)
             await fetch(RP_CONFIG.WORKER_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    type: 'assign', 
-                    state: rpState 
-                })
+                body: JSON.stringify({ type: 'assign', state: rpState })
             });
-
-            // 2. Trimitem logul de ieșire (Embed Roșu)
-            if (leftZone) {
-                await fetch(RP_CONFIG.WORKER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: 'log',
-                        action: 'leave',
-                        callSign: rpUser.callSign,
-                        name: rpUser.name,
-                        zone: leftZone,
-                        partner: partnerVal
-                    })
-                });
-            }
-        } catch (err) {
-            console.error('Eroare la trimiterea logului de ieșire:', err);
-        }
+        } catch (err) { }
     }
 }
 
 async function rpRemoveSpecificMember(zoneName, callSign) {
     if (!rpState[zoneName]) return;
 
-    // Găsim membrul de eliminat
     const index = rpState[zoneName].findIndex(m => m.callSign === callSign);
     if (index === -1) return;
 
     const removedMember = rpState[zoneName][index];
     rpState[zoneName].splice(index, 1);
 
-    // Salvăm și actualizăm interfața locală
     rpSaveState();
     rpRenderGrid();
+
+    rpQueueLogAction({
+        action: 'leave',
+        callSign: removedMember.callSign,
+        name: removedMember.name,
+        zone: zoneName,
+        partner: removedMember.partner || ''
+    });
 
     if (RP_CONFIG.WORKER_URL) {
         try {
             await fetch(RP_CONFIG.WORKER_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    type: 'assign', 
-                    state: rpState 
-                })
+                body: JSON.stringify({ type: 'assign', state: rpState })
             });
-
-            await fetch(RP_CONFIG.WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'log',
-                    action: 'leave',
-                    callSign: removedMember.callSign,
-                    name: removedMember.name,
-                    zone: zoneName,
-                    partner: removedMember.partner || ''
-                })
-            });
-        } catch (err) {
-            console.error('Eroare la eliminarea membrului:', err);
-        }
+        } catch (err) { }
     }
 }
 
-// Expunere globală explicită pentru atributul onclick din HTML
-window.rpLeaveCurrentZone = rpLeaveCurrentZone;
-window.rpLeaveZone = rpLeaveCurrentZone;
-window.rpRemoveSpecificMember = rpRemoveSpecificMember;
-
-        function rpAdminKickMember() {
-            if (!rpUser || !rpUser.isConducere) return;
-            const input = document.getElementById('rpAdminKickInput');
-            const msgEl = document.getElementById('rpAdminMsg');
-            let cs = (input ? input.value : '').trim();
-            if (!cs) {
-                if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'Introdu un Callsign.'; }
-                return;
-            }
-            if (!cs.toUpperCase().startsWith('M-') && cs.match(/^\d+$/)) cs = 'M-' + cs;
-
-            let removed = false;
-            RP_CONFIG.ZONES.forEach(z => {
-                const initialLen = (rpState[z] || []).length;
-                rpState[z] = (rpState[z] || []).filter(m => m.callSign.toUpperCase() !== cs.toUpperCase());
-                if (rpState[z].length < initialLen) removed = true;
-            });
-
-            if (msgEl) {
-                if (removed) {
-                    msgEl.style.color = '#16a34a';
-                    msgEl.textContent = `Medicul ${cs} a fost eliminat din repartizare.`;
-                } else {
-                    msgEl.style.color = '#dc2626';
-                    msgEl.textContent = `Medicul ${cs} nu a fost găsit în nicio zonă.`;
-                }
-                setTimeout(() => { msgEl.textContent = ''; }, 4000);
-            }
-
-            if (input) input.value = '';
-            rpSaveState();
-            rpRenderGrid();
-        }
-
-        function rpAdminClearAll() {
-            if (!rpUser || !rpUser.isConducere) return;
-            if (confirm('Atenție! Această acțiune va reseta toată repartizarea pentru toți medicii de pe tură. Continuați?')) {
-                RP_CONFIG.ZONES.forEach(z => { rpState[z] = []; });
-                rpSaveState();
-                rpRenderGrid();
-                const msgEl = document.getElementById('rpAdminMsg');
-                if (msgEl) {
-                    msgEl.style.color = '#16a34a';
-                    msgEl.textContent = 'Toate zonele au fost golite cu succes.';
-                    setTimeout(() => { msgEl.textContent = ''; }, 4000);
-                }
-            }
-        }
-
-        // Funcție care preia starea de la Worker și o aplică pe PC-ul curent
-async function rpFetchRealtimeState() {
-    if (!RP_CONFIG.WORKER_URL) return;
-
-    try {
-        const res = await fetch(RP_CONFIG.WORKER_URL, { method: 'GET' });
-        if (res.ok) {
-            const remoteState = await res.json();
-            // Actualizăm rpState doar dacă s-a schimbat ceva
-            if (JSON.stringify(remoteState) !== JSON.stringify(rpState)) {
-                rpState = remoteState;
-                localStorage.setItem('rpState', JSON.stringify(rpState));
-                rpRenderGrid(); // Re-randăm interfața cu noile zone
-            }
-        }
-    } catch (e) {
-        console.warn('Eroare la sincronizarea în timp real:', e);
+function rpAdminKickMember() {
+    if (!rpUser || !rpUser.isConducere) return;
+    const input = document.getElementById('rpAdminKickInput');
+    const msgEl = document.getElementById('rpAdminMsg');
+    let cs = (input ? input.value : '').trim();
+    if (!cs) {
+        if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'Introdu un Callsign.'; }
+        return;
     }
-}
+    if (!cs.toUpperCase().startsWith('M-') && cs.match(/^\d+$/)) cs = 'M-' + cs;
 
-// Pornim verificarea automată la fiecare 3 secunde (3000 ms)
-setInterval(rpFetchRealtimeState, 3000);
+    let removedZone = '';
+    let removedMember = null;
 
-        function rpOpenMapModal() {
-            const m = document.getElementById('rpMapModal');
-            if (m) m.style.display = 'flex';
+    RP_CONFIG.ZONES.forEach(z => {
+        const found = (rpState[z] || []).find(m => m.callSign.toUpperCase() === cs.toUpperCase());
+        if (found) {
+            removedZone = z;
+            removedMember = found;
         }
+        rpState[z] = (rpState[z] || []).filter(m => m.callSign.toUpperCase() !== cs.toUpperCase());
+    });
 
-        function rpCloseMapModal() {
-            const m = document.getElementById('rpMapModal');
-            if (m) m.style.display = 'none';
+    if (msgEl) {
+        if (removedMember) {
+            msgEl.style.color = '#16a34a';
+            msgEl.textContent = `Medicul ${cs} a fost eliminat din repartizare.`;
+        } else {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = `Medicul ${cs} nu a fost găsit în nicio zonă.`;
         }
+        setTimeout(() => { msgEl.textContent = ''; }, 4000);
+    }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            rpLoadState();
+    if (input) input.value = '';
+    rpSaveState();
+    rpRenderGrid();
 
-            // 1. Verificare token Discord în hash fragment
-            if (window.location.hash && window.location.hash.includes('access_token')) {
-                const params = new URLSearchParams(window.location.hash.substring(1));
-                const token = params.get('access_token');
-                if (token) {
-                    window.history.replaceState({}, '', window.location.pathname + window.location.search);
-                    showSection('repartizare-zone');
-                    rpHandleToken(token);
-                    return;
-                }
-            }
-
-            // 2. Verificare sesiune existentă
-            const storedUser = sessionStorage.getItem(RP_CONFIG.STORAGE_KEY_USER);
-            if (storedUser) {
-                try {
-                    const u = JSON.parse(storedUser);
-                    rpShowUser(u);
-                } catch (e) {
-                    sessionStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
-                }
-            }
-
-            // 3. Verificare redirect URL query (?section=repartizare-zone)
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('section') === 'repartizare-zone') {
-                showSection('repartizare-zone');
-            }
+    if (removedMember) {
+        rpQueueLogAction({
+            action: 'kick',
+            callSign: removedMember.callSign,
+            name: removedMember.name,
+            zone: removedZone,
+            by: rpUser.callSign
         });
 
-        
+        if (RP_CONFIG.WORKER_URL) {
+            fetch(RP_CONFIG.WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'assign', state: rpState })
+            });
+        }
+    }
+}
 
-       // 1. Sincronizarea automată la fiecare 1 minut (60.000 ms)
+function rpAdminClearAll() {
+    if (!rpUser || !rpUser.isConducere) return;
+    if (confirm('Atenție! Această acțiune va reseta toată repartizarea pentru toți medicii de pe tură. Continuați?')) {
+        RP_CONFIG.ZONES.forEach(z => { rpState[z] = []; });
+        rpSaveState();
+        rpRenderGrid();
+        
+        rpQueueLogAction({
+            action: 'clear_all',
+            by: rpUser.callSign
+        });
+
+        if (RP_CONFIG.WORKER_URL) {
+            fetch(RP_CONFIG.WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'assign', state: rpState })
+            });
+        }
+
+        const msgEl = document.getElementById('rpAdminMsg');
+        if (msgEl) {
+            msgEl.style.color = '#16a34a';
+            msgEl.textContent = 'Toate zonele au fost golite cu succes.';
+            setTimeout(() => { msgEl.textContent = ''; }, 4000);
+        }
+    }
+}
+
+// SINCRONIZARE DE PE SERVER LA FIECARE 5 SECUNDE (Pentru ca utilizatorii pe site sa vada rapid modificarile altora)
 async function rpSyncRealtimeState() {
     if (!RP_CONFIG.WORKER_URL) return;
     try {
@@ -7572,60 +7383,66 @@ async function rpSyncRealtimeState() {
             const serverState = await res.json();
             if (JSON.stringify(serverState) !== JSON.stringify(rpState)) {
                 rpState = serverState;
-                localStorage.setItem('rpState', JSON.stringify(rpState));
+                localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
                 rpRenderGrid();
             }
         }
-    } catch (e) {
-        // Ignorăm erorile temporare de rețea
-    }
+    } catch (e) { }
 }
 
-// Setăm verificarea o dată pe minut
-setInterval(rpSyncRealtimeState, 60000);
-document.addEventListener('DOMContentLoaded', rpSyncRealtimeState);
+function rpOpenMapModal() {
+    const m = document.getElementById('rpMapModal');
+    if (m) m.style.display = 'flex';
+}
 
+function rpCloseMapModal() {
+    const m = document.getElementById('rpMapModal');
+    if (m) m.style.display = 'none';
+}
 
-// 2. Funcția pentru butonul "Scoate de pe tură" (Conducere)
-async function rpRemoveFromDuty(zone, index) {
-    if (!confirm("Ești sigur că vrei să scoți acest medic de pe tură?")) return;
+// EXPOSING FUNCTIONS GLOBALLY
+window.rpLeaveCurrentZone = rpLeaveCurrentZone;
+window.rpLeaveZone = rpLeaveCurrentZone;
+window.rpRemoveSpecificMember = rpRemoveSpecificMember;
+window.rpRemoveFromDuty = rpRemoveSpecificMember;
 
-    // Extragerea și eliminarea medicului din starea locală
-    const removedDoctor = rpState[zone].splice(index, 1)[0];
-    localStorage.setItem('rpState', JSON.stringify(rpState));
-    rpRenderGrid();
+// INITIALIZARE
+document.addEventListener('DOMContentLoaded', function () {
+    rpLoadState();
 
-    // Notificare și salvare în Cloudflare KV
-    if (RP_CONFIG.WORKER_URL) {
-        try {
-            await fetch(RP_CONFIG.WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'log',
-                    action: 'leave',
-                    callSign: removedDoctor.callSign,
-                    name: removedDoctor.name,
-                    zone: zone,
-                    partner: removedDoctor.partner || 'Fără partener',
-                    state: rpState // Trimitem starea actualizată către KV
-                })
-            });
-
-            // Trimitem și update-ul pentru repartizare
-            await fetch(RP_CONFIG.WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'assign',
-                    state: rpState
-                })
-            });
-        } catch (e) {
-            console.error("Eroare la trimiterea modificării:", e);
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+        const params = new URLSearchParams(window.location.hash.substring(1));
+        const token = params.get('access_token');
+        if (token) {
+            window.history.replaceState({}, '', window.location.pathname + window.location.search);
+            if (typeof showSection === 'function') showSection('repartizare-zone');
+            rpHandleToken(token);
+            return;
         }
     }
-}
+
+    const storedUser = sessionStorage.getItem(RP_CONFIG.STORAGE_KEY_USER);
+    if (storedUser) {
+        try {
+            const u = JSON.parse(storedUser);
+            rpShowUser(u);
+        } catch (e) {
+            sessionStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
+        }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('section') === 'repartizare-zone' && typeof showSection === 'function') {
+        showSection('repartizare-zone');
+    }
+
+    // 1. Verificare rapidă la fiecare 5 secunde pe site (să se vadă mișcările colegilor instant)
+    rpSyncRealtimeState();
+    setInterval(rpSyncRealtimeState, 3000);
+
+    // 2. Trimitere loguri pe Discord STRICT O DATĂ LA 3 MINUTE (180.000 ms) - Doar dacă au existat schimbări!
+    setInterval(rpFlushDiscordLogs, 180000);
+});
     </script>
 </body>
 
