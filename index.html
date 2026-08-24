@@ -7563,7 +7563,7 @@ setInterval(rpFetchRealtimeState, 3000);
 
         
 
-        // Funcție care preia starea direct din baza de date centrală Cloudflare KV
+       // 1. Sincronizarea automată la fiecare 1 minut (60.000 ms)
 async function rpSyncRealtimeState() {
     if (!RP_CONFIG.WORKER_URL) return;
     try {
@@ -7581,14 +7581,51 @@ async function rpSyncRealtimeState() {
     }
 }
 
-// Interogăm serverul la fiecare 3 secunde pentru update-uri în timp real
-setInterval(rpSyncRealtimeState, 3000);
-
-// Pornim prima verificare imediat ce pagina e gata
+// Setăm verificarea o dată pe minut
+setInterval(rpSyncRealtimeState, 60000);
 document.addEventListener('DOMContentLoaded', rpSyncRealtimeState);
 
-// Verifică starea nouă de pe server la fiecare 3 secunde
-setInterval(rpSyncRealtimeState, 4000);
+
+// 2. Funcția pentru butonul "Scoate de pe tură" (Conducere)
+async function rpRemoveFromDuty(zone, index) {
+    if (!confirm("Ești sigur că vrei să scoți acest medic de pe tură?")) return;
+
+    // Extragerea și eliminarea medicului din starea locală
+    const removedDoctor = rpState[zone].splice(index, 1)[0];
+    localStorage.setItem('rpState', JSON.stringify(rpState));
+    rpRenderGrid();
+
+    // Notificare și salvare în Cloudflare KV
+    if (RP_CONFIG.WORKER_URL) {
+        try {
+            await fetch(RP_CONFIG.WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'log',
+                    action: 'leave',
+                    callSign: removedDoctor.callSign,
+                    name: removedDoctor.name,
+                    zone: zone,
+                    partner: removedDoctor.partner || 'Fără partener',
+                    state: rpState // Trimitem starea actualizată către KV
+                })
+            });
+
+            // Trimitem și update-ul pentru repartizare
+            await fetch(RP_CONFIG.WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'assign',
+                    state: rpState
+                })
+            });
+        } catch (e) {
+            console.error("Eroare la trimiterea modificării:", e);
+        }
+    }
+}
     </script>
 </body>
 
