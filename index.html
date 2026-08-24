@@ -7410,7 +7410,28 @@ async function rpRemoveSpecificMember(zoneName, callSign) {
             }
         }
 
-    
+        // Funcție care preia starea de la Worker și o aplică pe PC-ul curent
+async function rpFetchRealtimeState() {
+    if (!RP_CONFIG.WORKER_URL) return;
+
+    try {
+        const res = await fetch(RP_CONFIG.WORKER_URL, { method: 'GET' });
+        if (res.ok) {
+            const remoteState = await res.json();
+            // Actualizăm rpState doar dacă s-a schimbat ceva
+            if (JSON.stringify(remoteState) !== JSON.stringify(rpState)) {
+                rpState = remoteState;
+                localStorage.setItem('rpState', JSON.stringify(rpState));
+                rpRenderGrid(); // Re-randăm interfața cu noile zone
+            }
+        }
+    } catch (e) {
+        console.warn('Eroare la sincronizarea în timp real:', e);
+    }
+}
+
+// Pornim verificarea automată la fiecare 3 secunde (3000 ms)
+setInterval(rpFetchRealtimeState, 3000);
 
         function rpOpenMapModal() {
             const m = document.getElementById('rpMapModal');
