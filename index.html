@@ -7561,7 +7561,10 @@ setInterval(rpFetchRealtimeState, 3000);
             }
         });
 
-        async function rpSyncRealtimeState() {
+        
+
+        // Funcție care preia starea direct din baza de date centrală Cloudflare KV
+async function rpSyncRealtimeState() {
     if (!RP_CONFIG.WORKER_URL) return;
     try {
         const res = await fetch(RP_CONFIG.WORKER_URL, { method: 'GET' });
@@ -7574,12 +7577,18 @@ setInterval(rpFetchRealtimeState, 3000);
             }
         }
     } catch (e) {
-        // Ignorăm erorile temporare de rețea la polling
+        // Ignorăm erorile temporare de rețea
     }
 }
 
-// Verifică starea nouă de pe server la fiecare 3 secunde
+// Interogăm serverul la fiecare 3 secunde pentru update-uri în timp real
 setInterval(rpSyncRealtimeState, 3000);
+
+// Pornim prima verificare imediat ce pagina e gata
+document.addEventListener('DOMContentLoaded', rpSyncRealtimeState);
+
+// Verifică starea nouă de pe server la fiecare 3 secunde
+setInterval(rpSyncRealtimeState, 4000);
     </script>
 </body>
 
