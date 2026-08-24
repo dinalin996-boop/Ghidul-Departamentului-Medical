@@ -7438,7 +7438,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 1. Verificare rapidă la fiecare 5 secunde pe site (să se vadă mișcările colegilor instant)
     rpSyncRealtimeState();
-    setInterval(rpSyncRealtimeState, 3000);
+    setInterval(rpSyncRealtimeState, 1500);
 
     // 2. Trimitere loguri pe Discord STRICT O DATĂ LA 3 MINUTE (180.000 ms) - Doar dacă au existat schimbări!
     setInterval(rpFlushDiscordLogs, 180000);
