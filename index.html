@@ -7874,7 +7874,7 @@
             window.rpRemoveFromDuty = rpRemoveSpecificMember;
 
             // INITIALIZARE
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded'), function () {
                 rpLoadState();
 
                 if (window.location.hash && window.location.hash.includes('access_token')) {
@@ -7904,8 +7904,10 @@
                 }
 
                 let rpPollInterval = null;
+            }
+        
 
-function rpStartPolling() {
+    function rpStartPolling() {
     if (!rpPollInterval) {
         rpSyncRealtimeState(); // O citire imediată la activare
         rpPollInterval = setInterval(rpSyncRealtimeState, 10000); // Poll la 10 secunde
