@@ -7829,34 +7829,33 @@
 
             
             async function rpSyncRealtimeState() {
-                if (!RP_CONFIG.WORKER_URL || rpIsSaving) return;
-                try {
-                const res = await fetch(RP_CONFIG.WORKER_URL, { 
-                method: 'GET',
-                headers: { 'Cache-Control': 'no-cache' }
-                });
+    if (!RP_CONFIG.WORKER_URL || rpIsSaving) return;
+    try {
+        // Scoatem antetul manual de Cache-Control pentru a evita blocajul CORS
+        const res = await fetch(RP_CONFIG.WORKER_URL, { 
+            method: 'GET'
+        });
         
-                if (res.ok) {
-                    const serverState = await res.json();
+        if (res.ok) {
+            const serverState = await res.json();
             
-                    if (serverState && typeof serverState === 'object') {
-                    let isValidStructure = true;
-                    RP_CONFIG.ZONES.forEach(z => {
+            if (serverState && typeof serverState === 'object') {
+                let isValidStructure = true;
+                RP_CONFIG.ZONES.forEach(z => {
                     if (!Array.isArray(serverState[z])) isValidStructure = false;
-                    });
- 
-                    if (isValidStructure && JSON.stringify(serverState) !== JSON.stringify(rpState)) {
-                        rpState = serverState;
-                        localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
-                        rpRenderGrid();
-                        }
-                    }
-                  }
-                } catch (e) {
-                    console.warn('Eroare la sincronizarea în timp real:', e);
+                });
+
+                if (isValidStructure && JSON.stringify(serverState) !== JSON.stringify(rpState)) {
+                    rpState = serverState;
+                    localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
+                    rpRenderGrid();
                 }
             }
-
+        }
+    } catch (e) {
+        console.warn('Eroare la sincronizarea în timp real:', e);
+    }
+}
 
             function rpOpenMapModal() {
                 const m = document.getElementById('rpMapModal');
