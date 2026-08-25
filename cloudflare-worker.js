@@ -14,12 +14,6 @@ export default {
 
     if (request.method === 'OPTIONS') return new Response(null, { headers });
 
-    const authHeader = request.headers.get('Authorization');
-    const expectedToken = env.WORKER_AUTH_TOKEN;
-    if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
-      return jsonResponse({ error: 'Unauthorized' }, 401);
-    }
-
     try {
       if (request.method === 'GET') {
         const stored = env.RP_KV ? await env.RP_KV.get('state_v3') : null;
@@ -30,21 +24,10 @@ export default {
       let data;
       try { data = await request.json(); } catch (e) { return jsonResponse({ error: 'Invalid JSON body' }, 400); }
 
-      const { type, data: webhookData, action, state, logData } = data;
+      const { type, action, state, logData } = data;
       const WEBHOOK_REPARTIZARE = env.WEBHOOK_REPARTIZARE || '';
-      const WEBHOOK_LOGURI = env.WEBHOOK_LOGURI || env.DISCORD_WEBHOOK_LOGS || '';
+      const WEBHOOK_LOGURI = env.WEBHOOK_LOGURI || '';
 
-      // Fluxurile HR/debug/msg/request rămân exact pe webhookurile lor dedicate.
-      const untouchedWebhook = type === 'request' ? env.DISCORD_WEBHOOK_REQUEST
-        : type === 'msg' ? env.DISCORD_WEBHOOK_MSG
-        : type === 'hr' ? env.DISCORD_WEBHOOK_HR
-        : type === 'debug' ? env.DISCORD_WEBHOOK_DEBUG : '';
-      if (untouchedWebhook && webhookData) {
-        const relay = await fetch(untouchedWebhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(webhookData) });
-        return jsonResponse({ success: relay.ok }, relay.ok ? 200 : 400);
-      }
-
-      // Webhookurile HR/debug/msg/request nu sunt atinse de acest Worker.
       if (type === 'assign' && state !== undefined) {
         if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(state));
         if (WEBHOOK_REPARTIZARE) ctx.waitUntil(updateRepartizareEmbed(WEBHOOK_REPARTIZARE, state, env));
@@ -206,13 +189,20 @@ async function sendSeparateLog(webhookUrl, act = {}) {
   const fields = [];
   if (actionType !== 'clear_all' && actionType !== 'reset') {
     fields.push({ name: '👤 Medic', value: `**${act.callSign || act.badge || 'M-???'}** (${act.name || 'Necunoscut'})`, inline: false });
+    if (act.discordId) fields.push({ name: 'Discord', value: `<@${act.discordId}>`, inline: false });
     fields.push({ name: '📍 Zonă', value: `**${act.zone || 'Nespecificată'}**`, inline: false });
     if (act.partner) fields.push({ name: '🤝 Partener', value: `\`${act.partner}\``, inline: false });
     if (act.by) fields.push({ name: '🛡️ Acțiune efectuată de', value: `**${act.by}**`, inline: false });
   } else fields.push({ name: '⚙️ Efectuat de', value: `**${act.by || 'Admin'}**`, inline: false });
   await fetch(webhookUrl, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'Sistem Loguri Medicale', avatar_url: 'https://cdn-icons-png.flaticon.com/512/1021/1021799.png', embeds: [{ title, description, color, fields, timestamp: new Date().toISOString() }] })
+    body: JSON.stringify({
+      username: 'Loguri ZONE',
+      avatar_url: 'https://imgur.com/a/JRWgtRs',
+      content: act.discordId ? `<@${act.discordId}>` : undefined,
+      allowed_mentions: act.discordId ? { users: [String(act.discordId)] } : { parse: [] },
+      embeds: [{ title, description, color, fields, timestamp: new Date().toISOString() }]
+    })
   });
 }
 

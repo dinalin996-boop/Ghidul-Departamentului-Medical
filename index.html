@@ -7019,7 +7019,7 @@
                 SHEET_ID: '1uaXnzKcNeOOXrQB2TU2aGrq9ZTie4AeFlAUX_FhH06M',
                 API_KEY: 'AIzaSyCLhcTP6xh1EglshVQ78kIkPxzBZOUE-eI',
                 API_KEY_FALLBACK: 'AIzaSyCr3WttB34swwmlYYcVJtHdU30hKJWm51s',
-                WORKER_URL: 'https://hrmedici.dodolea-10.workers.dev/',
+                WORKER_URL: 'https://twilight-king-1c5e.morosan-david10.workers.dev/',
                 SHEET_NAME: 'LISTA DEPARTAMENT',
                 ZONES: ['Zona 1', 'Zona 2', 'Zona 3', 'Zona 4', 'Spital'],
                 STORAGE_KEY_STATE: 'medical_repartizare_state_v3',
@@ -7028,14 +7028,13 @@
             };
 
             const RP_ZONE_META = {
-                'Zona 1': { name: 'Zona 1 (Port / Aeroport)', icon: 'fa-solid fa-plane-departure', color: '#0284c7' },
-                'Zona 2': { name: 'Zona 2 (Zona Centrală / Amarrilo)', icon: 'fa-solid fa-city', color: '#7c3aed' },
-                'Zona 3': { name: 'Zona 3 (Vinewood + Highway)', icon: 'fa-solid fa-road', color: '#d97706' },
+                'Zona 1': { name: 'Zona 1 (Port - Aeroport)', icon: 'fa-solid fa-plane-departure', color: '#0284c7' },
+                'Zona 2': { name: 'Zona 2 (Zona Centrală - Amarrilo)', icon: 'fa-solid fa-city', color: '#7c3aed' },
+                'Zona 3': { name: 'Zona 3 (Vinewood - Highway)', icon: 'fa-solid fa-road', color: '#d97706' },
                 'Zona 4': { name: 'Zona 4 (Sandy - Paleto - Roxwood)', icon: 'fa-solid fa-mountain-sun', color: '#b91c1c' },
                 'Spital': { name: 'Spitalul Județean Eclipse (Garda Spital)', icon: 'fa-solid fa-hospital', color: '#059669' }
             };
 
-            // State global
             let rpUser = null;
             let rpState = { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], 'Spital': [] };
             let rpBroadcastChannel = null;
@@ -7127,7 +7126,7 @@
                     const member = rpExtractUser(row, null);
                     rpState[targetZone].push({ callSign: member.callSign, name: member.name, partner: '', timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' }) });
                     rpSaveState(); rpRenderGrid(); rpCloseAdminModal();
-                    rpQueueLogAction({ action: 'admin_add', callSign: member.callSign, name: member.name, zone: targetZone, by: rpUser.callSign });
+                    rpQueueLogAction({ action: 'admin_add', callSign: member.callSign, name: member.name, zone: targetZone, by: rpUser.callSign, byDiscordId: rpUser.discordId, discordId: member.discordId || '' });
                     await rpSyncAssignmentState();
                     rpNotify(`${member.callSign} a fost adăugat pe ${targetZone}.`, 'success');
                 } catch (e) { rpNotify('Nu am putut adăuga medicul. Încearcă din nou.', 'error'); }
@@ -7178,7 +7177,6 @@
                 } catch (e) { }
             }
 
-            // MANAGEMENT COADĂ LOGURI (Discord)
             function rpQueueLogAction(logData) {
                 try {
                     const currentLogs = JSON.parse(localStorage.getItem(RP_CONFIG.STORAGE_KEY_LOGS) || '[]');
@@ -7194,11 +7192,9 @@
                 try {
                     const currentLogs = JSON.parse(localStorage.getItem(RP_CONFIG.STORAGE_KEY_LOGS) || '[]');
 
-                    // Dacă nu s-a schimbat nimic în ultimele 3 minute, NU trimitem nimic pe Discord
                     if (!currentLogs || currentLogs.length === 0) return;
 
                     if (RP_CONFIG.WORKER_URL) {
-                        // Trimitem pachetul de loguri către Worker pentru Discord Webhook
                         const res = await fetch(RP_CONFIG.WORKER_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -7209,16 +7205,13 @@
                         });
 
                         if (res.ok) {
-                            // Curățăm coada doar dacă s-a trimis cu succes
                             localStorage.setItem(RP_CONFIG.STORAGE_KEY_LOGS, JSON.stringify([]));
                         } else {
-                            // Dacă serverul returnează un status error, logăm dar nu curățăm coada
                             console.warn(`Worker return status ${res.status}: ${res.statusText}`);
                         }
                     }
                 } catch (e) {
                     console.warn('Eroare trimitere loguri batch pe Discord:', e);
-                    // Nu curățăm coada în caz de eroare - se va reîncerca la următoarea sesiune
                 }
             }
 
@@ -7228,7 +7221,6 @@
                 window.location.href = url;
             }
 
-            // Extragere si mapare utilizator din Google Sheets
             function rpExtractUser(row, discordUser) {
                 const csRaw = (row[2] || '').toString().trim();
                 const csNum = parseInt(csRaw.replace(/\D/g, ''), 10) || 0;
@@ -7649,6 +7641,7 @@
                 rpState[zoneName].push({
                     callSign: rpUser.callSign,
                     name: rpUser.name,
+                    discordId: rpUser.discordId,
                     partner: partnerVal,
                     timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
                 });
@@ -7662,7 +7655,8 @@
                     callSign: rpUser.callSign,
                     name: rpUser.name,
                     zone: zoneName,
-                    partner: partnerVal
+                    partner: partnerVal,
+                    discordId: rpUser.discordId
                 });
 
                 // Sincronizare IMEDIATĂ pe server (KV) pentru ca ceilalți colegi de pe site să vadă pe loc
@@ -7699,7 +7693,8 @@
                         callSign: rpUser.callSign,
                         name: rpUser.name,
                         zone: leftZone,
-                        partner: partnerVal
+                        partner: partnerVal,
+                        discordId: rpUser.discordId
                     });
                 }
 
@@ -7731,7 +7726,8 @@
                     callSign: removedMember.callSign,
                     name: removedMember.name,
                     zone: zoneName,
-                    partner: removedMember.partner || ''
+                    partner: removedMember.partner || '',
+                    discordId: removedMember.discordId || rpUser.discordId
                 });
 
                 if (RP_CONFIG.WORKER_URL) {
@@ -7790,7 +7786,9 @@
                         callSign: removedMember.callSign,
                         name: removedMember.name,
                         zone: removedZone,
-                        by: rpUser.callSign
+                        by: rpUser.callSign,
+                        byDiscordId: rpUser.discordId,
+                        discordId: removedMember.discordId || ''
                     });
 
                     rpSyncAssignmentState();
