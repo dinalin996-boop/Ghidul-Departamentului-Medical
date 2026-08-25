@@ -7132,16 +7132,23 @@
                     rpNotify(`${member.callSign} a fost adăugat pe ${targetZone}.`, 'success');
                 } catch (e) { rpNotify('Nu am putut adăuga medicul. Încearcă din nou.', 'error'); }
             }
+            let rpIsSaving = false;
 
             async function rpSyncAssignmentState() {
                 if (!RP_CONFIG.WORKER_URL) return;
+                 rpIsSaving = true; 
                 try {
                     await fetch(RP_CONFIG.WORKER_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'assign', state: rpState })
-                    });
-                } catch (e) { }
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'assign', state: rpState })
+                });
+
+                    } catch (e) {
+                            console.error('Eroare la salvarea pe server:', e);
+                        } finally {
+                        setTimeout(() => { rpIsSaving = false; }, 1500);
+                    }
             }
 
             async function rpSendLogImmediately(logData) {
@@ -7637,130 +7644,109 @@
 
             // ARONDARE PE ZONĂ - Sincronizare IMEDIATĂ pe site, log pus în coadă pt Discord
             async function rpJoinZone(zoneName) {
-                if (!rpUser) return;
+    if (!rpUser) return;
 
-                const cooldownKey = `rpLastAssign_${rpUser.callSign}`;
-                const lastAssign = parseInt(sessionStorage.getItem(cooldownKey) || '0', 10);
-                const now = Date.now();
-                const timePassed = (now - lastAssign) / 1000;
+    const cooldownKey = `rpLastAssign_${rpUser.callSign}`;
+    const lastAssign = parseInt(sessionStorage.getItem(cooldownKey) || '0', 10);
+    const now = Date.now();
+    const timePassed = (now - lastAssign) / 1000;
 
-                if (timePassed < 10) {
-                    const remaining = Math.ceil(10 - timePassed);
-                    rpNotify(`Așteaptă încă ${remaining} secunde înainte de a te aronda din nou.`, 'info');
-                    return;
-                }
-                sessionStorage.setItem(cooldownKey, now.toString());
+    if (timePassed < 5) {
+        const remaining = Math.ceil(5 - timePassed);
+        rpNotify(`Așteaptă încă ${remaining} secunde înainte de a schimba zona.`, 'info');
+        return;
+    }
+    sessionStorage.setItem(cooldownKey, now.toString());
 
-                const partnerVal = document.getElementById('rpPartnerInput') ? document.getElementById('rpPartnerInput').value.trim() : '';
+    const partnerVal = document.getElementById('rpPartnerInput') ? document.getElementById('rpPartnerInput').value.trim() : '';
 
-                RP_CONFIG.ZONES.forEach(z => {
-                    rpState[z] = (rpState[z] || []).filter(m => m.callSign !== rpUser.callSign);
-                });
+    RP_CONFIG.ZONES.forEach(z => {
+        rpState[z] = (rpState[z] || []).filter(m => m.callSign !== rpUser.callSign);
+    });
 
-                if (!rpState[zoneName]) rpState[zoneName] = [];
-                rpState[zoneName].push({
-                    callSign: rpUser.callSign,
-                    name: rpUser.name,
-                    discordId: rpUser.discordId,
-                    partner: partnerVal,
-                    timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
-                });
+    if (!rpState[zoneName]) rpState[zoneName] = [];
+    rpState[zoneName].push({
+        callSign: rpUser.callSign,
+        name: rpUser.name,
+        discordId: rpUser.discordId,
+        partner: partnerVal,
+        timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
+    });
 
-                rpSaveState();
-                rpRenderGrid();
+    rpSaveState();
+    rpRenderGrid();
 
-                // Adăugăm în coada de Discord (se va trimite la intervalul de 3 minute)
-                const joinLog = {
-                    action: 'join',
-                    callSign: rpUser.callSign,
-                    name: rpUser.name,
-                    zone: zoneName,
-                    partner: partnerVal,
-                    discordId: rpUser.discordId
-                };
-                await rpSendLogImmediately(joinLog);
-
-                // Sincronizare IMEDIATĂ pe server (KV) pentru ca ceilalți colegi de pe site să vadă pe loc
-                await rpSyncAssignmentState();
-            }
+    // Sincronizăm imediat pe server și trimitem logul
+    await rpSyncAssignmentState();
+    rpSendLogImmediately({
+        action: 'join',
+        callSign: rpUser.callSign,
+        name: rpUser.name,
+        zone: zoneName,
+        partner: partnerVal,
+        discordId: rpUser.discordId
+    });
+}
 
             // PĂRĂSIRE ZONĂ - Sincronizare IMEDIATĂ pe site, log pus în coadă pt Discord
             async function rpLeaveCurrentZone() {
-                if (!rpUser) return;
+    if (!rpUser) return;
 
-                let leftZone = '';
-                let partnerVal = '';
+    let leftZone = '';
+    let partnerVal = '';
 
-                RP_CONFIG.ZONES.forEach(z => {
-                    const list = rpState[z] || [];
-                    const foundIndex = list.findIndex(m =>
-                        (m.callSign && rpUser.callSign && m.callSign.trim().toLowerCase() === rpUser.callSign.trim().toLowerCase()) ||
-                        (m.name && rpUser.name && m.name.trim().toLowerCase() === rpUser.name.trim().toLowerCase())
-                    );
+    RP_CONFIG.ZONES.forEach(z => {
+        const list = rpState[z] || [];
+        const foundIndex = list.findIndex(m =>
+            (m.callSign && rpUser.callSign && m.callSign.trim().toLowerCase() === rpUser.callSign.trim().toLowerCase()) ||
+            (m.name && rpUser.name && m.name.trim().toLowerCase() === rpUser.name.trim().toLowerCase())
+        );
 
-                    if (foundIndex !== -1) {
-                        leftZone = z;
-                        partnerVal = list[foundIndex].partner || '';
-                        list.splice(foundIndex, 1);
-                    }
-                });
+        if (foundIndex !== -1) {
+            leftZone = z;
+            partnerVal = list[foundIndex].partner || '';
+            list.splice(foundIndex, 1);
+        }
+    });
 
-                rpSaveState();
-                rpRenderGrid();
+    rpSaveState();
+    rpRenderGrid();
 
-                if (leftZone) {
-                    await rpSendLogImmediately({
-                        action: 'leave',
-                        callSign: rpUser.callSign,
-                        name: rpUser.name,
-                        zone: leftZone,
-                        partner: partnerVal,
-                        discordId: rpUser.discordId
-                    });
-                }
-
-                if (RP_CONFIG.WORKER_URL) {
-                    try {
-                        await fetch(RP_CONFIG.WORKER_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ type: 'assign', state: rpState })
-                        });
-                    } catch (err) { }
-                }
-            }
+    if (leftZone) {
+        await rpSyncAssignmentState();
+        rpSendLogImmediately({
+            action: 'leave',
+            callSign: rpUser.callSign,
+            name: rpUser.name,
+            zone: leftZone,
+            partner: partnerVal,
+            discordId: rpUser.discordId
+        });
+    }
+}
 
             async function rpRemoveSpecificMember(zoneName, callSign) {
-                if (!rpState[zoneName]) return;
+    if (!rpState[zoneName]) return;
 
-                const index = rpState[zoneName].findIndex(m => m.callSign === callSign);
-                if (index === -1) return;
+    const index = rpState[zoneName].findIndex(m => m.callSign === callSign);
+    if (index === -1) return;
 
-                const removedMember = rpState[zoneName][index];
-                rpState[zoneName].splice(index, 1);
+    const removedMember = rpState[zoneName][index];
+    rpState[zoneName].splice(index, 1);
 
-                rpSaveState();
-                rpRenderGrid();
+    rpSaveState();
+    rpRenderGrid();
 
-                await rpSendLogImmediately({
-                    action: 'leave',
-                    callSign: removedMember.callSign,
-                    name: removedMember.name,
-                    zone: zoneName,
-                    partner: removedMember.partner || '',
-                    discordId: removedMember.discordId || rpUser.discordId
-                });
-
-                if (RP_CONFIG.WORKER_URL) {
-                    try {
-                        await fetch(RP_CONFIG.WORKER_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ type: 'assign', state: rpState })
-                        });
-                    } catch (err) { }
-                }
-            }
+    await rpSyncAssignmentState();
+    rpSendLogImmediately({
+        action: 'leave',
+        callSign: removedMember.callSign,
+        name: removedMember.name,
+        zone: zoneName,
+        partner: removedMember.partner || '',
+        discordId: removedMember.discordId || rpUser.discordId
+    });
+}
 
             function rpAdminKickMember(csOverride = '') {
                 if (!rpUser || !rpUser.isConducere) return;
@@ -7840,21 +7826,36 @@
                 }
             }
 
-            // SINCRONIZARE DE PE SERVER LA FIECARE 5 SECUNDE (Pentru ca utilizatorii pe site sa vada rapid modificarile altora)
+            
             async function rpSyncRealtimeState() {
-                if (!RP_CONFIG.WORKER_URL) return;
+                if (!RP_CONFIG.WORKER_URL || rpIsSaving) return;
                 try {
-                    const res = await fetch(RP_CONFIG.WORKER_URL, { method: 'GET' });
-                    if (res.ok) {
-                        const serverState = await res.json();
-                        if (JSON.stringify(serverState) !== JSON.stringify(rpState)) {
-                            rpState = serverState;
-                            localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
-                            rpRenderGrid();
+                const res = await fetch(RP_CONFIG.WORKER_URL, { 
+                method: 'GET',
+                headers: { 'Cache-Control': 'no-cache' }
+                });
+        
+                if (res.ok) {
+                    const serverState = await res.json();
+            
+                    if (serverState && typeof serverState === 'object') {
+                    let isValidStructure = true;
+                    RP_CONFIG.ZONES.forEach(z => {
+                    if (!Array.isArray(serverState[z])) isValidStructure = false;
+                    });
+ 
+                    if (isValidStructure && JSON.stringify(serverState) !== JSON.stringify(rpState)) {
+                        rpState = serverState;
+                        localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
+                        rpRenderGrid();
                         }
                     }
-                } catch (e) { }
+                  }
+                } catch (e) {
+                    console.warn('Eroare la sincronizarea în timp real:', e);
+                }
             }
+
 
             function rpOpenMapModal() {
                 const m = document.getElementById('rpMapModal');
@@ -7904,10 +7905,16 @@
 
                 // 1. Verificare rapidă la fiecare 5 secunde pe site (să se vadă mișcările colegilor instant)
                 rpSyncRealtimeState();
-                setInterval(rpSyncRealtimeState, 15000);
+                setInterval(rpSyncRealtimeState, 3500);
 
                 // 2. Trimitere loguri pe Discord STRICT O DATĂ LA 3 MINUTE (180.000 ms) - Doar dacă au existat schimbări!
                 setInterval(rpFlushDiscordLogs, 180000);
+
+                window.addEventListener('focus', rpSyncRealtimeState);
+                document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) rpSyncRealtimeState();
+                });
+
             });
         </script>
 </body>
