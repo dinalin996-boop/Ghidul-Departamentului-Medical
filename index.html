@@ -7922,13 +7922,13 @@ function rpStopPolling() {
 }
 
 
-                document.addEventListener('visibilitychange'), () => {
+                document.addEventListener('visibilitychange', () => {
                     if (document.hidden) {
                         rpStopPolling();
                     } else {
                         rpStartPolling();
                     }
-                }
+                });
 
                 window.addEventListener('focus', rpStartPolling);
                 window.addEventListener('blur', rpStopPolling);
