@@ -3,8 +3,9 @@
 
 export default {
   async fetch(request, env, ctx) {
+    const allowedOrigin = env.ALLOWED_ORIGIN || 'https://ghidul-departamentului-medical-eight.vercel.app';
     const headers = {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': allowedOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Content-Type': 'application/json'
@@ -12,6 +13,12 @@ export default {
     const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), { status, headers });
 
     if (request.method === 'OPTIONS') return new Response(null, { headers });
+
+    const authHeader = request.headers.get('Authorization');
+    const expectedToken = env.WORKER_AUTH_TOKEN;
+    if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
+      return jsonResponse({ error: 'Unauthorized' }, 401);
+    }
 
     try {
       if (request.method === 'GET') {

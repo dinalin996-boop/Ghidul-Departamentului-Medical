@@ -4,6 +4,7 @@ const { google } = require('googleapis');
 const session = require('express-session');
 const dotenv = require('dotenv');
 const path = require('path');
+const crypto = require('crypto');
 
 dotenv.config();
 
@@ -11,11 +12,22 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
+const isProduction = process.env.NODE_ENV === 'production';
+if (isProduction && !process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET is required in production');
+}
+
+app.set('trust proxy', 1);
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  secret: process.env.SESSION_SECRET || 'development-only-session-secret',
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }
+  saveUninitialized: false,
+  cookie: {
+    secure: isProduction,
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
 
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
@@ -46,17 +58,25 @@ let zoneAssignments = {
 
 // Discord OAuth Login
 app.get('/auth/discord', (req, res) => {
-  const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify`;
+  const state = crypto.randomBytes(32).toString('hex');
+  req.session.oauthState = state;
+  const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify&state=${state}`;
   res.redirect(discordAuthUrl);
 });
 
 // Discord OAuth Callback
 app.get('/auth/discord/callback', async (req, res) => {
   const code = req.query.code;
-  
+  const state = req.query.state;
+
   if (!code) {
     return res.redirect('/repartizare.html?error=no_code');
   }
+
+  if (!state || !req.session.oauthState || state !== req.session.oauthState) {
+    return res.redirect('/repartizare.html?error=invalid_state');
+  }
+  delete req.session.oauthState;
 
   try {
     const tokenResponse = await axios.post('https://discord.com/api/oauth2/token', {
@@ -116,7 +136,7 @@ async function getSheetData() {
 // Găsește utilizatorul în Google Sheets
 async function findUserByDiscordId(discordId) {
   const data = await getSheetData();
-  
+
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
     if (row[19] && row[19].toString() === discordId.toString()) {
@@ -160,6 +180,10 @@ function canAssignToZone(user, zone) {
   const average = calculateAverageMembers();
   const zoneMembers = zoneAssignments[zone].length;
 
+  if (zoneMembers >= ZONES[zone].maxMembers) {
+    return { allowed: false, reason: `Zona ${zone} este plină.` };
+  }
+
   // Restricții grad
   if (grad === 600 && (!user.radio || !user.bls)) {
     return { allowed: false, reason: 'Grad 600 fără Radio/BLS poate merge doar pe Spital' };
@@ -193,7 +217,13 @@ app.post('/api/zones/assign', async (req, res) => {
     return res.status(400).json({ error: 'Invalid zone' });
   }
 
-  const user = await findUserByDiscordId(req.session.discordId);
+  let user;
+  try {
+    user = await findUserByDiscordId(req.session.discordId);
+  } catch (error) {
+    console.error('Assignment user lookup error:', error);
+    return res.status(503).json({ error: 'Unable to access user database' });
+  }
   if (!user) {
     return res.status(404).json({ error: 'User not found in database' });
   }
@@ -223,7 +253,12 @@ app.post('/api/zones/assign', async (req, res) => {
     assignmentData.partner = partnerCallSign;
   }
 
-  zoneAssignments[zone].push(assignmentData);
+  try {
+    zoneAssignments[zone].push(assignmentData);
+  } catch (error) {
+    console.error('Assignment update error:', error);
+    return res.status(500).json({ error: 'Unable to update zone assignment' });
+  }
 
   res.json({
     success: true,

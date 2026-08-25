@@ -466,6 +466,41 @@
             box-shadow: 0 8px 22px rgba(15, 23, 42, .08) !important;
         }
 
+        /* Repartizare: tema întunecată trebuie să suprascrie stilurile inline generate de JS. */
+        body.dark-mode #rpZonesGrid .rp-zone-card {
+            background: #232323 !important;
+            color: #f1f5f9 !important;
+            border-color: #475569 !important;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .28) !important;
+        }
+
+        body.dark-mode #rpZonesGrid .rp-zone-header {
+            border-bottom-color: #3f3f46 !important;
+        }
+
+        body.dark-mode #rpZonesGrid .rp-member-row {
+            background: #2d2d2d !important;
+            border-color: #454545 !important;
+        }
+
+        body.dark-mode #rpZonesGrid .rp-member-name {
+            color: #f8fafc !important;
+        }
+
+        body.dark-mode #rpZonesGrid .rp-member-meta {
+            color: #cbd5e1 !important;
+        }
+
+        body.dark-mode #rpZonesGrid .rp-zone-count {
+            background: #263b5c !important;
+            color: #bfdbfe !important;
+            border-color: #41618f !important;
+        }
+
+        body.dark-mode #rpAdminPanel {
+            background: linear-gradient(135deg, #3a281c 0%, #4a2f18 100%) !important;
+        }
+
         #rpAdminPanel {
             position: relative;
             overflow: hidden;
@@ -1575,8 +1610,6 @@
                                 </h4>
                                 <div
                                     style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:1em;">
-                                    <input id="rpAdminKickInput" type="text" placeholder="Callsign de scos (ex: M-602)"
-                                        style="padding:9px 14px; border-radius:12px; border:2px solid #ea580c; font-size:0.95rem; width:220px;">
                                     <button onclick="rpOpenAdminModal('remove')"
                                         style="background:#ea580c; color:#fff; border:none; border-radius:12px; padding:10px 18px; font-weight:800; font-size:0.95rem; cursor:pointer;"><i
                                             class="fa-solid fa-user-minus"></i> Scoate din Repartizare</button>
@@ -7516,17 +7549,18 @@
                     const check = rpCanAssignZone(rpUser, zone, partnerVal);
 
                     const card = document.createElement('div');
+                    card.className = 'rp-zone-card';
                     card.style.cssText = `background:#fff; border-radius:22px; padding:1.4em; box-shadow:0 4px 18px rgba(0,0,0,0.06); border:2px solid ${isUserInThisZone ? '#10b981' : (check.ok ? '#e2e8f0' : '#fecaca')}; display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.2s, box-shadow 0.2s;`;
 
                     let headerHtml = `
-            <div style="border-bottom:1px solid #f1f5f9; padding-bottom:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:flex-start;">
+            <div class="rp-zone-header" style="border-bottom:1px solid #f1f5f9; padding-bottom:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
                     <div style="font-weight:900; color:${meta.color}; font-size:1.15rem; display:flex; align-items:center; gap:8px;">
                         <i class="${meta.icon}"></i> ${meta.name}
                     </div>
                     <span style="font-size:0.8rem; color:#64748b; font-weight:600;">${zone === 'Spital' ? 'Zonă Medicală Centrală' : 'Zonă Teren'}</span>
                 </div>
-                <span style="background:${members.length > 0 ? '#eff6ff' : '#f8fafc'}; color:${members.length > 0 ? '#1d4ed8' : '#94a3b8'}; border:1px solid #dbeafe; padding:3px 10px; border-radius:12px; font-size:0.82rem; font-weight:800;">
+                <span class="rp-zone-count" style="background:${members.length > 0 ? '#eff6ff' : '#f8fafc'}; color:${members.length > 0 ? '#1d4ed8' : '#94a3b8'}; border:1px solid #dbeafe; padding:3px 10px; border-radius:12px; font-size:0.82rem; font-weight:800;">
                     ${members.length} ${members.length === 1 ? 'medic' : 'medici'}
                 </span>
             </div>
@@ -7540,12 +7574,12 @@
                         members.forEach(m => {
                             const isSelf = m.callSign === rpUser.callSign;
                             membersHtml += `
-                    <div style="background:${isSelf ? '#f0fdf4' : '#f8fafc'}; border:1px solid ${isSelf ? '#bbf7d0' : '#e2e8f0'}; border-radius:12px; padding:7px 10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div class="rp-member-row" style="background:${isSelf ? '#f0fdf4' : '#f8fafc'}; border:1px solid ${isSelf ? '#bbf7d0' : '#e2e8f0'}; border-radius:12px; padding:7px 10px; display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-weight:800; font-size:0.92rem; color:#1e293b;">
+                            <div class="rp-member-name" style="font-weight:800; font-size:0.92rem; color:#1e293b;">
                                 <span style="color:#245ab1;">${m.callSign}</span> &bull; ${m.name}
                             </div>
-                            <div style="font-size:0.78rem; color:#64748b;">
+                            <div class="rp-member-meta" style="font-size:0.78rem; color:#64748b;">
                                 <i class="fa-regular fa-clock"></i> Arondat la ${m.timestamp || '—'}${m.partner ? ` <span style="color:#d97706; font-weight:700;">&bull; Patrulă cu ${m.partner}</span>` : ''}
                             </div>
                         </div>

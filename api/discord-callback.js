@@ -9,10 +9,17 @@ export default async function handler(req, res) {
   const { code } = req.body;
   if (!code) return res.status(400).json({ error: 'No code provided' });
 
-  const DISCORD_CLIENT_ID = '1541376656718037042';
-  const DISCORD_CLIENT_SECRET = '5QVb8bwZlSxoisJ19m-IwLqAOu1Gduso';
-  const REDIRECT_URI = 'https://ghidul-departamentului-medical-eight.vercel.app/callback';
-  const SHEET_ID = '1uaXnzKcNeOOXrQB2TU2aGrq9ZTie4AeFlAUX_FhH06M';
+  const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+  const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
+  const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
+  const SHEET_ID = process.env.GOOGLE_SHEETS_ID;
+  const API_KEY = process.env.GOOGLE_API_KEY;
+  if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !REDIRECT_URI || !SHEET_ID || !API_KEY) {
+    throw new Error('Missing required OAuth or Google API environment variables');
+  }
+
+
+
   const API_KEY = 'AIzaSyCLhcTP6xh1EglshVQ78kIkPxzBZOUE-eI';
 
   try {
@@ -31,13 +38,20 @@ export default async function handler(req, res) {
     });
 
     const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) return res.status(400).json({ error: 'Token exchange failed', details: tokenData });
+    if (!tokenRes.ok || !tokenData.access_token) {
+      console.error('Discord token exchange failed:', tokenRes.status, tokenData.error);
+      return res.status(502).json({ error: 'Token exchange failed' });
+    }
 
     // 2. Obține Discord user
     const userRes = await fetch('https://discord.com/api/users/@me', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` }
     });
     const discordUser = await userRes.json();
+    if (!userRes.ok || !discordUser.id) {
+      console.error('Discord user lookup failed:', userRes.status);
+      return res.status(502).json({ error: 'Discord user lookup failed' });
+    }
     const discordId = discordUser.id;
 
     // 3. Caută în Google Sheets coloana T (index 19) după Discord ID
@@ -45,7 +59,11 @@ export default async function handler(req, res) {
       `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('LISTA DEPARTAMENT!A1:T300')}?key=${API_KEY}`
     );
     const sheetData = await sheetRes.json();
-    const rows = sheetData.values || [];
+    if (!sheetRes.ok || !Array.isArray(sheetData.values)) {
+      console.error('Google Sheets lookup failed:', sheetRes.status, sheetData.error?.code);
+      return res.status(502).json({ error: 'User database lookup failed' });
+    }
+    const rows = sheetData.values;
 
     let foundUser = null;
     for (let i = 1; i < rows.length; i++) {
@@ -94,12 +112,8 @@ export default async function handler(req, res) {
     }
 
     if (!foundUser) {
-      return res.status(404).json({
-        error: 'not_found',
-        discordId,
-        totalRows: rows.length,
-        debug: rows.slice(1, 5).map(r => ({ col_T: r[19], col_C: r[2] }))
-      });
+      console.warn('Discord user not found in Google Sheets:', { discordId, totalRows: rows.length });
+      return res.status(404).json({ error: 'not_found' });
     }
 
     return res.status(200).json({ success: true, user: foundUser });
