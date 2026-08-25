@@ -7903,7 +7903,6 @@
         showSection('repartizare-zone');
     }
 
-    let rpPollInterval = null;
 });
         
 
@@ -7934,7 +7933,7 @@ function rpStopPolling() {
                 window.addEventListener('blur', rpStopPolling);
 
                 rpStartPolling();
-
+let rpPollInterval = null;
         </script>
 </body>
 
