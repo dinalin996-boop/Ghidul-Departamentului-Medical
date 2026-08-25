@@ -7903,19 +7903,36 @@
                     showSection('repartizare-zone');
                 }
 
-                // 1. Verificare rapidă la fiecare 5 secunde pe site (să se vadă mișcările colegilor instant)
-                rpSyncRealtimeState();
-                setInterval(rpSyncRealtimeState, 3500);
+                let rpPollInterval = null;
 
-                // 2. Trimitere loguri pe Discord STRICT O DATĂ LA 3 MINUTE (180.000 ms) - Doar dacă au existat schimbări!
-                setInterval(rpFlushDiscordLogs, 180000);
+function rpStartPolling() {
+    if (!rpPollInterval) {
+        rpSyncRealtimeState(); // O citire imediată la activare
+        rpPollInterval = setInterval(rpSyncRealtimeState, 10000); // Poll la 10 secunde
+    }
+}
 
-                window.addEventListener('focus', rpSyncRealtimeState);
+function rpStopPolling() {
+    if (rpPollInterval) {
+        clearInterval(rpPollInterval);
+        rpPollInterval = null;
+    }
+}
+
+
                 document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) rpSyncRealtimeState();
+                    if (document.hidden) {
+                        rpStopPolling();
+                    } else {
+                        rpStartPolling();
+                    }
                 });
 
-            });
+                window.addEventListener('focus', rpStartPolling);
+                window.addEventListener('blur', rpStopPolling);
+
+                rpStartPolling();
+
         </script>
 </body>
 
