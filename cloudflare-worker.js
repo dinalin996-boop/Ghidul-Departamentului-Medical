@@ -35,12 +35,10 @@ export default {
       }
 
       const activeAction = action || logData;
-      if ((type === 'log_batch' || activeAction) && WEBHOOK_LOGURI) {
-        if (type === 'log_batch' && Array.isArray(data.logs)) {
-          data.logs.forEach(log => ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, log)));
-        } else {
-          ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, activeAction));
-        }
+      if (WEBHOOK_LOGURI && type === 'log_batch' && Array.isArray(data.logs)) {
+        data.logs.forEach(log => ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, log)));
+      } else if (WEBHOOK_LOGURI && activeAction) {
+        ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, activeAction));
       }
 
       if (state !== undefined && env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(state));
@@ -200,7 +198,7 @@ async function sendSeparateLog(webhookUrl, act = {}) {
       username: 'Loguri ZONE',
       avatar_url: 'https://imgur.com/a/JRWgtRs',
       content: act.discordId ? `<@${act.discordId}>` : undefined,
-      allowed_mentions: act.discordId ? { users: [String(act.discordId)] } : { parse: [] },
+      allowed_mentions: { parse: [] },
       embeds: [{ title, description, color, fields, timestamp: new Date().toISOString() }]
     })
   });

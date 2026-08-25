@@ -7126,7 +7126,8 @@
                     const member = rpExtractUser(row, null);
                     rpState[targetZone].push({ callSign: member.callSign, name: member.name, partner: '', timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' }) });
                     rpSaveState(); rpRenderGrid(); rpCloseAdminModal();
-                    rpQueueLogAction({ action: 'admin_add', callSign: member.callSign, name: member.name, zone: targetZone, by: rpUser.callSign, byDiscordId: rpUser.discordId, discordId: member.discordId || '' });
+                    const adminLog = { action: 'admin_add', callSign: member.callSign, name: member.name, zone: targetZone, by: rpUser.callSign, byDiscordId: rpUser.discordId, discordId: member.discordId || '' };
+                    await rpSendLogImmediately(adminLog);
                     await rpSyncAssignmentState();
                     rpNotify(`${member.callSign} a fost adăugat pe ${targetZone}.`, 'success');
                 } catch (e) { rpNotify('Nu am putut adăuga medicul. Încearcă din nou.', 'error'); }
@@ -7134,7 +7135,26 @@
 
             async function rpSyncAssignmentState() {
                 if (!RP_CONFIG.WORKER_URL) return;
-                try { await fetch(RP_CONFIG.WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'assign', state: rpState }) }); } catch (e) { }
+                try {
+                    await fetch(RP_CONFIG.WORKER_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'assign', state: rpState })
+                    });
+                } catch (e) { }
+            }
+
+            async function rpSendLogImmediately(logData) {
+                if (!RP_CONFIG.WORKER_URL || !logData) return;
+                try {
+                    await fetch(RP_CONFIG.WORKER_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'log', action: logData })
+                    });
+                } catch (e) {
+                    console.warn('Logul nu a putut fi trimis instant:', e);
+                }
             }
 
             try {
@@ -7650,14 +7670,15 @@
                 rpRenderGrid();
 
                 // Adăugăm în coada de Discord (se va trimite la intervalul de 3 minute)
-                rpQueueLogAction({
+                const joinLog = {
                     action: 'join',
                     callSign: rpUser.callSign,
                     name: rpUser.name,
                     zone: zoneName,
                     partner: partnerVal,
                     discordId: rpUser.discordId
-                });
+                };
+                await rpSendLogImmediately(joinLog);
 
                 // Sincronizare IMEDIATĂ pe server (KV) pentru ca ceilalți colegi de pe site să vadă pe loc
                 await rpSyncAssignmentState();
@@ -7688,7 +7709,7 @@
                 rpRenderGrid();
 
                 if (leftZone) {
-                    rpQueueLogAction({
+                    await rpSendLogImmediately({
                         action: 'leave',
                         callSign: rpUser.callSign,
                         name: rpUser.name,
@@ -7721,7 +7742,7 @@
                 rpSaveState();
                 rpRenderGrid();
 
-                rpQueueLogAction({
+                await rpSendLogImmediately({
                     action: 'leave',
                     callSign: removedMember.callSign,
                     name: removedMember.name,
@@ -7781,7 +7802,7 @@
                 rpRenderGrid();
 
                 if (removedMember) {
-                    rpQueueLogAction({
+                    const kickLog = {
                         action: 'kick',
                         callSign: removedMember.callSign,
                         name: removedMember.name,
@@ -7789,8 +7810,8 @@
                         by: rpUser.callSign,
                         byDiscordId: rpUser.discordId,
                         discordId: removedMember.discordId || ''
-                    });
-
+                    };
+                    rpSendLogImmediately(kickLog);
                     rpSyncAssignmentState();
                 }
             }
