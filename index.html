@@ -7874,37 +7874,37 @@
             window.rpRemoveFromDuty = rpRemoveSpecificMember;
 
             // INITIALIZARE
-            document.addEventListener('DOMContentLoaded'), function () {
-                rpLoadState();
+            document.addEventListener('DOMContentLoaded', function () {
+    rpLoadState();
 
-                if (window.location.hash && window.location.hash.includes('access_token')) {
-                    const params = new URLSearchParams(window.location.hash.substring(1));
-                    const token = params.get('access_token');
-                    if (token) {
-                        window.history.replaceState({}, '', window.location.pathname + window.location.search);
-                        if (typeof showSection === 'function') showSection('repartizare-zone');
-                        rpHandleToken(token);
-                        return;
-                    }
-                }
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+        const params = new URLSearchParams(window.location.hash.substring(1));
+        const token = params.get('access_token');
+        if (token) {
+            window.history.replaceState({}, '', window.location.pathname + window.location.search);
+            if (typeof showSection === 'function') showSection('repartizare-zone');
+            rpHandleToken(token);
+            return;
+        }
+    }
 
-                const storedUser = sessionStorage.getItem(RP_CONFIG.STORAGE_KEY_USER);
-                if (storedUser) {
-                    try {
-                        const u = JSON.parse(storedUser);
-                        rpShowUser(u);
-                    } catch (e) {
-                        sessionStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
-                    }
-                }
+    const storedUser = sessionStorage.getItem(RP_CONFIG.STORAGE_KEY_USER);
+    if (storedUser) {
+        try {
+            const u = JSON.parse(storedUser);
+            rpShowUser(u);
+        } catch (e) {
+            sessionStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
+        }
+    }
 
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('section') === 'repartizare-zone' && typeof showSection === 'function') {
-                    showSection('repartizare-zone');
-                }
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('section') === 'repartizare-zone' && typeof showSection === 'function') {
+        showSection('repartizare-zone');
+    }
 
-                let rpPollInterval = null;
-            }
+    let rpPollInterval = null;
+});
         
 
     function rpStartPolling() {
