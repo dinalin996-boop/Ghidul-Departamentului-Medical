@@ -7035,6 +7035,7 @@
                 'Spital': { name: 'Spitalul Județean Eclipse (Garda Spital)', icon: 'fa-solid fa-hospital', color: '#059669' }
             };
 
+            let rpPollInterval = null;
             let rpUser = null;
             let rpState = { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], 'Spital': [] };
             let rpBroadcastChannel = null;
@@ -7933,7 +7934,8 @@ function rpStopPolling() {
                 window.addEventListener('blur', rpStopPolling);
 
                 rpStartPolling();
-let rpPollInterval = null;
+
+                
         </script>
 </body>
 
