@@ -7928,8 +7928,8 @@ function rpStopPolling() {
                     } else {
                         rpStartPolling();
                     }
-                };
-                
+                }
+
                 window.addEventListener('focus', rpStartPolling);
                 window.addEventListener('blur', rpStopPolling);
 
