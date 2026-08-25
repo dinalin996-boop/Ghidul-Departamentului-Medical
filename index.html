@@ -7922,7 +7922,7 @@ function rpStopPolling() {
 }
 
 
-                document.addEventListener('visibilitychange', () => {
+                document.addEventListener('visibilitychange'), () => {
                     if (document.hidden) {
                         rpStopPolling();
                     } else {
