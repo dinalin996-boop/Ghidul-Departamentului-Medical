@@ -30,8 +30,6 @@
         /* ======= STRUCTURA ======= */
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #f8fbfd 0%, #f0f7fb 50%, #e8f3f9 100%);
-            background-attachment: fixed;
             transition: background 0.3s, color 0.3s;
         }
 
@@ -429,6 +427,31 @@
             background: linear-gradient(135deg, #fff7ed, #ffedd5);
             color: #c2410c;
             border: 1px solid #fdba74;
+        }
+
+        .rp-zone-toolbar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 0 0 1em;
+            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid #dbeafe;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(36, 90, 177, .08);
+        }
+
+        .rp-zone-toolbar select {
+            min-width: 210px;
+            border: 2px solid #dbeafe;
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: #1e3a8a;
+            font-weight: 700;
+            background: #f8fbff;
         }
 
         #rpZonesGrid {
@@ -1537,43 +1560,53 @@
                             <!-- PROFIL MEDIC -->
                             <div id="rpUserCard"
                                 style="background: #1e293b !important; color: #f8fafc !important; border: 1px solid #334155 !important; border-radius: 24px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.3) !important; margin-bottom:1.6em !important; padding: 20px !important; display:flex !important; justify-content:space-between !important; align-items:center !important; flex-wrap:wrap !important; gap:16px !important;">
-                            <div style="display:flex !important; align-items:center !important; gap:16px !important; flex-wrap:wrap !important;">
-                                <div id="rpUserAvatar"
-                                    style="width:58px !important; height:58px !important; border-radius:50% !important; background:#245ab1 !important; color:#fff !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.6rem !important; font-weight:900 !important; overflow:hidden !important; border:3px solid #3b82f6 !important;">
-                                    <i class="fa-solid fa-user-doctor"></i>
+                                <div
+                                    style="display:flex !important; align-items:center !important; gap:16px !important; flex-wrap:wrap !important;">
+                                    <div id="rpUserAvatar"
+                                        style="width:58px !important; height:58px !important; border-radius:50% !important; background:#245ab1 !important; color:#fff !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:1.6rem !important; font-weight:900 !important; overflow:hidden !important; border:3px solid #3b82f6 !important;">
+                                        <i class="fa-solid fa-user-doctor"></i>
+                                    </div>
+                                    <div>
+                                        <div
+                                            style="display:flex !important; align-items:center !important; gap:10px !important; flex-wrap:wrap !important;">
+                                            <h3 id="rpProfileName"
+                                                style="color: #ffffff !important; margin:0 !important; font-size:1.3rem !important; font-weight:800 !important;">
+                                                -</h3>
+                                            <span id="rpProfileRank"
+                                                style="background: rgba(59, 130, 246, 0.2) !important; color: #93c5fd !important; padding: 2px 10px !important; border-radius: 8px !important; font-size: 0.85rem !important; font-weight: 700 !important;">
+                                                <i class="fa-solid fa-id-badge"></i> <span
+                                                    id="rpProfileRankText">-</span>
+                                            </span>
+                                            <span id="rpBadgeLeadership"
+                                                style="display:none; background: rgba(245, 158, 11, 0.2) !important; color: #fcd34d !important; padding: 2px 10px !important; border-radius: 8px !important; font-size: 0.85rem !important; font-weight: 700 !important;">
+                                                <i class="fa-solid fa-crown"></i> Conducere
+                                            </span>
+                                            <span id="rpProfileCallsign"
+                                                style="background:#245ab1 !important; color:#fff !important; padding:3px 12px !important; border-radius:10px !important; font-weight:800 !important; font-size:0.95rem !important;">-</span>
+                                        </div>
+                                        <div
+                                            style="display:flex !important; align-items:center !important; gap:8px !important; margin-top:8px !important; flex-wrap:wrap !important;">
+                                            <span id="rpBadgeRadio"
+                                                style="padding:2px 10px !important; border-radius:8px !important; font-size:0.82rem !important; font-weight:700 !important;"></span>
+                                            <span id="rpBadgeBLS"
+                                                style="padding:2px 10px !important; border-radius:8px !important; font-size:0.82rem !important; font-weight:700 !important;"></span>
+                                            <span id="rpBadgeZone"
+                                                style="background:rgba(255,255,255,0.1) !important; color:#cbd5e1 !important; padding:2px 10px !important; border-radius:8px !important; font-size:0.82rem !important; font-weight:700 !important;">Nearondat</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            <div>
-                                <div style="display:flex !important; align-items:center !important; gap:10px !important; flex-wrap:wrap !important;">
-                                        <h3 id="rpProfileName"
-                                        style="color: #ffffff !important; margin:0 !important; font-size:1.3rem !important; font-weight:800 !important;">-</h3>
-                                    <span id="rpProfileRank" style="background: rgba(59, 130, 246, 0.2) !important; color: #93c5fd !important; padding: 2px 10px !important; border-radius: 8px !important; font-size: 0.85rem !important; font-weight: 700 !important;">
-                                        <i class="fa-solid fa-id-badge"></i> <span id="rpProfileRankText">-</span>
-                                    </span>
-                                    <span id="rpBadgeLeadership" style="display:none; background: rgba(245, 158, 11, 0.2) !important; color: #fcd34d !important; padding: 2px 10px !important; border-radius: 8px !important; font-size: 0.85rem !important; font-weight: 700 !important;">
-                                        <i class="fa-solid fa-crown"></i> Conducere
-                                    </span>
-                                    <span id="rpProfileCallsign"
-                                        style="background:#245ab1 !important; color:#fff !important; padding:3px 12px !important; border-radius:10px !important; font-weight:800 !important; font-size:0.95rem !important;">-</span>
-                                </div>
-                            <div style="display:flex !important; align-items:center !important; gap:8px !important; margin-top:8px !important; flex-wrap:wrap !important;">
-                                <span id="rpBadgeRadio" style="padding:2px 10px !important; border-radius:8px !important; font-size:0.82rem !important; font-weight:700 !important;"></span>
-                                <span id="rpBadgeBLS" style="padding:2px 10px !important; border-radius:8px !important; font-size:0.82rem !important; font-weight:700 !important;"></span>
-                                <span id="rpBadgeZone" style="background:rgba(255,255,255,0.1) !important; color:#cbd5e1 !important; padding:2px 10px !important; border-radius:8px !important; font-size:0.82rem !important; font-weight:700 !important;">Nearondat</span>
-                            </div>
-                        </div>
-                    </div>
 
-    <div style="display:flex !important; gap:10px !important;">
-        <button onclick="rpLeaveCurrentZone()" id="rpBtnLeaveCurrent"
-            style="display:none; background:#dc2626 !important; color:#fff !important; border:none !important; border-radius:12px !important; padding:10px 18px !important; font-weight:700 !important; font-size:0.9rem !important; cursor:pointer !important;">
-            <i class="fa-solid fa-person-walking-arrow-right"></i> Părăsește Zona
-        </button>
-        <button onclick="rpLogout()"
-            style="background:#475569 !important; color:#fff !important; border:none !important; border-radius:12px !important; padding:10px 18px !important; font-weight:700 !important; font-size:0.9rem !important; cursor:pointer !important;">
-            <i class="fa-solid fa-right-from-bracket"></i> Deconectare
-        </button>
-    </div>
-</div>
+                                <div style="display:flex !important; gap:10px !important;">
+                                    <button onclick="rpLeaveCurrentZone()" id="rpBtnLeaveCurrent"
+                                        style="display:none; background:#dc2626 !important; color:#fff !important; border:none !important; border-radius:12px !important; padding:10px 18px !important; font-weight:700 !important; font-size:0.9rem !important; cursor:pointer !important;">
+                                        <i class="fa-solid fa-person-walking-arrow-right"></i> Părăsește Zona
+                                    </button>
+                                    <button onclick="rpLogout()"
+                                        style="background:#475569 !important; color:#fff !important; border:none !important; border-radius:12px !important; padding:10px 18px !important; font-weight:700 !important; font-size:0.9rem !important; cursor:pointer !important;">
+                                        <i class="fa-solid fa-right-from-bracket"></i> Deconectare
+                                    </button>
+                                </div>
+                            </div>
                             <!-- BOX PENTRU GRAD 600 PARTENER -->
                             <div id="rpPartnerBox"
                                 style="display:none; background:#fff8e1; border:2px dashed #ffb300; border-radius:20px; padding:1.2em 1.6em; margin-bottom:1.6em;">
@@ -1594,6 +1627,21 @@
                                     <span style="font-size:0.85rem; color:#8d6e63; font-style:italic;">*Obligatoriu
                                         pentru arondarea pe teren.</span>
                                 </div>
+                            </div>
+
+                            <!-- SELECTOR RAPID DE ZONE -->
+                            <div class="rp-zone-toolbar" aria-label="Navigare rapidă între zone">
+                                <span style="color:#1e3a8a; font-weight:800;"><i class="fa-solid fa-compass"></i>
+                                    Navigare rapidă</span>
+                                <select id="rpZoneQuickSelect" onchange="rpFocusZone(this.value)"
+                                    aria-label="Selectează zona">
+                                    <option value="all">Toate zonele</option>
+                                    <option value="Zona 1">Zona 1</option>
+                                    <option value="Zona 2">Zona 2</option>
+                                    <option value="Zona 3">Zona 3</option>
+                                    <option value="Zona 4">Zona 4</option>
+                                    <option value="Spital">Spital</option>
+                                </select>
                             </div>
 
                             <!-- GRID ZONE -->
@@ -7137,19 +7185,20 @@
 
             async function rpSyncAssignmentState() {
                 if (!RP_CONFIG.WORKER_URL) return;
-                 rpIsSaving = true; 
+                rpIsSaving = true;
                 try {
-                    await fetch(RP_CONFIG.WORKER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'assign', state: rpState })
-                });
-
-                    } catch (e) {
-                            console.error('Eroare la salvarea pe server:', e);
-                        } finally {
-                        setTimeout(() => { rpIsSaving = false; }, 1500);
-                    }
+                    const res = await fetch(`${RP_CONFIG.WORKER_URL}?t=${Date.now()}`, {
+                        method: 'POST',
+                        cache: 'no-store',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'assign', state: rpState })
+                    });
+                    if (!res.ok) throw new Error(`Server status ${res.status}`);
+                } catch (e) {
+                    console.error('Eroare la salvarea pe server:', e);
+                } finally {
+                    setTimeout(() => { rpIsSaving = false; }, 1500);
+                }
             }
 
             async function rpSendLogImmediately(logData) {
@@ -7183,6 +7232,20 @@
                     rpRenderGrid();
                 }
             });
+
+            async function rpLoadRemoteState() {
+                if (!RP_CONFIG.WORKER_URL) return;
+                try {
+                    const res = await fetch(`${RP_CONFIG.WORKER_URL}?t=${Date.now()}`, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`Server status ${res.status}`);
+                    const parsed = await res.json();
+                    RP_CONFIG.ZONES.forEach(z => {
+                        rpState[z] = Array.isArray(parsed[z]) ? parsed[z] : [];
+                    });
+                } catch (e) {
+                    console.warn('Nu s-a putut încărca starea actualizată:', e);
+                }
+            }
 
             function rpLoadState() {
                 try {
@@ -7529,6 +7592,15 @@
                 rpRenderGrid();
             }
 
+            function rpFocusZone(zoneName) {
+                const grid = document.getElementById('rpZonesGrid');
+                if (!grid) return;
+                grid.querySelectorAll('.rp-zone-card').forEach(card => {
+                    const matches = zoneName === 'all' || card.dataset.zone === zoneName;
+                    card.style.display = matches ? 'flex' : 'none';
+                });
+            }
+
             function rpRenderGrid() {
                 if (!rpUser) return;
 
@@ -7570,6 +7642,7 @@
 
                     const card = document.createElement('div');
                     card.className = 'rp-zone-card';
+                    card.dataset.zone = zone;
                     card.style.cssText = `background:#fff; border-radius:22px; padding:1.4em; box-shadow:0 4px 18px rgba(0,0,0,0.06); border:2px solid ${isUserInThisZone ? '#10b981' : (check.ok ? '#e2e8f0' : '#fecaca')}; display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.2s, box-shadow 0.2s;`;
 
                     let headerHtml = `
@@ -7605,8 +7678,8 @@
                         </div>
                         <div>
                             ${(rpUser.isConducere || isSelf) ? `
-                                <button onclick="rpRemoveSpecificMember('${zone}', '${m.callSign}')" title="${isSelf ? 'Părăsește zona' : 'Scoate din zonă'}" style="background:#fee2e2; color:#b91c1c; border:none; border-radius:8px; padding:3px 8px; font-size:0.78rem; font-weight:800; cursor:pointer;">
-                                    ✕
+                                <button onclick="${rpUser.isConducere && !isSelf ? `rpAdminKickMember('${m.callSign}')` : `rpRemoveSpecificMember('${zone}', '${m.callSign}')`}" title="${isSelf ? 'Părăsește zona' : 'Scoate din zonă'}" style="background:${rpUser.isConducere && !isSelf ? '#ffedd5' : '#fee2e2'}; color:${rpUser.isConducere && !isSelf ? '#c2410c' : '#b91c1c'}; border:none; border-radius:8px; padding:3px 8px; font-size:0.78rem; font-weight:800; cursor:pointer;">
+                                    ${rpUser.isConducere && !isSelf ? 'KICK' : '✕'}
                                 </button>
                             ` : ''}
                         </div>
@@ -7641,113 +7714,126 @@
                     card.innerHTML = headerHtml + membersHtml + actionHtml;
                     gridEl.appendChild(card);
                 });
+                const quickSelect = document.getElementById('rpZoneQuickSelect');
+                if (quickSelect) rpFocusZone(quickSelect.value || 'all');
             }
 
             // ARONDARE PE ZONĂ - Sincronizare IMEDIATĂ pe site, log pus în coadă pt Discord
             async function rpJoinZone(zoneName) {
-    if (!rpUser) return;
+                if (!rpUser) return;
 
-    const cooldownKey = `rpLastAssign_${rpUser.callSign}`;
-    const lastAssign = parseInt(sessionStorage.getItem(cooldownKey) || '0', 10);
-    const now = Date.now();
-    const timePassed = (now - lastAssign) / 1000;
+                const cooldownKey = `rpLastAssign_${rpUser.callSign}`;
+                const lastAssign = parseInt(sessionStorage.getItem(cooldownKey) || '0', 10);
+                const now = Date.now();
+                const timePassed = (now - lastAssign) / 1000;
 
-    if (timePassed < 5) {
-        const remaining = Math.ceil(5 - timePassed);
-        rpNotify(`Așteaptă încă ${remaining} secunde înainte de a schimba zona.`, 'info');
-        return;
-    }
-    sessionStorage.setItem(cooldownKey, now.toString());
+                if (timePassed < 5) {
+                    const remaining = Math.ceil(5 - timePassed);
+                    rpNotify(`Așteaptă încă ${remaining} secunde înainte de a schimba zona.`, 'info');
+                    return;
+                }
+                sessionStorage.setItem(cooldownKey, now.toString());
 
-    const partnerVal = document.getElementById('rpPartnerInput') ? document.getElementById('rpPartnerInput').value.trim() : '';
+                const partnerVal = document.getElementById('rpPartnerInput') ? document.getElementById('rpPartnerInput').value.trim() : '';
+                const previousZone = RP_CONFIG.ZONES.find(z =>
+                    (rpState[z] || []).some(m => m.callSign === rpUser.callSign)
+                ) || '';
 
-    RP_CONFIG.ZONES.forEach(z => {
-        rpState[z] = (rpState[z] || []).filter(m => m.callSign !== rpUser.callSign);
-    });
+                // Reia starea de pe server înainte de modificare, pentru a evita suprascrierea
+                // repartizărilor apărute între două actualizări simultane.
+                await rpLoadRemoteState();
+                const latestPreviousZone = RP_CONFIG.ZONES.find(z =>
+                    (rpState[z] || []).some(m => m.callSign === rpUser.callSign)
+                ) || previousZone;
 
-    if (!rpState[zoneName]) rpState[zoneName] = [];
-    rpState[zoneName].push({
-        callSign: rpUser.callSign,
-        name: rpUser.name,
-        discordId: rpUser.discordId,
-        partner: partnerVal,
-        timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
-    });
+                RP_CONFIG.ZONES.forEach(z => {
+                    rpState[z] = (rpState[z] || []).filter(m => m.callSign !== rpUser.callSign);
+                });
 
-    rpSaveState();
-    rpRenderGrid();
+                if (!rpState[zoneName]) rpState[zoneName] = [];
+                rpState[zoneName].push({
+                    callSign: rpUser.callSign,
+                    name: rpUser.name,
+                    discordId: rpUser.discordId,
+                    partner: partnerVal,
+                    timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
+                });
 
-    // Sincronizăm imediat pe server și trimitem logul
-    await rpSyncAssignmentState();
-    rpSendLogImmediately({
-        action: 'join',
-        callSign: rpUser.callSign,
-        name: rpUser.name,
-        zone: zoneName,
-        partner: partnerVal,
-        discordId: rpUser.discordId
-    });
-}
+                rpSaveState();
+                rpRenderGrid();
+
+                // Sincronizăm imediat pe server și trimitem logul
+                await rpSyncAssignmentState();
+                rpSendLogImmediately({
+                    action: latestPreviousZone && latestPreviousZone !== zoneName ? 'move' : 'join',
+                    callSign: rpUser.callSign,
+                    name: rpUser.name,
+                    fromZone: latestPreviousZone,
+                    zone: zoneName,
+                    partner: partnerVal,
+                    discordId: rpUser.discordId
+                });
+            }
 
             // PĂRĂSIRE ZONĂ - Sincronizare IMEDIATĂ pe site, log pus în coadă pt Discord
             async function rpLeaveCurrentZone() {
-    if (!rpUser) return;
+                if (!rpUser) return;
 
-    let leftZone = '';
-    let partnerVal = '';
+                let leftZone = '';
+                let partnerVal = '';
 
-    RP_CONFIG.ZONES.forEach(z => {
-        const list = rpState[z] || [];
-        const foundIndex = list.findIndex(m =>
-            (m.callSign && rpUser.callSign && m.callSign.trim().toLowerCase() === rpUser.callSign.trim().toLowerCase()) ||
-            (m.name && rpUser.name && m.name.trim().toLowerCase() === rpUser.name.trim().toLowerCase())
-        );
+                RP_CONFIG.ZONES.forEach(z => {
+                    const list = rpState[z] || [];
+                    const foundIndex = list.findIndex(m =>
+                        (m.callSign && rpUser.callSign && m.callSign.trim().toLowerCase() === rpUser.callSign.trim().toLowerCase()) ||
+                        (m.name && rpUser.name && m.name.trim().toLowerCase() === rpUser.name.trim().toLowerCase())
+                    );
 
-        if (foundIndex !== -1) {
-            leftZone = z;
-            partnerVal = list[foundIndex].partner || '';
-            list.splice(foundIndex, 1);
-        }
-    });
+                    if (foundIndex !== -1) {
+                        leftZone = z;
+                        partnerVal = list[foundIndex].partner || '';
+                        list.splice(foundIndex, 1);
+                    }
+                });
 
-    rpSaveState();
-    rpRenderGrid();
+                rpSaveState();
+                rpRenderGrid();
 
-    if (leftZone) {
-        await rpSyncAssignmentState();
-        rpSendLogImmediately({
-            action: 'leave',
-            callSign: rpUser.callSign,
-            name: rpUser.name,
-            zone: leftZone,
-            partner: partnerVal,
-            discordId: rpUser.discordId
-        });
-    }
-}
+                if (leftZone) {
+                    await rpSyncAssignmentState();
+                    rpSendLogImmediately({
+                        action: 'leave',
+                        callSign: rpUser.callSign,
+                        name: rpUser.name,
+                        zone: leftZone,
+                        partner: partnerVal,
+                        discordId: rpUser.discordId
+                    });
+                }
+            }
 
             async function rpRemoveSpecificMember(zoneName, callSign) {
-    if (!rpState[zoneName]) return;
+                if (!rpState[zoneName]) return;
 
-    const index = rpState[zoneName].findIndex(m => m.callSign === callSign);
-    if (index === -1) return;
+                const index = rpState[zoneName].findIndex(m => m.callSign === callSign);
+                if (index === -1) return;
 
-    const removedMember = rpState[zoneName][index];
-    rpState[zoneName].splice(index, 1);
+                const removedMember = rpState[zoneName][index];
+                rpState[zoneName].splice(index, 1);
 
-    rpSaveState();
-    rpRenderGrid();
+                rpSaveState();
+                rpRenderGrid();
 
-    await rpSyncAssignmentState();
-    rpSendLogImmediately({
-        action: 'leave',
-        callSign: removedMember.callSign,
-        name: removedMember.name,
-        zone: zoneName,
-        partner: removedMember.partner || '',
-        discordId: removedMember.discordId || rpUser.discordId
-    });
-}
+                await rpSyncAssignmentState();
+                rpSendLogImmediately({
+                    action: 'leave',
+                    callSign: removedMember.callSign,
+                    name: removedMember.name,
+                    zone: zoneName,
+                    partner: removedMember.partner || '',
+                    discordId: removedMember.discordId || rpUser.discordId
+                });
+            }
 
             function rpAdminKickMember(csOverride = '') {
                 if (!rpUser || !rpUser.isConducere) return;
@@ -7827,35 +7913,41 @@
                 }
             }
 
-            
-            async function rpSyncRealtimeState() {
-    if (!RP_CONFIG.WORKER_URL || rpIsSaving) return;
-    try {
-        // Scoatem antetul manual de Cache-Control pentru a evita blocajul CORS
-        const res = await fetch(RP_CONFIG.WORKER_URL, { 
-            method: 'GET'
-        });
-        
-        if (res.ok) {
-            const serverState = await res.json();
-            
-            if (serverState && typeof serverState === 'object') {
-                let isValidStructure = true;
-                RP_CONFIG.ZONES.forEach(z => {
-                    if (!Array.isArray(serverState[z])) isValidStructure = false;
-                });
 
-                if (isValidStructure && JSON.stringify(serverState) !== JSON.stringify(rpState)) {
-                    rpState = serverState;
-                    localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
-                    rpRenderGrid();
+            async function rpSyncRealtimeState() {
+                if (!RP_CONFIG.WORKER_URL || rpIsSaving) return;
+                try {
+                    // Scoatem antetul manual de Cache-Control pentru a evita blocajul CORS
+                    const res = await fetch(`${RP_CONFIG.WORKER_URL}?t=${Date.now()}`, {
+                        method: 'GET',
+                        cache: 'no-store'
+                    });
+
+                    if (!res.ok) {
+                        console.warn(`Sincronizarea în timp real a eșuat cu statusul ${res.status}.`);
+                        rpNotify('Sincronizarea a eșuat. Verifică conexiunea și încearcă din nou.', 'error');
+                        return;
+                    }
+
+                    const serverState = await res.json();
+
+                    if (serverState && typeof serverState === 'object') {
+                        let isValidStructure = true;
+                        RP_CONFIG.ZONES.forEach(z => {
+                            if (!Array.isArray(serverState[z])) isValidStructure = false;
+                        });
+
+                        if (isValidStructure && JSON.stringify(serverState) !== JSON.stringify(rpState)) {
+                            rpState = serverState;
+                            localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
+                            rpRenderGrid();
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Eroare la sincronizarea în timp real:', e);
+                    rpNotify('Sincronizarea a eșuat. Verifică conexiunea și încearcă din nou.', 'error');
                 }
             }
-        }
-    } catch (e) {
-        console.warn('Eroare la sincronizarea în timp real:', e);
-    }
-}
 
             function rpOpenMapModal() {
                 const m = document.getElementById('rpMapModal');
@@ -7875,66 +7967,66 @@
 
             // INITIALIZARE
             document.addEventListener('DOMContentLoaded', function () {
-    rpLoadState();
+                rpLoadState();
 
-    if (window.location.hash && window.location.hash.includes('access_token')) {
-        const params = new URLSearchParams(window.location.hash.substring(1));
-        const token = params.get('access_token');
-        if (token) {
-            window.history.replaceState({}, '', window.location.pathname + window.location.search);
-            if (typeof showSection === 'function') showSection('repartizare-zone');
-            rpHandleToken(token);
-            return;
-        }
-    }
-
-    const storedUser = sessionStorage.getItem(RP_CONFIG.STORAGE_KEY_USER);
-    if (storedUser) {
-        try {
-            const u = JSON.parse(storedUser);
-            rpShowUser(u);
-        } catch (e) {
-            sessionStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
-        }
-    }
-
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('section') === 'repartizare-zone' && typeof showSection === 'function') {
-        showSection('repartizare-zone');
-    }
-
-});
-        
-
-    function rpStartPolling() {
-    if (!rpPollInterval) {
-        rpSyncRealtimeState(); // O citire imediată la activare
-        rpPollInterval = setInterval(rpSyncRealtimeState, 10000); // Poll la 10 secunde
-    }
-}
-
-function rpStopPolling() {
-    if (rpPollInterval) {
-        clearInterval(rpPollInterval);
-        rpPollInterval = null;
-    }
-}
-
-
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) {
-                        rpStopPolling();
-                    } else {
-                        rpStartPolling();
+                if (window.location.hash && window.location.hash.includes('access_token')) {
+                    const params = new URLSearchParams(window.location.hash.substring(1));
+                    const token = params.get('access_token');
+                    if (token) {
+                        window.history.replaceState({}, '', window.location.pathname + window.location.search);
+                        if (typeof showSection === 'function') showSection('repartizare-zone');
+                        rpHandleToken(token);
+                        return;
                     }
-                });
+                }
 
-                window.addEventListener('focus', rpStartPolling);
-                window.addEventListener('blur', rpStopPolling);
+                const storedUser = sessionStorage.getItem(RP_CONFIG.STORAGE_KEY_USER);
+                if (storedUser) {
+                    try {
+                        const u = JSON.parse(storedUser);
+                        rpShowUser(u);
+                    } catch (e) {
+                        sessionStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
+                    }
+                }
 
-                rpStartPolling();
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('section') === 'repartizare-zone' && typeof showSection === 'function') {
+                    showSection('repartizare-zone');
+                }
 
-                
+            });
+
+
+            function rpStartPolling() {
+                if (!rpPollInterval) {
+                    rpSyncRealtimeState(); // O citire imediată la activare
+                    rpPollInterval = setInterval(rpSyncRealtimeState, 10000); // Poll la 10 secunde
+                }
+            }
+
+            function rpStopPolling() {
+                if (rpPollInterval) {
+                    clearInterval(rpPollInterval);
+                    rpPollInterval = null;
+                }
+            }
+
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    rpStopPolling();
+                } else {
+                    rpStartPolling();
+                }
+            });
+
+            window.addEventListener('focus', rpStartPolling);
+            window.addEventListener('blur', rpStopPolling);
+
+            rpStartPolling();
+
+
         </script>
 </body>
 

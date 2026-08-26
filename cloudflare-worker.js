@@ -1,14 +1,24 @@
-// Cloudflare Worker - Webhook Relay (Optional)
-// Dacă vrei să trimiti webhook-uri prin Cloudflare Worker
-
-export default {
-  async fetch(request, env, ctx) {
-    const allowedOrigin = env.ALLOWED_ORIGIN || 'https://ghidul-departamentului-medical-eight.vercel.app';
+export default {  async fetch(request, env, ctx) {
+    const allowedOrigins = [
+      'https://ghidul-departamentului-medical-eight.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:5500',
+      'http://127.0.0.1:5500'
+    ];
+    const requestOrigin = request.headers.get('Origin');
+    const configuredOrigin = env.ALLOWED_ORIGIN;
+    const allowedOrigin = allowedOrigins.includes(requestOrigin)
+      ? requestOrigin
+      : configuredOrigin && allowedOrigins.includes(configuredOrigin)
+        ? configuredOrigin
+        : allowedOrigins[0];
     const headers = {
       'Access-Control-Allow-Origin': allowedOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'Vary': 'Origin'
     };
     const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), { status, headers });
 
@@ -53,129 +63,11 @@ function emptyState() {
   return { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], Spital: [] };
 }
 
-/* Codul vechi de construire a unui webhook batch nu mai este folosit. */
-/*
-        if (type === 'log_batch') {
-          // Logurile de arondare/ieșire/conducere merg exclusiv în canalul de loguri.
-          const logs = Array.isArray(data.logs) ? data.logs : [];
-          const actionNames = {
-            join: 's-a arondat',
-            leave: 'a părăsit zona',
-            kick: 'a fost scos din zonă de conducere',
-            clear_all: 'a resetat toată tura'
-          };
-          payload = {
-            embeds: [{
-              title: '📋 Log Arondare',
-              description: logs.length
-                ? logs.map(log => {
-                    const actor = log.by ? ` (de ${log.by})` : '';
-                    const zoneText = log.zone ? ` pe **${log.zone}**` : '';
-                    const partnerText = log.partner ? ` — Patrulă cu **${log.partner}**` : '';
-                    return `• **${log.callSign || 'N/A'}** — ${actionNames[log.action] || log.action || 'acțiune'}${zoneText}${partnerText}${actor}`;
-                  }).join('\\n')
-                : 'Nu există acțiuni de logat.',
-              color: 3066993,
-              footer: { text: `Actualizat la ${new Date().toLocaleString('ro-RO')}` }
-            }]
-          };
-          webhookUrl = WEBHOOK_LOGURI;
-        } else if (type === 'log') {
-          // Compatibilitate pentru apelurile vechi; nu afectează webhook-ul de repartizare.
-          payload = {
-            embeds: [{
-              title: '📋 Log Arondare',
-              fields: [
-                { name: 'Call-Sign', value: callSign || 'N/A', inline: true },
-                { name: 'Nume', value: data.name || 'N/A', inline: true },
-                { name: 'Discord ID', value: discordId || 'N/A', inline: true },
-                { name: 'Zonă', value: zone || 'N/A', inline: false },
-                { name: 'Patrulă', value: partner || 'N/A', inline: true },
-                { name: 'Oră', value: new Date().toLocaleString('ro-RO'), inline: true }
-              ],
-              color: 3066993
-            }]
-          };
-          webhookUrl = WEBHOOK_LOGURI;
-        }
-
-        if (!webhookUrl || webhookUrl.includes('YOUR_WEBHOOK_ID')) {
-          return new Response(JSON.stringify({ success: false, error: 'Configurează URL-urile webhook în Cloudflare Worker.' }), { status: 503, headers });
-        }
-
-        // Trimite la Discord
-        const response = await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-          return new Response(JSON.stringify({ success: true }), { headers });
-        } else {
-          return new Response(JSON.stringify({ error: 'Webhook failed' }), {
-            status: 400,
-            headers
-          });
-        }
-      } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500,
-          headers
-        });
-      }
-    }
-
-    return new Response('Method not allowed', { status: 405, headers });
-  }
-};
-*/
-
-// Funcțiile active pentru loguri și tabloul live sunt definite mai jos.
-
-/*
-SETUP CLOUDFLARE WORKER:
-
-1. Mergi pe https://dash.cloudflare.com/
-2. Workers & Pages → Create Application → Create Worker
-3. Copiază codul de mai sus
-4. Settings → Variables and Secrets → adaugă `WEBHOOK_REPARTIZARE` și `WEBHOOK_LOGURI`
-5. Deploy
-
-FOLOSIRE DIN FRONTEND:
-
-const WORKER_URL = 'https://your-worker.your-subdomain.workers.dev'; // setează aceeași adresă în RP_CONFIG.WORKER_URL din index.html
-
-// Trimite repartizare
-await fetch(WORKER_URL, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    type: 'assign',
-    callSign: 'M-007',
-    zone: 'Spital',
-    partner: 'M-001'
-  })
-});
-
-// Trimite log
-await fetch(WORKER_URL, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    type: 'log',
-    discordId: '123456789',
-    callSign: 'M-007',
-    zone: 'Spital',
-    partner: 'M-001'
-  })
-});
-*/
-
 async function sendSeparateLog(webhookUrl, act = {}) {
   const actionType = act.action || act.type;
   const config = {
     join: ['🟢 Intrare în Zonă', 0x10B981, 'Un cadru medical s-a arondat pe o zonă/spital.'],
+    move: ['🔁 Schimbare Zonă', 0x7C3AED, 'Un cadru medical și-a schimbat zona de repartizare.'],
     admin_add: ['🔵 Adăugare în Repartizare', 0x2563EB, `Un cadru medical a fost adăugat de către **${act.by || 'un superior'}**`],
     leave: ['🔴 Ieșire din Zonă', 0xEF4444, 'Un cadru medical a părăsit zona.'],
     kick: ['⚠️ Dat afară din Zonă', 0xF59E0B, `Un cadru medical a fost scos de către **${act.by || 'un superior'}**`],
@@ -189,6 +81,7 @@ async function sendSeparateLog(webhookUrl, act = {}) {
     fields.push({ name: '👤 Medic', value: `**${act.callSign || act.badge || 'M-???'}** (${act.name || 'Necunoscut'})`, inline: false });
     if (act.discordId) fields.push({ name: 'Discord', value: `<@${act.discordId}>`, inline: false });
     fields.push({ name: '📍 Zonă', value: `**${act.zone || 'Nespecificată'}**`, inline: false });
+    if (actionType === 'move' && act.fromZone) fields.push({ name: '↔️ Zona anterioară', value: `**${act.fromZone}**`, inline: false });
     if (act.partner) fields.push({ name: '🤝 Partener', value: `\`${act.partner}\``, inline: false });
     if (act.by) fields.push({ name: '🛡️ Acțiune efectuată de', value: `**${act.by}**`, inline: false });
   } else fields.push({ name: '⚙️ Efectuat de', value: `**${act.by || 'Admin'}**`, inline: false });
