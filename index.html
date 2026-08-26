@@ -454,6 +454,87 @@
             background: #f8fbff;
         }
 
+        body.dark-mode .rp-zone-toolbar {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .25) !important;
+            color: #f8fafc !important;
+        }
+
+        body.dark-mode .rp-zone-toolbar span {
+            color: #bfdbfe !important;
+        }
+
+        body.dark-mode .rp-zone-toolbar select {
+            background: #232323 !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
+        }
+
+        body.dark-mode .rp-zone-toolbar select option {
+            background: #232323;
+            color: #f1f5f9;
+        }
+
+        .rp-zone-card.rp-zone-crowded {
+            border: 3px solid #f97316 !important;
+            background: linear-gradient(145deg, #fff7ed 0%, #ffffff 42%) !important;
+            box-shadow: 0 10px 28px rgba(234, 88, 12, .2) !important;
+        }
+
+        .rp-zone-card.rp-zone-crowded .rp-zone-header {
+            border-bottom: 2px solid #fed7aa !important;
+        }
+
+        .rp-zone-card.rp-zone-crowded .rp-zone-count {
+            background: #ea580c !important;
+            color: #fff !important;
+            border-color: #c2410c !important;
+            font-size: .95rem !important;
+            padding: 5px 12px !important;
+        }
+
+        .rp-crowded-alert {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: -3px 0 10px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: #ffedd5;
+            color: #9a3412;
+            border: 1px solid #fdba74;
+            font-size: .82rem;
+            font-weight: 900;
+        }
+
+        .rp-member-list {
+            max-height: 260px;
+            overflow-y: auto;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #f97316 #ffedd5;
+        }
+
+        .rp-zone-crowded .rp-member-list {
+            max-height: 360px;
+        }
+
+        .rp-member-list::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .rp-member-list::-webkit-scrollbar-thumb {
+            background: #f97316;
+            border-radius: 8px;
+        }
+
+        .rp-zone-card.rp-zone-crowded .rp-member-row {
+            background: #fff !important;
+            border-color: #fed7aa !important;
+            padding: 9px 10px !important;
+        }
+
         #rpZonesGrid {
             display: grid !important;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -7641,7 +7722,8 @@
                     const check = rpCanAssignZone(rpUser, zone, partnerVal);
 
                     const card = document.createElement('div');
-                    card.className = 'rp-zone-card';
+                    const isCrowded = members.length >= 7;
+                    card.className = `rp-zone-card${isCrowded ? ' rp-zone-crowded' : ''}`;
                     card.dataset.zone = zone;
                     card.style.cssText = `background:#fff; border-radius:22px; padding:1.4em; box-shadow:0 4px 18px rgba(0,0,0,0.06); border:2px solid ${isUserInThisZone ? '#10b981' : (check.ok ? '#e2e8f0' : '#fecaca')}; display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.2s, box-shadow 0.2s;`;
 
@@ -7660,10 +7742,13 @@
         `;
 
                     let membersHtml = '<div style="flex:1; min-height:80px; margin-bottom:14px;">';
+                    if (isCrowded) {
+                        membersHtml += `<div class="rp-crowded-alert"><i class="fa-solid fa-triangle-exclamation"></i> Zonă aglomerată — ${members.length} medici activi</div>`;
+                    }
                     if (members.length === 0) {
                         membersHtml += '<div style="color:#94a3b8; font-size:0.88rem; font-style:italic; padding:12px 0; text-align:center;">— Niciun medic arondat —</div>';
                     } else {
-                        membersHtml += '<div style="display:flex; flex-direction:column; gap:8px;">';
+                        membersHtml += '<div class="rp-member-list" style="display:flex; flex-direction:column; gap:8px;">';
                         members.forEach(m => {
                             const isSelf = m.callSign === rpUser.callSign;
                             membersHtml += `
