@@ -707,28 +707,27 @@
             background: linear-gradient(135deg, #3a281c 0%, #4a2f18 100%) !important;
         }
 
-        }
-
         .rp-admin-actions {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
+            display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
+            flex-wrap: wrap;
+            max-width: 900px;
+            margin: 0 auto 1em;
         }
 
-        .rp-admin-actions button:first-child { justify-self: start; }
-        .rp-admin-actions button:nth-child(2) { justify-self: center; }
-        .rp-admin-actions button:last-child { justify-self: end; }
+        .rp-admin-actions button {
+            flex: 0 1 auto;
+            white-space: nowrap;
+        }
 
         @media (max-width: 620px) {
             .rp-admin-actions {
-                grid-template-columns: 1fr;
+                align-items: stretch;
             }
-            .rp-admin-actions button,
-            .rp-admin-actions button:first-child,
-            .rp-admin-actions button:nth-child(2),
-            .rp-admin-actions button:last-child {
-                justify-self: stretch;
+            .rp-admin-actions button {
+                flex: 1 1 100%;
                 width: 100%;
             }
         }
@@ -1901,7 +1900,7 @@
                                     <i class="fa-solid fa-crown"></i> Panou Conducere
                                 </h4>
                                 <div
-                                    style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:1em;">
+                                    style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom:1em;">
                                     <div class="rp-admin-actions">
                                         <button onclick="rpOpenAdminModal('add')"
                                             style="background:#2563eb; color:#fff; border:none; border-radius:12px; padding:10px 18px; font-weight:800; font-size:0.95rem; cursor:pointer;"><i
