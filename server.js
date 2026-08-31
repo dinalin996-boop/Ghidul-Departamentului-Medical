@@ -41,20 +41,33 @@ const sheets = google.sheets({ version: 'v4', auth: GOOGLE_API_KEY });
 // Structura zone
 const ZONES = {
   1: { name: 'Port/Aeroport', maxMembers: 4 },
-  2: { name: 'Zona Centrală/Amarrilo', maxMembers: 4 },
-  3: { name: 'Vinewood + Highway', maxMembers: 4 },
-  4: { name: 'Sandy-Paleto-Roxwood', maxMembers: 4 },
+  2: { name: 'Zona Centrală', maxMembers: 4 },
+   3: { name: 'Vinewood + Highway', maxMembers: 4 },
+   4: { name: 'SS - PB - RX', maxMembers: 4 },
   spital: { name: 'Spital', maxMembers: 10 }
 };
 
 // Stocaj în memorie (în producție, folosiți bază de date)
 let zoneAssignments = {
-  1: [],
-  2: [],
-  3: [],
-  4: [],
+ 1: [],
+ 2: [],
+ 3: [],
+ 4: [],
   spital: []
 };
+let assignmentQueue = Promise.resolve();
+
+async function withAssignmentLock(task) {
+  const previous = assignmentQueue;
+  let release;
+  assignmentQueue = new Promise(resolve => { release = resolve; });
+  await previous;
+  try {
+    return await task();
+  } finally {
+    release();
+  }
+}
 
 // Discord OAuth Login
 app.get('/auth/discord', (req, res) => {
@@ -157,11 +170,15 @@ async function findUserByDiscordId(discordId) {
 app.get('/api/zones/status', (req, res) => {
   const status = {};
   for (const [zone, members] of Object.entries(zoneAssignments)) {
+    const zoneConfig = ZONES[zone];
+    if (!zoneConfig || !Array.isArray(members)) {
+      continue;
+    }
     status[zone] = {
-      members: members,
+      members,
       count: members.length,
-      maxMembers: ZONES[zone].maxMembers,
-      name: ZONES[zone].name
+      maxMembers: zoneConfig.maxMembers,
+      name: zoneConfig.name
     };
   }
   res.json(status);
@@ -176,9 +193,11 @@ function calculateAverageMembers() {
 
 // Verifică dacă utilizatorul poate fi alocat pe o zonă
 function canAssignToZone(user, zone) {
-  const grad = parseInt(user.grad.match(/\d+/)?.[0] || 0);
+  const gradValue = typeof user?.grad === 'string' ? user.grad : '';
+  const gradMatch = gradValue.match(/\d+/);
+  const grad = gradMatch ? parseInt(gradMatch[0], 10) : 0;
   const average = calculateAverageMembers();
-  const zoneMembers = zoneAssignments[zone].length;
+  const zoneMembers = Array.isArray(zoneAssignments[zone]) ? zoneAssignments[zone].length : 0;
 
   if (zoneMembers >= ZONES[zone].maxMembers) {
     return { allowed: false, reason: `Zona ${zone} este plină.` };
@@ -228,42 +247,41 @@ app.post('/api/zones/assign', async (req, res) => {
     return res.status(404).json({ error: 'User not found in database' });
   }
 
-  // Verifică dacă utilizatorul este deja alocat
-  for (const [z, members] of Object.entries(zoneAssignments)) {
-    if (members.some(m => m.discordId === req.session.discordId)) {
-      return res.status(400).json({ error: 'Already assigned to a zone' });
+  const assignmentData = await withAssignmentLock(async () => {
+    // Verificările și inserarea rulează în aceeași secțiune serializată.
+    for (const members of Object.values(zoneAssignments)) {
+      if (members.some(m => m.discordId === req.session.discordId)) {
+        return { error: 'Already assigned to a zone', status: 400 };
+      }
     }
-  }
 
-  // Verifică restricții
-  const canAssign = canAssignToZone(user, zone);
-  if (!canAssign.allowed) {
-    return res.status(400).json({ error: canAssign.reason });
-  }
+    const canAssign = canAssignToZone(user, zone);
+    if (!canAssign.allowed) {
+      return { error: canAssign.reason, status: 400 };
+    }
 
-  // Pentru grad 600, necesită partner
-  let assignmentData = {
-    discordId: req.session.discordId,
-    name: user.name,
-    callSign: user.callSign,
-    grad: user.grad
-  };
+    const data = {
+      discordId: req.session.discordId,
+      name: user.name,
+      callSign: user.callSign,
+      grad: user.grad
+    };
+    if (typeof user.grad === 'string' && user.grad.includes('600') && partnerCallSign) {
+      data.partner = partnerCallSign;
+    }
+    zoneAssignments[zone].push(data);
+    return { assignment: data };
+  });
 
-  if (user.grad.includes('600') && partnerCallSign) {
-    assignmentData.partner = partnerCallSign;
+  if (assignmentData.error) {
+    return res.status(assignmentData.status).json({ error: assignmentData.error });
   }
-
-  try {
-    zoneAssignments[zone].push(assignmentData);
-  } catch (error) {
-    console.error('Assignment update error:', error);
-    return res.status(500).json({ error: 'Unable to update zone assignment' });
-  }
+  const assignedUser = assignmentData.assignment;
 
   res.json({
     success: true,
     message: `Alocat pe ${ZONES[zone].name}`,
-    assignment: assignmentData
+    assignment: assignedUser
   });
 });
 
@@ -290,7 +308,13 @@ app.get('/api/user/info', async (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
-  const user = await findUserByDiscordId(req.session.discordId);
+  let user;
+  try {
+    user = await findUserByDiscordId(req.session.discordId);
+  } catch (error) {
+    console.error('User info lookup error:', error);
+    return res.status(503).json({ error: 'Unable to access user database' });
+  }
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }

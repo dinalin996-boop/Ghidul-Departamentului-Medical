@@ -66,24 +66,24 @@ function emptyState() {
 async function sendSeparateLog(webhookUrl, act = {}) {
   const actionType = act.action || act.type;
   const config = {
-    join: ['🟢 Intrare în Zonă', 0x10B981, 'Un cadru medical s-a arondat pe o zonă/spital.'],
-    move: ['🔁 Schimbare Zonă', 0x7C3AED, 'Un cadru medical și-a schimbat zona de repartizare.'],
-    admin_add: ['🔵 Adăugare în Repartizare', 0x2563EB, `Un cadru medical a fost adăugat de către **${act.by || 'un superior'}**`],
-    leave: ['🔴 Ieșire din Zonă', 0xEF4444, 'Un cadru medical a părăsit zona.'],
-    kick: ['⚠️ Dat afară din Zonă', 0xF59E0B, `Un cadru medical a fost scos de către **${act.by || 'un superior'}**`],
-    removed: ['⚠️ Dat afară din Zonă', 0xF59E0B, `Un cadru medical a fost scos de către **${act.by || 'un superior'}**`],
-    clear_all: ['🔄 Resetare Generală Tură', 0xEF4444, `Toate turele au fost golite de către **${act.by || 'Admin'}**`],
-    reset: ['🔄 Resetare Generală Tură', 0xEF4444, `Toate turele au fost golite de către **${act.by || 'Admin'}**`]
+    join: ['🟢 Intrare pe tură', 0x10B981, 'Un medic s-a arondat pe o zonă/spital.'],
+    move: ['🔁 Schimbare Zonă', 0x7C3AED, 'Un medic și-a schimbat zona.'],
+    admin_add: ['🔵 Adăugare în Repartizare', 0x2563EB, `Un medic a fost adăugat de către **${act.by || 'un superior'}**`],
+    leave: ['🔴 Ieșire de pe tură', 0xEF4444, 'Un medic a părăsit zona.'],
+    kick: ['⚠️ Kick de pe tură', 0xF59E0B, `Un medic a fost scos de către **${act.by || 'un superior'}**`],
+    removed: ['⚠️ Kick de pe tură', 0xF59E0B, `Un medic a fost scos de către **${act.by || 'un superior'}**`],
+    clear_all: ['🔄 Resetare Tură', 0xEF4444, `Toti medicii au fost scosi de către **${act.by || 'Admin'}**`],
+    reset: ['🔄 Resetare Tură', 0xEF4444, `Toti medicii au fost scosi de către **${act.by || 'Admin'}**`]
   };
   const [title, color, description] = config[actionType] || ['📋 Acțiune Repartizare', 0x245AB1, 'A fost înregistrată o acțiune în repartizare.'];
   const fields = [];
   if (actionType !== 'clear_all' && actionType !== 'reset') {
-    fields.push({ name: '👤 Medic', value: `**${act.callSign || act.badge || 'M-???'}** (${act.name || 'Necunoscut'})`, inline: false });
-    if (act.discordId) fields.push({ name: 'Discord', value: `<@${act.discordId}>`, inline: false });
+    fields.push({ name: '🥼 Medic', value: `**${act.callSign || act.badge || 'M-???'}** (${act.name || 'Necunoscut'})`, inline: false });
+    if (act.discordId) fields.push({ name: '🤖Discord', value: `<@${act.discordId}>`, inline: false });
     fields.push({ name: '📍 Zonă', value: `**${act.zone || 'Nespecificată'}**`, inline: false });
     if (actionType === 'move' && act.fromZone) fields.push({ name: '↔️ Zona anterioară', value: `**${act.fromZone}**`, inline: false });
     if (act.partner) fields.push({ name: '🤝 Partener', value: `\`${act.partner}\``, inline: false });
-    if (act.by) fields.push({ name: '🛡️ Acțiune efectuată de', value: `**${act.by}**`, inline: false });
+    if (act.by) fields.push({ name: '🛡️ Modificare facuta de', value: `**${act.by}**`, inline: false });
   } else fields.push({ name: '⚙️ Efectuat de', value: `**${act.by || 'Admin'}**`, inline: false });
   await fetch(webhookUrl, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -105,8 +105,8 @@ async function updateRepartizareEmbed(webhookUrl, state, env) {
     totalMedici += members.length;
     fields.push({ name: `📍 ${zone} (${members.length})`, value: members.length ? members.map(m => `• **${m.callSign || m.badge || 'M-???'}** ${m.name || 'Necunoscut'}${m.partner ? ` *(cu ${m.partner})*` : ''}`).join('\n') : '_Niciun medic arondat_', inline: false });
   });
-  fields.push({ name: '👥 Total medici (spital + teren)', value: `**${totalMedici}** cadre medicale active`, inline: false });
-  const payload = { username: 'Tablou Live Repartizare', avatar_url: 'https://cdn-icons-png.flaticon.com/512/1021/1021799.png', embeds: [{ title: '🚑 Situație Repartizare Medicală pe Zone', description: 'Această listă afișează repartizarea curentă a cadrelor medicale pe teren și la spital.', color: 0x245AB1, fields, timestamp: new Date().toISOString() }] };
+  fields.push({ name: '🥼 Total medici pe teren', value: `**${totalMedici}** cadre medicale active`, inline: false });
+  const payload = { username: 'Repartizare LIVE', avatar_url: 'https://imgur.com/a/JRWgtRs', embeds: [{ title: '🩺Medicii repartizați pe zone.', description: 'Mai jos este lista cu medicii pe tura.', color: 0x245AB1, fields, timestamp: new Date().toISOString() }] };
   const messageId = env.RP_KV ? await env.RP_KV.get('discord_live_msg_id') : null;
   if (messageId) {
     const editRes = await fetch(`${webhookUrl}/messages/${messageId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
