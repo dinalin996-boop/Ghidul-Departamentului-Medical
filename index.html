@@ -7256,7 +7256,10 @@
                 document.querySelectorAll('.section').forEach(section => {
                     section.classList.remove('active');
                 });
-                document.getElementById(id).classList.add('active');
+                const targetSection = document.getElementById(id);
+                if (!targetSection) return;
+                targetSection.classList.add('active');
+                localStorage.setItem('activeSection', id);
 
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.classList.remove('active');
@@ -7649,6 +7652,19 @@
                 return data.values || [];
             }
 
+            async function rpValidateStoredUser(user) {
+                const rows = await rpFetchSheetRows();
+                const discordId = (user.discordId || '').toString().trim();
+                const callSign = (user.callSign || '').toString().trim().toUpperCase();
+                return rows.slice(1).some(row => {
+                    const rowDiscordId = (row[19] || '').toString().trim();
+                    const rowCallSign = (row[2] || '').toString().trim().toUpperCase();
+                    return discordId
+                        ? rowDiscordId === discordId
+                        : callSign && (rowCallSign === callSign || rowCallSign === callSign.replace(/^M-/, ''));
+                });
+            }
+
             async function rpHandleToken(accessToken) {
                 const statusEl = document.getElementById('rpLoginStatus');
                 if (statusEl) statusEl.textContent = 'Se verifică identitatea Discord și datele departamentale...';
@@ -7676,7 +7692,7 @@
                     }
 
                     const userObj = rpExtractUser(foundRow, discordUser);
-                    sessionStorage.setItem(RP_CONFIG.STORAGE_KEY_USER, JSON.stringify(userObj));
+                    localStorage.setItem(RP_CONFIG.STORAGE_KEY_USER, JSON.stringify(userObj));
                     if (statusEl) statusEl.textContent = '';
                     rpShowUser(userObj);
                 } catch (err) {
@@ -7716,7 +7732,7 @@
                     }
 
                     const userObj = rpExtractUser(foundRow, null);
-                    sessionStorage.setItem(RP_CONFIG.STORAGE_KEY_USER, JSON.stringify(userObj));
+                    localStorage.setItem(RP_CONFIG.STORAGE_KEY_USER, JSON.stringify(userObj));
                     if (statusEl) statusEl.textContent = '';
                     rpShowUser(userObj);
                 } catch (err) {
@@ -7725,6 +7741,7 @@
             }
 
             function rpLogout() {
+                localStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
                 sessionStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
                 rpUser = null;
                 document.getElementById('rpLoginContainer').style.display = 'block';
@@ -8255,7 +8272,7 @@
             window.rpRemoveFromDuty = rpRemoveSpecificMember;
 
             // INITIALIZARE
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', async function () {
                 rpLoadState();
 
                 if (window.location.hash && window.location.hash.includes('access_token')) {
@@ -8269,19 +8286,28 @@
                     }
                 }
 
-                const storedUser = sessionStorage.getItem(RP_CONFIG.STORAGE_KEY_USER);
+                const storedUser = localStorage.getItem(RP_CONFIG.STORAGE_KEY_USER) || sessionStorage.getItem(RP_CONFIG.STORAGE_KEY_USER);
                 if (storedUser) {
                     try {
                         const u = JSON.parse(storedUser);
-                        rpShowUser(u);
+                        const stillInDepartment = await rpValidateStoredUser(u);
+                        if (stillInDepartment) {
+                            rpShowUser(u);
+                        } else {
+                            rpLogout();
+                            rpNotify('Contul nu mai apare în lista departamentului. Te rugăm să te autentifici din nou.', 'error');
+                        }
                     } catch (e) {
+                        localStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
                         sessionStorage.removeItem(RP_CONFIG.STORAGE_KEY_USER);
                     }
                 }
 
                 const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('section') === 'repartizare-zone' && typeof showSection === 'function') {
-                    showSection('repartizare-zone');
+                const savedSection = localStorage.getItem('activeSection') || 'introducere';
+                const sectionToRestore = urlParams.get('section') || savedSection;
+                if (typeof showSection === 'function') {
+                    showSection(sectionToRestore);
                 }
 
             });
