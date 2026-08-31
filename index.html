@@ -401,9 +401,22 @@
         }
 
         #rpUserCard {
-            border: 1px solid #dbeafe;
+            border: 1px solid #dbeafe !important;
             background: linear-gradient(135deg, #fff 0%, #f8fbff 100%) !important;
+            color: #1e293b !important;
             box-shadow: 0 10px 30px rgba(36, 90, 177, .12) !important;
+        }
+
+        body.dark-mode #rpUserCard,
+        body.dark-mode .rp-zone-toolbar {
+            background: #232323 !important;
+            border-color: #3f3f46 !important;
+            color: #f8fafc !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .24) !important;
+        }
+
+        body.dark-mode #rpUserCard #rpProfileName {
+            color: #f8fafc !important;
         }
 
         #rpProfileRank,
@@ -1788,7 +1801,7 @@
                         <div id="rpDashboard" style="display:none; width:100%; max-width:1040px;">
                             <!-- PROFIL MEDIC -->
                             <div id="rpUserCard"
-                                style="background: #1e293b !important; color: #f8fafc !important; border: 1px solid #334155 !important; border-radius: 24px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.3) !important; margin-bottom:1.6em !important; padding: 20px !important; display:flex !important; justify-content:space-between !important; align-items:center !important; flex-wrap:wrap !important; gap:16px !important;">
+                                style="background: linear-gradient(135deg, #fff 0%, #f8fbff 100%) !important; color: #1e293b !important; border: 1px solid #dbeafe !important; border-radius: 24px !important; box-shadow: 0 10px 30px rgba(36, 90, 177, .12) !important; margin-bottom:1.6em !important; padding: 20px !important; display:flex !important; justify-content:space-between !important; align-items:center !important; flex-wrap:wrap !important; gap:16px !important;">
                                 <div
                                     style="display:flex !important; align-items:center !important; gap:16px !important; flex-wrap:wrap !important;">
                                     <div id="rpUserAvatar"
@@ -1889,7 +1902,7 @@
 
                             <!-- GRID ZONE -->
                             <div id="rpZonesGrid"
-                                style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px; margin-bottom:2em;">
+                                style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px; margin-bottom:0 !important;">
                             </div>
 
                             <!-- PANOU ADMIN CONDUCERE -->
