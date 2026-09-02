@@ -27,7 +27,13 @@ export default {  async fetch(request, env, ctx) {
     try {
       if (request.method === 'GET') {
         const stored = env.RP_KV ? await env.RP_KV.get('state_v3') : null;
-        return jsonResponse(stored ? JSON.parse(stored) : emptyState());
+        if (!stored) return jsonResponse(emptyState());
+        try {
+          return jsonResponse(JSON.parse(stored));
+        } catch (parseError) {
+          console.error('Corrupted stored state:', parseError);
+          return jsonResponse(emptyState());
+        }
       }
 
       if (request.method !== 'POST') return jsonResponse({ error: 'Metodă netratată' }, 405);
@@ -39,6 +45,9 @@ export default {  async fetch(request, env, ctx) {
       const WEBHOOK_LOGURI = env.WEBHOOK_LOGURI || '';
 
       if (type === 'assign' && state !== undefined) {
+        if (!isValidState(state)) {
+          return jsonResponse({ error: 'Invalid state shape' }, 400);
+        }
         if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(state));
         if (WEBHOOK_REPARTIZARE) ctx.waitUntil(updateRepartizareEmbed(WEBHOOK_REPARTIZARE, state, env));
         return jsonResponse({ success: true, message: 'Starea a fost sincronizată.' });
@@ -51,7 +60,12 @@ export default {  async fetch(request, env, ctx) {
         ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, activeAction));
       }
 
-      if (state !== undefined && env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(state));
+      if (state !== undefined) {
+        if (!isValidState(state)) {
+          return jsonResponse({ error: 'Invalid state shape' }, 400);
+        }
+        if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(state));
+      }
       return jsonResponse({ success: true, message: 'Procesat cu succes.' });
     } catch (error) {
       return jsonResponse({ error: 'Eroare Worker: ' + error.message }, 500);
@@ -61,6 +75,13 @@ export default {  async fetch(request, env, ctx) {
 
 function emptyState() {
   return { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], Spital: [] };
+}
+
+function isValidState(state) {
+  if (!state || typeof state !== 'object' || Array.isArray(state)) return false;
+  const supportedZones = ['Zona 1', 'Zona 2', 'Zona 3', 'Zona 4', 'Spital'];
+  return Object.keys(state).every(zone => supportedZones.includes(zone))
+    && supportedZones.every(zone => Array.isArray(state[zone]));
 }
 
 async function sendSeparateLog(webhookUrl, act = {}) {

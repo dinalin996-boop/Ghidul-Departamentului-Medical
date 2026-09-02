@@ -35,6 +35,16 @@ const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'http://localhost:3000/auth/discord/callback';
 const GOOGLE_SHEETS_ID = process.env.GOOGLE_SHEETS_ID;
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const SHEET_RANGE = 'LISTA DEPARTAMENT!A1:T300';
+const SHEET_COLUMNS = {
+  id: 1,
+  name: 3,
+  callSign: 2,
+  grad: 4,
+  radio: 11,
+  bls: 12,
+  discordId: 19
+};
 
 const sheets = google.sheets({ version: 'v4', auth: GOOGLE_API_KEY });
 
@@ -137,7 +147,7 @@ async function getSheetData() {
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: GOOGLE_SHEETS_ID,
-      range: 'Sheet1!A:T'
+      range: SHEET_RANGE
     });
     return response.data.values || [];
   } catch (error) {
@@ -152,13 +162,14 @@ async function findUserByDiscordId(discordId) {
 
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
-    if (row[19] && row[19].toString() === discordId.toString()) {
+    if (row[SHEET_COLUMNS.discordId] && row[SHEET_COLUMNS.discordId].toString().trim() === discordId.toString().trim()) {
       return {
-        name: row[1] || 'Unknown',
-        callSign: row[2] || 'N/A',
-        grad: row[4] || 'N/A',
-        radio: row[11] === 'TRUE' || row[11] === true,
-        bls: row[12] === 'TRUE' || row[12] === true,
+        id: (row[SHEET_COLUMNS.id] || '').toString().trim(),
+        name: row[SHEET_COLUMNS.name] || 'Unknown',
+        callSign: row[SHEET_COLUMNS.callSign] || 'N/A',
+        grad: row[SHEET_COLUMNS.grad] || 'N/A',
+        radio: row[SHEET_COLUMNS.radio] === 'TRUE' || row[SHEET_COLUMNS.radio] === true,
+        bls: row[SHEET_COLUMNS.bls] === 'TRUE' || row[SHEET_COLUMNS.bls] === true,
         rowIndex: i
       };
     }
