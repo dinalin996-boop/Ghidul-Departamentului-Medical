@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spitalul Județean Eclipse Medical Tower</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/site.css">
     <style>
         /* ======= RESET & BASE ======= */
 
@@ -745,6 +746,7 @@
             .rp-admin-actions {
                 align-items: stretch;
             }
+
             .rp-admin-actions button {
                 flex: 1 1 100%;
                 width: 100%;
@@ -1827,7 +1829,7 @@
                                             </span>
                                             <span id="rpBadgeLeadership"
                                                 style="display:none; background: rgba(245, 158, 11, 0.2) !important; color: #fcd34d !important; padding: 2px 10px !important; border-radius: 8px !important; font-size: 0.85rem !important; font-weight: 700 !important;">
-                                                <i class="fa-solid fa-crown"></i> Conducere
+                                                <i class="fa-solid fa-shield-halved"></i> Administrativ
                                             </span>
                                             <span id="rpProfileCallsign"
                                                 style="background:#245ab1 !important; color:#fff !important; padding:3px 12px !important; border-radius:10px !important; font-weight:800 !important; font-size:0.95rem !important;">-</span>
@@ -1911,20 +1913,20 @@
                                 style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px; margin-bottom:0 !important;">
                             </div>
 
-                            <!-- PANOU ADMIN CONDUCERE -->
+                            <!-- PANOU ADMINISTRATIV -->
                             <div id="rpAdminPanel"
                                 style="display:none; background:linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border:2px solid #fdba74; border-radius:24px; padding:1.4em 1.8em; margin-bottom:2em; box-shadow:0 4px 16px rgba(234,88,12,0.15);">
                                 <h4
                                     style="color:#c2410c; margin:0 0 0.8em 0; font-size:1.15rem; font-weight:900; display:flex; align-items:center; gap:8px;">
-                                    <i class="fa-solid fa-crown"></i> Panou Conducere
+                                    <i class="fa-solid fa-shield-halved"></i> Panou Administrativ
                                 </h4>
                                 <div
                                     style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom:1em;">
                                     <div class="rp-admin-actions">
-                                        <button onclick="rpOpenAdminModal('add')"
+                                        <button id="rpAdminAddButton" onclick="rpOpenAdminModal('add')"
                                             style="background:#2563eb; color:#fff; border:none; border-radius:12px; padding:10px 18px; font-weight:800; font-size:0.95rem; cursor:pointer;"><i
                                                 class="fa-solid fa-user-plus"></i> Adaugă Repartizare</button>
-                                        <button onclick="rpOpenAdminModal('clear')"
+                                        <button id="rpAdminClearButton" onclick="rpOpenAdminModal('clear')"
                                             style="background:#b91c1c; color:#fff; border:none; border-radius:12px; padding:10px 18px; font-weight:700; font-size:0.9rem; cursor:pointer;"><i
                                                 class="fa-solid fa-trash"></i> Reset Tură</button>
                                         <button onclick="rpOpenAdminModal('remove')"
@@ -7352,10 +7354,19 @@
             };
 
             let rpPollInterval = null;
+            let rpRealtimeSyncInFlight = false;
+            let rpStateRevision = 0;
+            let rpRealtimeSyncFailed = false;
             let rpUser = null;
             let rpState = { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], 'Spital': [] };
             let rpBroadcastChannel = null;
             let rpAdminModalMode = 'remove';
+
+            function rpHasAdminAccess(user = rpUser) {
+                if (!user) return false;
+                const csNum = Number(user.csNum) || parseInt((user.callSign || '').toString().replace(/\D/g, ''), 10) || 0;
+                return Boolean(user.isConducere) || (csNum >= 101 && csNum <= 125);
+            }
 
             function rpNotify(message, type = 'info', duration = 3600) {
                 const stack = document.getElementById('rpToastStack');
@@ -7368,7 +7379,7 @@
             }
 
             function rpOpenAdminModal(mode) {
-                if (!rpUser || !rpUser.isConducere) return;
+                if (!rpHasAdminAccess() || (mode !== 'remove' && !rpUser.isConducere)) return;
                 rpAdminModalMode = mode;
                 const modal = document.getElementById('rpAdminModal');
                 const title = document.getElementById('rpAdminModalTitle');
@@ -7407,15 +7418,16 @@
             }
 
             async function rpSubmitAdminModal() {
-                if (!rpUser || !rpUser.isConducere) return;
+                if (!rpHasAdminAccess()) return;
                 if (rpAdminModalMode === 'clear') {
                     if (!document.getElementById('rpAdminModalConfirm').checked) return rpNotify('Bifează confirmarea înainte de a continua.', 'error');
                     RP_CONFIG.ZONES.forEach(z => { rpState[z] = []; });
                     rpSaveState(); rpRenderGrid(); rpCloseAdminModal();
+                    // Salveaza resetarea inaintea operatiunilor de logare Discord.
+                    await rpSyncAssignmentState();
                     const resetLog = { action: 'clear_all', by: rpUser.callSign };
                     const resetLogSent = await rpSendLogImmediately(resetLog);
                     if (!resetLogSent) rpQueueLogAction(resetLog);
-                    await rpSyncAssignmentState();
                     rpNotify('Toată repartizarea a fost resetată.', 'success');
                     return;
                 }
@@ -7455,6 +7467,8 @@
 
             async function rpSyncAssignmentState() {
                 if (!RP_CONFIG.WORKER_URL) return;
+                // Invalidateaza GET-urile pornite inaintea acestei modificari.
+                rpStateRevision++;
                 rpIsSaving = true;
                 try {
                     const res = await fetch(`${RP_CONFIG.WORKER_URL}?t=${Date.now()}`, {
@@ -7606,6 +7620,7 @@
                     rank.toUpperCase().includes('INSPECTOR') ||
                     rank.toUpperCase().includes('CONDUCERE') ||
                     dept.toUpperCase().includes('CONDUCERE');
+                const isAdmin = isConducere || (csNum >= 101 && csNum <= 125);
 
                 const isSuperiorRank = isConducere || (csNum >= 100 && csNum <= 599);
 
@@ -7634,6 +7649,7 @@
                     dept: dept,
                     tier: tier,
                     isConducere: isConducere,
+                    isAdmin: isAdmin,
                     radio: isRadio,
                     bls: isBLS,
                     discordId: (row[19] || (discordUser ? discordUser.id : '')).toString().trim(),
@@ -7832,7 +7848,7 @@
                 document.getElementById('rpProfileName').textContent = user.name;
                 document.getElementById('rpProfileRankText').textContent = user.rank || 'Grad nespecificat';
                 const leadershipBadge = document.getElementById('rpBadgeLeadership');
-                if (leadershipBadge) leadershipBadge.style.display = user.isConducere ? 'inline-flex' : 'none';
+                if (leadershipBadge) leadershipBadge.style.display = rpHasAdminAccess(user) ? 'inline-flex' : 'none';
                 document.getElementById('rpProfileCallsign').textContent = user.callSign;
 
                 const avatarEl = document.getElementById('rpUserAvatar');
@@ -7873,7 +7889,12 @@
 
                 const is600WithCerts = (user.tier === '600' || (user.csNum >= 600 && user.csNum <= 699)) && hasRadio && hasBLS;
                 document.getElementById('rpPartnerBox').style.display = is600WithCerts ? 'block' : 'none';
-                document.getElementById('rpAdminPanel').style.display = user.isConducere ? 'block' : 'none';
+                const hasAdminAccess = rpHasAdminAccess(user);
+                document.getElementById('rpAdminPanel').style.display = hasAdminAccess ? 'block' : 'none';
+                const addButton = document.getElementById('rpAdminAddButton');
+                const clearButton = document.getElementById('rpAdminClearButton');
+                if (addButton) addButton.style.display = user.isConducere ? 'inline-block' : 'none';
+                if (clearButton) clearButton.style.display = user.isConducere ? 'inline-block' : 'none';
 
                 rpLoadState();
                 rpRenderGrid();
@@ -7974,9 +7995,9 @@
                             </div>
                         </div>
                         <div>
-                            ${(rpUser.isConducere || isSelf) ? `
-                                <button onclick="${rpUser.isConducere && !isSelf ? `rpAdminKickMember('${m.callSign}')` : `rpRemoveSpecificMember('${zone}', '${m.callSign}')`}" title="${isSelf ? 'Părăsește zona' : 'Scoate din zonă'}" style="background:${rpUser.isConducere && !isSelf ? '#ffedd5' : '#fee2e2'}; color:${rpUser.isConducere && !isSelf ? '#c2410c' : '#b91c1c'}; border:none; border-radius:8px; padding:3px 8px; font-size:0.78rem; font-weight:800; cursor:pointer;">
-                                    ${rpUser.isConducere && !isSelf ? 'KICK' : '✕'}
+                            ${(rpHasAdminAccess() || isSelf) ? `
+                                <button onclick="${rpHasAdminAccess() && !isSelf ? `rpAdminKickMember('${m.callSign}')` : `rpRemoveSpecificMember('${zone}', '${m.callSign}')`}" title="${isSelf ? 'Părăsește zona' : 'Scoate din zonă'}" style="background:${rpHasAdminAccess() && !isSelf ? '#ffedd5' : '#fee2e2'}; color:${rpHasAdminAccess() && !isSelf ? '#c2410c' : '#b91c1c'}; border:none; border-radius:8px; padding:3px 8px; font-size:0.78rem; font-weight:800; cursor:pointer;">
+                                    ${rpHasAdminAccess() && !isSelf ? 'KICK' : '✕'}
                                 </button>
                             ` : ''}
                         </div>
@@ -8142,7 +8163,7 @@
             }
 
             function rpAdminKickMember(csOverride = '') {
-                if (!rpUser || !rpUser.isConducere) return;
+                if (!rpHasAdminAccess()) return;
                 const input = document.getElementById('rpAdminKickInput');
                 const msgEl = document.getElementById('rpAdminMsg');
                 let cs = (csOverride || (input ? input.value : '')).trim();
@@ -8221,7 +8242,9 @@
 
 
             async function rpSyncRealtimeState() {
-                if (!RP_CONFIG.WORKER_URL || rpIsSaving) return;
+                if (!RP_CONFIG.WORKER_URL || rpIsSaving || rpRealtimeSyncInFlight) return;
+                rpRealtimeSyncInFlight = true;
+                const requestRevision = rpStateRevision;
                 try {
                     // Scoatem antetul manual de Cache-Control pentru a evita blocajul CORS
                     const res = await fetch(`${RP_CONFIG.WORKER_URL}?t=${Date.now()}`, {
@@ -8231,11 +8254,21 @@
 
                     if (!res.ok) {
                         console.warn(`Sincronizarea în timp real a eșuat cu statusul ${res.status}.`);
-                        rpNotify('Sincronizarea a eșuat. Verifică conexiunea și încearcă din nou.', 'error');
+                        if (!rpRealtimeSyncFailed) {
+                            rpRealtimeSyncFailed = true;
+                            rpNotify('Sincronizarea a eșuat. Verifică conexiunea și încearcă din nou.', 'error');
+                        }
                         return;
                     }
 
                     const serverState = await res.json();
+                    if (rpRealtimeSyncFailed) {
+                        rpRealtimeSyncFailed = false;
+                        rpNotify('Sincronizarea a fost restabilită.', 'success');
+                    }
+
+                    // Ignora un raspuns cerut inainte de resetare sau alta salvare.
+                    if (requestRevision !== rpStateRevision) return;
 
                     if (serverState && typeof serverState === 'object') {
                         let isValidStructure = true;
@@ -8251,7 +8284,12 @@
                     }
                 } catch (e) {
                     console.warn('Eroare la sincronizarea în timp real:', e);
-                    rpNotify('Sincronizarea a eșuat. Verifică conexiunea și încearcă din nou.', 'error');
+                    if (!rpRealtimeSyncFailed) {
+                        rpRealtimeSyncFailed = true;
+                        rpNotify('Sincronizarea a eșuat. Verifică conexiunea și încearcă din nou.', 'error');
+                    }
+                } finally {
+                    rpRealtimeSyncInFlight = false;
                 }
             }
 
@@ -8315,8 +8353,10 @@
 
             function rpStartPolling() {
                 if (!rpPollInterval) {
-                    rpSyncRealtimeState(); // O citire imediată la activare
-                    rpPollInterval = setInterval(rpSyncRealtimeState, 10000); // Poll la 10 secunde
+                    void rpSyncRealtimeState(); // O citire imediată la activare
+                    rpPollInterval = setInterval(() => {
+                        void rpSyncRealtimeState(); // Guardul intern evită cererile suprapuse
+                    }, 10000);
                 }
             }
 
@@ -8343,6 +8383,7 @@
 
 
         </script>
+        <script src="assets/repartizare-module.js"></script>
 </body>
 
 </html>

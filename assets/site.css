@@ -1,0 +1,20 @@
+/* Shared site rules live here while legacy page-specific rules remain inline. */
+
+:root {
+    --medical-blue: #245ab1;
+    --medical-blue-dark: #1a4080;
+}
+
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid #f59e0b;
+    outline-offset: 2px;
+}
