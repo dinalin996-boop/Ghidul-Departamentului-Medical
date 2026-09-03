@@ -1240,6 +1240,9 @@
         <button class="nav-btn" onclick="showSection('rezidentiat')">
             <i class="fa-solid fa-user-graduate"></i> Rezidentiat
         </button>
+        <button class="nav-btn" onclick="showSection('cert-parasutism')">
+            <i class="fa-solid fa-parachute-box"></i> Ghid Parașutism
+        </button>
         <button class="nav-btn" onclick="showSection('rp-cert-moto')">
             <i class="fa-solid fa-motorcycle"></i> Rp Certificat Moto
         </button>
@@ -4027,6 +4030,12 @@
                                     <td style="text-align:center; color:#d32f2f; font-weight:700;">5 zile</td>
                                     <td style="text-align:center; font-weight:700;">MEDIC REZIDENT [M-300+]</td>
                                 </tr>
+                                <tr>
+                                    <td style="text-align:center; font-weight:700; color:#66356E;">Parașutism</td>
+                                    <td style="text-align:center; color:#66356E; font-weight:700;">30k/zi</td>
+                                    <td style="text-align:center; color:#66356E; font-weight:700;">5 zile</td>
+                                    <td style="text-align:center; font-weight:700;">MEDIC SPECIALIST [M-200+]</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -4050,70 +4059,13 @@
                                     </tr>
                                 </thead>
                                 <tbody style="text-align:center;">
-                                    <tr>
-                                        <td style="padding:10px;">LUNI</td>
-                                        <td>Lea Shades</td>
-                                        <td><span
-                                                style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic
-                                                Primar</span></td>
-                                        <td>M-106</td>
-                                        <td>62402</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding:10px;">MARTI</td>
-                                        <td>Freya NDC</td>
-                                        <td><span
-                                                style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic
-                                                Primar</span></td>
-                                        <td>M-102</td>
-                                        <td>154984</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding:10px;">MIERCURI</td>
-                                        <td>Eva Mendez</td>
-                                        <td><span
-                                                style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic
-                                                Primar</span></td>
-                                        <td>M-108</td>
-                                        <td>155067</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding:10px;">JOI</td>
-                                        <td>Stefano Ravioli</td>
-                                        <td><span
-                                                style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic
-                                                Primar</span></td>
-                                        <td>M-103</td>
-                                        <td>66909</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding:10px;">VINERI</td>
-                                        <td>AlMajdi Tariq</td>
-                                        <td><span
-                                                style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic
-                                                Primar</span></td>
-                                        <td>M-110</td>
-                                        <td>30188</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding:10px;">SAMBATA</td>
-                                        <td>Toma Madalin</td>
-                                        <td><span
-                                                style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic
-                                                Primar</span></td>
-                                        <td>M-107</td>
-                                        <td>9221
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding:10px;">DUMINICA</td>
-                                        <td>Mihail Parvu</td>
-                                        <td><span
-                                                style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic
-                                                Inspector</span></td>
-                                        <td>M-007</td>
-                                        <td>46165</td>
-                                    </tr>
+                                    <tr><td style="padding:10px;">LUNI</td><td>Lea Shades</td><td><span style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic Primar</span></td><td>M-106</td><td>62402</td></tr>
+                                    <tr><td style="padding:10px;">MARTI</td><td>Freya NDC</td><td><span style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic Primar</span></td><td>M-102</td><td>154984</td></tr>
+                                    <tr><td style="padding:10px;">MIERCURI</td><td>Eva Mendez</td><td><span style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic Primar</span></td><td>M-108</td><td>155067</td></tr>
+                                    <tr><td style="padding:10px;">JOI</td><td>Stefano Ravioli</td><td><span style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic Primar</span></td><td>M-103</td><td>66909</td></tr>
+                                    <tr><td style="padding:10px;">VINERI</td><td>AlMajdi Tariq</td><td><span style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic Primar</span></td><td>M-110</td><td>30188</td></tr>
+                                    <tr><td style="padding:10px;">SAMBATA</td><td>Toma Madalin</td><td><span style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic Primar</span></td><td>M-107</td><td>9221</td></tr>
+                                    <tr><td style="padding:10px;">DUMINICA</td><td>Mihail Parvu</td><td><span style="background:#245ab1; color:#fff; padding:6px 12px; border-radius:12px;">Medic Inspector</span></td><td>M-007</td><td>46165</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -4178,6 +4130,11 @@
                                     <td style="text-align:center;">Obligatoriu pentru avansarea în grad (300+200) |
                                         Cunoaștere Rp. Operații (Ghid), Medicamente/echipamente</td>
                                     <td style="text-align:center; color:#d32f2f; font-weight:700;">5 Zile</td>
+                                </tr>
+                                <tr>
+                                     <td style="text-align:center; font-weight:700; color:#66356E;">Parasutism</td>
+                                    <td style="text-align:center;">Minim 200+, Certificatul S.M.U.L.S | Cunoașterea Ghid Parașutism</td>
+                                    <td style="text-align:center; color:#66356E; font-weight:700;">5 Zile</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -4283,6 +4240,16 @@
                                         <button onclick="showSection('cert-pilot')"
                                             style="background:#245ab1; color:#fff; border:none; border-radius:18px; padding:7px 22px; font-weight:700; cursor:pointer; font-size:1rem; align-items: left; justify-content: left;">
                                             Certificat Pilot
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:center; font-weight:700; color:#66356E;">Parașutism</td>
+                                    <td
+                                        style="text-align:left; display:flex; flex-wrap:wrap; gap:8px; justify-content: left; align-items: left;">
+                                        <button onclick="showSection('cert-parasutism')"
+                                            style="background:#245ab1; color:#fff; border:none; border-radius:18px; padding:7px 22px; font-weight:700; cursor:pointer; font-size:1rem; align-items: left; justify-content: left;">
+                                            Ghid Parașutism
                                         </button>
                                     </td>
                                 </tr>
@@ -6558,6 +6525,76 @@
                     <div style="background:#fffbe7; border-radius:12px; padding:1em; color:#245ab1; text-align:center;">
                         <b>ATENȚIE:</b> Moto poate interveni la jafuri/cod 0 doar dacă ai minim gradul de <b>Medic
                             Specialist (200+)</b>!
+                    </div>
+                </div>
+            </div>
+            <div id="cert-parasutism" class="section">
+                <div
+                    style="background: linear-gradient(120deg, #f3f7ff 60%, #e0e7ff 100%); border-radius: 48px; box-shadow: 0 8px 40px #89CFF0; padding: 2.5em 1.5em 2em 1.5em; max-width: 900px; margin: 0 auto 2.5em auto;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5em;">
+                        <img src="hr.png" alt="Logo stânga"
+                            style="height:60px; border-radius:16px; background:#fff; box-shadow:0 2px 8px #bbb;">
+                        <h2
+                            style="color:#245ab1; font-size:2.2rem; font-weight:900; letter-spacing:2px; margin:0; text-align:center;">
+                            <center><i class="fa-solid fa-parachute-box"></i> GHID PARAȘUTISM</center>
+                        </h2>
+                        <img src="logo-fivem.png" alt="Logo dreapta"
+                            style="height:60px; border-radius:16px; background:#fff; box-shadow:0 2px 8px #bbb;">
+                    </div>
+                    <div
+                        style="background:#fff; border-radius:24px; box-shadow:0 2px 16px #89CFF0; margin-bottom:2em; padding:2em;">
+                        <h3
+                            style="color:#245ab1; font-size:1.25rem; font-weight:900; margin-bottom:1em; text-align:center;">
+                            <i class="fa-solid fa-id-card"></i> Obligatoriu pentru susținerea certificatului
+                        </h3>
+                        <ul
+                            style="font-size:1.09rem; color:#222; font-weight:500; margin:0; padding-left:1.2em; line-height:1.6em;">
+                            <li>Gradul necesar: <b style="color:#245ab1;">Medic-Specialist [MS]+</b></li>
+                            <li>Deținerea certificatului: <b style="color:#245ab1;">S.M.U.L.S.</b></li>
+                            <li>Cine deține acest certificat are obligația de a purta în permanență cel puțin o parașută
+                                cu el.</li>
+                            <li>Testul se susține exclusiv în condiții meteo favorabile: fără ploaie, ceață sau
+                                ninsoare.</li>
+                            <li>Certificatul este destinat eficientizării intervențiilor la jafuri complexe / coduri 0
+                                extinse.</li>
+                            <li>Orice abuz atrage confiscarea certificatului și o posibilă interdicție.</li>
+                        </ul>
+                    </div>
+                    <div
+                        style="background:#f8f8f8; border-radius:18px; box-shadow:0 2px 8px #89CFF0; padding:1.5em; margin-bottom:2em;">
+                        <h3
+                            style="color:#1976d2; font-size:1.18rem; font-weight:800; margin-bottom:0.7em; text-align:center;">
+                            <i class="fa-solid fa-person-falling"></i> Reguli de parasutare
+                        </h3>
+                        <ul
+                            style="font-size:1.05rem; color:#222; font-weight:500; margin:0; padding-left:1.2em; line-height:1.6em;">
+                            <li>Altitudinea minimă permisă pentru lansare este de <b>150 metri</b>, de la clădirea G de
+                                la PACIFIC.</li>
+                            <li>Înainte de parasutare este strict interzis să aveți orice obiect în mână. În caz
+                                contrar, parașuta nu se va deschide, rezultând comă / deces.</li>
+                            <li>Parasutarea se face printr-o săritură simplă, de pe loc. Este strict interzisă
+                                parasutarea din alergare.</li>
+                            <li>Aterizarea trebuie făcută întotdeauna pe picioare. Este interzisă apăsarea tastei W în
+                                sol.</li>
+                            <li>Dacă elicopterul are defecțiuni tehnice grave, pasagerii își echipează parașutele și sar
+                                primii. Pilotul rămâne ultimul, menținând aeronava stabilă.</li>
+                        </ul>
+                    </div>
+                    <div style="background:#f8f8f8; border-radius:18px; box-shadow:0 2px 8px #89CFF0; padding:1.5em;">
+                        <h3
+                            style="color:#245ab1; font-size:1.18rem; font-weight:800; margin-bottom:0.7em; text-align:center;">
+                            <i class="fa-solid fa-gamepad"></i> Controale și Manevrare Parașută
+                        </h3>
+                        <ul
+                            style="font-size:1.05rem; color:#222; font-weight:500; margin:0; padding-left:1.2em; line-height:1.6em;">
+                            <li><b>Click stânga:</b> deschide parașuta la altitudinea corespunzătoare.</li>
+                            <li><b>W:</b> înclinare în față, viteză mai mare de coborâre.</li>
+                            <li><b>S:</b> ridică ușor picioarele, viteză redusă și plutire controlată.</li>
+                            <li><b>SHIFT:</b> ridică picioarele spre abdomen, plutire la viteză minimă.</li>
+                            <li><b>Q &amp; E:</b> viraje ascuțite și schimbare rapidă a direcției.</li>
+                            <li><b>A &amp; D:</b> viraje line și schimbare treptată a direcției.</li>
+                            <li><b>F:</b> taie parașuta în aer.</li>
+                        </ul>
                     </div>
                 </div>
             </div>

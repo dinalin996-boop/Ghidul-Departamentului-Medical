@@ -215,11 +215,11 @@ function canAssignToZone(user, zone) {
   }
 
   // Restricții grad
-  if (grad === 600 && (!user.radio || !user.bls)) {
+  if (grad === 600 && (!user.radio || !user.bls) && zone !== 'spital') {
     return { allowed: false, reason: 'Grad 600 fără Radio/BLS poate merge doar pe Spital' };
   }
 
-  if (grad === 600 && zone !== 'spital') {
+  if (grad === 600 && user.radio && user.bls && !['spital', '1', '2', '3'].includes(zone)) {
     return { allowed: false, reason: 'Grad 600 cu Radio/BLS poate merge pe Spital + Zona 1,2,3' };
   }
 
