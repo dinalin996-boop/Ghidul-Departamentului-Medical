@@ -26,14 +26,8 @@ export default {  async fetch(request, env, ctx) {
 
     try {
       if (request.method === 'GET') {
-        const stored = env.RP_KV ? await env.RP_KV.get('state_v3') : null;
-        if (!stored) return jsonResponse(emptyState());
-        try {
-          return jsonResponse(JSON.parse(stored));
-        } catch (parseError) {
-          console.error('Corrupted stored state:', parseError);
-          return jsonResponse(emptyState());
-        }
+        const state = await readState(env);
+        return jsonResponse(state);
       }
 
       if (request.method !== 'POST') return jsonResponse({ error: 'Metodă netratată' }, 405);
@@ -44,13 +38,35 @@ export default {  async fetch(request, env, ctx) {
       const WEBHOOK_REPARTIZARE = env.WEBHOOK_REPARTIZARE || '';
       const WEBHOOK_LOGURI = env.WEBHOOK_LOGURI || '';
 
+      // OPERAȚIE ATOMICĂ: modifică DOAR membrul vizat peste starea curentă din KV.
+      // Astfel un client cu o stare locală veche nu mai poate „readuce” pe zonă
+      // un medic care a fost scos de altcineva.
+      if (type === 'op' && data.op) {
+        const result = await applyOperation(env, data.op);
+        if (!result.ok) return jsonResponse({ error: result.error }, result.status || 400);
+        if (WEBHOOK_REPARTIZARE) ctx.waitUntil(updateRepartizareEmbed(WEBHOOK_REPARTIZARE, result.state, env));
+        const opAction = data.op.log;
+        if (WEBHOOK_LOGURI && opAction) ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, opAction));
+        return jsonResponse({ success: true, state: result.state, message: 'Operațiune aplicată.' });
+      }
+
       if (type === 'assign' && state !== undefined) {
         if (!isValidState(state)) {
           return jsonResponse({ error: 'Invalid state shape' }, 400);
         }
-        if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(state));
-        if (WEBHOOK_REPARTIZARE) ctx.waitUntil(updateRepartizareEmbed(WEBHOOK_REPARTIZARE, state, env));
-        return jsonResponse({ success: true, message: 'Starea a fost sincronizată.' });
+        // Protecție anti-suprascriere: dacă serverul are deja o stare MAI NOUĂ decât
+        // cea pe care se bazează clientul, refuzăm scrierea integrală învechită.
+        const current = await readState(env);
+        const baseRev = Number(data.baseRev) || 0;
+        if (baseRev && baseRev < current.rev) {
+          return jsonResponse({ success: false, stale: true, state: current, message: 'Starea serverului este mai nouă.' });
+        }
+        const payload = stripMeta(state);
+        payload.rev = current.rev + 1;
+        payload.updatedAt = Date.now();
+        if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(payload));
+        if (WEBHOOK_REPARTIZARE) ctx.waitUntil(updateRepartizareEmbed(WEBHOOK_REPARTIZARE, payload, env));
+        return jsonResponse({ success: true, rev: payload.rev, message: 'Starea a fost sincronizată.' });
       }
 
       const activeAction = action || logData;
@@ -64,7 +80,11 @@ export default {  async fetch(request, env, ctx) {
         if (!isValidState(state)) {
           return jsonResponse({ error: 'Invalid state shape' }, 400);
         }
-        if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(state));
+        const payload = stripMeta(state);
+        const current = await readState(env);
+        payload.rev = current.rev + 1;
+        payload.updatedAt = Date.now();
+        if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(payload));
       }
       return jsonResponse({ success: true, message: 'Procesat cu succes.' });
     } catch (error) {
@@ -73,15 +93,114 @@ export default {  async fetch(request, env, ctx) {
   }
 };
 
+const SUPPORTED_ZONES = ['Zona 1', 'Zona 2', 'Zona 3', 'Zona 4', 'Spital'];
+
 function emptyState() {
-  return { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], Spital: [] };
+  return { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], Spital: [], rev: 0, updatedAt: 0 };
 }
 
 function isValidState(state) {
   if (!state || typeof state !== 'object' || Array.isArray(state)) return false;
-  const supportedZones = ['Zona 1', 'Zona 2', 'Zona 3', 'Zona 4', 'Spital'];
-  return Object.keys(state).every(zone => supportedZones.includes(zone))
-    && supportedZones.every(zone => Array.isArray(state[zone]));
+  return Object.keys(state).every(zone => SUPPORTED_ZONES.includes(zone) || zone === 'rev' || zone === 'updatedAt')
+    && SUPPORTED_ZONES.every(zone => Array.isArray(state[zone]));
+}
+
+// Elimină metadatele (rev/updatedAt) când trimitem starea către client/embed.
+function stripMeta(state) {
+  const out = {};
+  SUPPORTED_ZONES.forEach(z => { out[z] = Array.isArray(state[z]) ? state[z] : []; });
+  return out;
+}
+
+// Citește starea completă din KV, normalizată, cu metadate de versiune.
+async function readState(env) {
+  const fallback = emptyState();
+  if (!env.RP_KV) return fallback;
+  const stored = await env.RP_KV.get('state_v3');
+  if (!stored) return fallback;
+  let parsed;
+  try {
+    parsed = JSON.parse(stored);
+  } catch (parseError) {
+    console.error('Corrupted stored state:', parseError);
+    return fallback;
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return fallback;
+  const normalised = stripMeta(parsed);
+  normalised.rev = Number(parsed.rev) || 0;
+  normalised.updatedAt = Number(parsed.updatedAt) || 0;
+  return normalised;
+}
+
+// Compară membrii după discordId (preferat) sau callsign, ca ieșirea să fie
+// consistentă indiferent cum e identificat medicul.
+function memberKey(member = {}) {
+  const discordId = (member.discordId || '').toString().trim();
+  if (discordId) return 'd:' + discordId;
+  const callSign = (member.callSign || member.badge || '').toString().trim().toUpperCase();
+  return 'c:' + callSign;
+}
+
+// Aplică o operațiune atomică peste starea din KV.
+// op = { kind: 'remove'|'add', target: { discordId, callSign }, member, zone }
+async function applyOperation(env, op = {}) {
+  const current = await readState(env);
+  const next = stripMeta(current);
+  const kind = op.kind;
+
+  if (kind === 'remove') {
+    const target = op.target || {};
+    const targetKey = memberKey(target);
+    const targetCallsign = (target.callSign || '').toString().trim().toUpperCase();
+    let removedZone = '';
+    let removedMember = null;
+    SUPPORTED_ZONES.forEach(zone => {
+      next[zone] = next[zone].filter(member => {
+        const matches = (op.matchByName && member.name && target.name
+          && member.name.trim().toLowerCase() === target.name.trim().toLowerCase())
+          || (targetKey && memberKey(member) === targetKey)
+          || (targetCallsign && (member.callSign || '').toString().trim().toUpperCase() === targetCallsign);
+        if (matches) {
+          removedZone = zone;
+          removedMember = member;
+          return false;
+        }
+        return true;
+      });
+    });
+    next.rev = current.rev + 1;
+    next.updatedAt = Date.now();
+    if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(next));
+    return { ok: true, state: next, removed: removedMember, removedZone };
+  }
+
+  if (kind === 'add') {
+    const member = op.member;
+    const zone = op.zone;
+    if (!member || !SUPPORTED_ZONES.includes(zone)) {
+      return { ok: false, error: 'Zonă sau membru invalid', status: 400 };
+    }
+    // Elimină membrul de oriunde altundeva (evită duplicate), apoi îl adaugă.
+    const key = memberKey(member);
+    SUPPORTED_ZONES.forEach(z => {
+      next[z] = next[z].filter(m => memberKey(m) !== key);
+    });
+    next[zone].push(member);
+    next.rev = current.rev + 1;
+    next.updatedAt = Date.now();
+    if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(next));
+    return { ok: true, state: next };
+  }
+
+  if (kind === 'clear') {
+    const cleared = emptyState();
+    cleared.rev = current.rev + 1;
+    cleared.updatedAt = Date.now();
+    if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(cleared));
+    return { ok: true, state: cleared };
+  }
+
+  return { ok: false, error: 'Operațiune necunoscută', status: 400 };
 }
 
 async function sendSeparateLog(webhookUrl, act = {}) {
@@ -121,7 +240,7 @@ async function sendSeparateLog(webhookUrl, act = {}) {
 async function updateRepartizareEmbed(webhookUrl, state, env) {
   const fields = [];
   let totalMedici = 0;
-  Object.keys(state || {}).forEach(zone => {
+  SUPPORTED_ZONES.forEach(zone => {
     const members = Array.isArray(state[zone]) ? state[zone] : [];
     totalMedici += members.length;
     fields.push({ name: `📍 ${zone} (${members.length})`, value: members.length ? members.map(m => `• **${m.callSign || m.badge || 'M-???'}** ${m.name || 'Necunoscut'}${m.partner ? ` *(cu ${m.partner})*` : ''}`).join('\n') : '_Niciun medic arondat_', inline: false });

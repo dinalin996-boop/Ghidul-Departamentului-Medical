@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="ro">
 
 <head>
@@ -7447,9 +7447,19 @@
             let rpPollInterval = null;
             let rpRealtimeSyncInFlight = false;
             let rpStateRevision = 0;
+            // rev-ul stării cunoscute de pe server; folosit ca să nu suprascriem
+            // o stare mai nouă cu una locală învechită.
+            let rpServerRev = 0;
             let rpRealtimeSyncFailed = false;
             let rpUser = null;
             let rpState = { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], 'Spital': [] };
+
+            // Compară doar zonele, ignorând metadatele de versiune (rev/updatedAt).
+            function rpZonesOnly(state) {
+                const out = {};
+                RP_CONFIG.ZONES.forEach(z => { out[z] = Array.isArray(state && state[z]) ? state[z] : []; });
+                return out;
+            }
             let rpBroadcastChannel = null;
             let rpAdminModalMode = 'remove';
 
@@ -7514,11 +7524,11 @@
                     if (!document.getElementById('rpAdminModalConfirm').checked) return rpNotify('Bifează confirmarea înainte de a continua.', 'error');
                     RP_CONFIG.ZONES.forEach(z => { rpState[z] = []; });
                     rpSaveState(); rpRenderGrid(); rpCloseAdminModal();
-                    // Salveaza resetarea inaintea operatiunilor de logare Discord.
-                    await rpSyncAssignmentState();
-                    const resetLog = { action: 'clear_all', by: rpUser.callSign };
-                    const resetLogSent = await rpSendLogImmediately(resetLog);
-                    if (!resetLogSent) rpQueueLogAction(resetLog);
+                    // Operațiune atomică de resetare + log, pe server.
+                    await rpApplyOperation({
+                        kind: 'clear',
+                        log: { action: 'clear_all', by: rpUser.callSign }
+                    });
                     rpNotify('Toată repartizarea a fost resetată.', 'success');
                     return;
                 }
@@ -7546,11 +7556,11 @@
                     });
                     if (!row) return rpNotify(`Nu am găsit ${cs} în lista departamentului.`, 'error');
                     const member = rpExtractUser(row, null);
-                    rpState[targetZone].push({ callSign: member.callSign, name: member.name, partner: '', timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' }) });
+                    const newMember = { callSign: member.callSign, name: member.name, discordId: member.discordId || '', partner: '', timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' }) };
+                    rpState[targetZone].push(newMember);
                     rpSaveState(); rpRenderGrid(); rpCloseAdminModal();
                     const adminLog = { action: 'admin_add', callSign: member.callSign, name: member.name, zone: targetZone, by: rpUser.callSign, byDiscordId: rpUser.discordId, discordId: member.discordId || '' };
-                    await rpSendLogImmediately(adminLog);
-                    await rpSyncAssignmentState();
+                    await rpApplyOperation({ kind: 'add', zone: targetZone, member: newMember, log: adminLog });
                     rpNotify(`${member.callSign} a fost adăugat pe ${targetZone}.`, 'success');
                 } catch (e) { rpNotify('Nu am putut adăuga medicul. Încearcă din nou.', 'error'); }
             }
@@ -7566,14 +7576,60 @@
                         method: 'POST',
                         cache: 'no-store',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'assign', state: rpState })
+                        body: JSON.stringify({ type: 'assign', state: rpZonesOnly(rpState), baseRev: rpServerRev })
                     });
                     if (!res.ok) throw new Error(`Server status ${res.status}`);
+                    const result = await res.json().catch(() => ({}));
+                    // Serverul are o stare mai nouă (altcineva a modificat între timp):
+                    // preluăm starea serverului în loc să o suprascriem cu cea locală veche.
+                    if (result && result.stale && result.state) {
+                        rpApplyServerState(result.state);
+                        rpNotify('Repartizarea a fost actualizată de pe server.', 'info');
+                    } else if (result && typeof result.rev === 'number') {
+                        rpServerRev = result.rev;
+                    }
                 } catch (e) {
                     console.error('Eroare la salvarea pe server:', e);
                 } finally {
                     setTimeout(() => { rpIsSaving = false; }, 1500);
                 }
+            }
+
+            // Trimite o operațiune atomică (remove/add/clear) către worker.
+            // Serverul modifică DOAR membrul vizat peste starea lui curentă,
+            // deci un client cu date vechi nu mai poate readuce pe nimeni pe zonă.
+            async function rpApplyOperation(op) {
+                if (!RP_CONFIG.WORKER_URL || !op) return null;
+                rpStateRevision++;
+                rpIsSaving = true;
+                try {
+                    const res = await fetch(`${RP_CONFIG.WORKER_URL}?t=${Date.now()}`, {
+                        method: 'POST',
+                        cache: 'no-store',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'op', op })
+                    });
+                    if (!res.ok) throw new Error(`Server status ${res.status}`);
+                    const result = await res.json().catch(() => ({}));
+                    if (result && result.state) rpApplyServerState(result.state);
+                    return result;
+                } catch (e) {
+                    console.error('Eroare la operațiunea atomică:', e);
+                    return null;
+                } finally {
+                    setTimeout(() => { rpIsSaving = false; }, 1500);
+                }
+            }
+
+            // Aplică o stare venită de la server (fără să declanșeze un POST înapoi).
+            function rpApplyServerState(serverState) {
+                if (!serverState || typeof serverState !== 'object') return;
+                RP_CONFIG.ZONES.forEach(z => {
+                    rpState[z] = Array.isArray(serverState[z]) ? serverState[z] : [];
+                });
+                if (typeof serverState.rev === 'number') rpServerRev = serverState.rev;
+                try { localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpZonesOnly(rpState))); } catch (e) { }
+                rpRenderGrid();
             }
 
             async function rpSendLogImmediately(logData) {
@@ -7620,6 +7676,7 @@
                     RP_CONFIG.ZONES.forEach(z => {
                         rpState[z] = Array.isArray(parsed[z]) ? parsed[z] : [];
                     });
+                    if (typeof parsed.rev === 'number') rpServerRev = parsed.rev;
                 } catch (e) {
                     console.warn('Nu s-a putut încărca starea actualizată:', e);
                 }
@@ -7639,7 +7696,7 @@
 
             function rpSaveState() {
                 try {
-                    localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
+                    localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpZonesOnly(rpState)));
                     if (rpBroadcastChannel) {
                         rpBroadcastChannel.postMessage({ type: 'SYNC_STATE', timestamp: Date.now() });
                     }
@@ -8169,27 +8226,33 @@
                 });
 
                 if (!rpState[zoneName]) rpState[zoneName] = [];
-                rpState[zoneName].push({
+                const newMember = {
                     callSign: rpUser.callSign,
                     name: rpUser.name,
                     discordId: rpUser.discordId,
                     partner: partnerVal,
                     timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
-                });
+                };
+                rpState[zoneName].push(newMember);
 
                 rpSaveState();
                 rpRenderGrid();
 
-                // Sincronizăm imediat pe server și trimitem logul
-                await rpSyncAssignmentState();
-                rpSendLogImmediately({
-                    action: latestPreviousZone && latestPreviousZone !== zoneName ? 'move' : 'join',
-                    callSign: rpUser.callSign,
-                    name: rpUser.name,
-                    fromZone: latestPreviousZone,
+                // Operațiune atomică: serverul șterge utilizatorul de oriunde altundeva
+                // și îl adaugă pe zona nouă, indiferent de starea locală a clientului.
+                await rpApplyOperation({
+                    kind: 'add',
                     zone: zoneName,
-                    partner: partnerVal,
-                    discordId: rpUser.discordId
+                    member: newMember,
+                    log: {
+                        action: latestPreviousZone && latestPreviousZone !== zoneName ? 'move' : 'join',
+                        callSign: rpUser.callSign,
+                        name: rpUser.name,
+                        fromZone: latestPreviousZone,
+                        zone: zoneName,
+                        partner: partnerVal,
+                        discordId: rpUser.discordId
+                    }
                 });
             }
 
@@ -8218,14 +8281,21 @@
                 rpRenderGrid();
 
                 if (leftZone) {
-                    await rpSyncAssignmentState();
-                    rpSendLogImmediately({
-                        action: 'leave',
-                        callSign: rpUser.callSign,
-                        name: rpUser.name,
-                        zone: leftZone,
-                        partner: partnerVal,
-                        discordId: rpUser.discordId
+                    // Operațiune atomică pe server: șterge medicul după discordId/callsign,
+                    // indiferent de ce stare locală are acest client. Logul pleacă în același request,
+                    // deci ieșirea și logul rămân mereu sincronizate.
+                    await rpApplyOperation({
+                        kind: 'remove',
+                        matchByName: true,
+                        target: { discordId: rpUser.discordId, callSign: rpUser.callSign, name: rpUser.name },
+                        log: {
+                            action: 'leave',
+                            callSign: rpUser.callSign,
+                            name: rpUser.name,
+                            zone: leftZone,
+                            partner: partnerVal,
+                            discordId: rpUser.discordId
+                        }
                     });
                 }
             }
@@ -8242,14 +8312,17 @@
                 rpSaveState();
                 rpRenderGrid();
 
-                await rpSyncAssignmentState();
-                rpSendLogImmediately({
-                    action: 'leave',
-                    callSign: removedMember.callSign,
-                    name: removedMember.name,
-                    zone: zoneName,
-                    partner: removedMember.partner || '',
-                    discordId: removedMember.discordId || rpUser.discordId
+                await rpApplyOperation({
+                    kind: 'remove',
+                    target: { discordId: removedMember.discordId, callSign: removedMember.callSign },
+                    log: {
+                        action: 'leave',
+                        callSign: removedMember.callSign,
+                        name: removedMember.name,
+                        zone: zoneName,
+                        partner: removedMember.partner || '',
+                        discordId: removedMember.discordId || rpUser.discordId
+                    }
                 });
             }
 
@@ -8302,8 +8375,11 @@
                         byDiscordId: rpUser.discordId,
                         discordId: removedMember.discordId || ''
                     };
-                    rpSendLogImmediately(kickLog);
-                    rpSyncAssignmentState();
+                    rpApplyOperation({
+                        kind: 'remove',
+                        target: { discordId: removedMember.discordId, callSign: removedMember.callSign },
+                        log: kickLog
+                    });
                 }
             }
 
@@ -8367,8 +8443,11 @@
                             if (!Array.isArray(serverState[z])) isValidStructure = false;
                         });
 
-                        if (isValidStructure && JSON.stringify(serverState) !== JSON.stringify(rpState)) {
-                            rpState = serverState;
+                        // Compară doar zonele (ignoră rev/updatedAt).
+                        const serverZones = rpZonesOnly(serverState);
+                        if (isValidStructure && JSON.stringify(serverZones) !== JSON.stringify(rpZonesOnly(rpState))) {
+                            if (typeof serverState.rev === 'number') rpServerRev = serverState.rev;
+                            rpState = { ...rpZonesOnly(serverState) };
                             localStorage.setItem(RP_CONFIG.STORAGE_KEY_STATE, JSON.stringify(rpState));
                             rpRenderGrid();
                         }
