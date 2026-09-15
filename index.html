@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="ro">
 
 <head>
@@ -7460,6 +7460,16 @@
                 RP_CONFIG.ZONES.forEach(z => { out[z] = Array.isArray(state && state[z]) ? state[z] : []; });
                 return out;
             }
+
+            // Returnează ora României (fusul Europe/Bucharest), indiferent de fusul
+            // orar al dispozitivului utilizatorului (America, Germania etc.).
+            function rpRomaniaTime() {
+                return new Date().toLocaleTimeString('ro-RO', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Europe/Bucharest'
+                });
+            }
             let rpBroadcastChannel = null;
             let rpAdminModalMode = 'remove';
 
@@ -7556,7 +7566,7 @@
                     });
                     if (!row) return rpNotify(`Nu am găsit ${cs} în lista departamentului.`, 'error');
                     const member = rpExtractUser(row, null);
-                    const newMember = { callSign: member.callSign, name: member.name, discordId: member.discordId || '', partner: '', timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' }) };
+                    const newMember = { callSign: member.callSign, name: member.name, discordId: member.discordId || '', partner: '', timestamp: rpRomaniaTime() };
                     rpState[targetZone].push(newMember);
                     rpSaveState(); rpRenderGrid(); rpCloseAdminModal();
                     const adminLog = { action: 'admin_add', callSign: member.callSign, name: member.name, zone: targetZone, by: rpUser.callSign, byDiscordId: rpUser.discordId, discordId: member.discordId || '' };
@@ -7708,7 +7718,7 @@
                     const currentLogs = JSON.parse(localStorage.getItem(RP_CONFIG.STORAGE_KEY_LOGS) || '[]');
                     currentLogs.push({
                         ...logData,
-                        time: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
+                        time: rpRomaniaTime()
                     });
                     localStorage.setItem(RP_CONFIG.STORAGE_KEY_LOGS, JSON.stringify(currentLogs));
                 } catch (e) { }
@@ -8231,7 +8241,7 @@
                     name: rpUser.name,
                     discordId: rpUser.discordId,
                     partner: partnerVal,
-                    timestamp: new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
+                    timestamp: rpRomaniaTime()
                 };
                 rpState[zoneName].push(newMember);
 
