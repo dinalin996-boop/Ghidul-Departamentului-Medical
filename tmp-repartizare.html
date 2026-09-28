@@ -1,0 +1,129 @@
+/**
+ * tmp-repartizare.html — Redirect catre sistemul real de repartizare.
+ *
+ * Vechea pagina repartizare.html avea credentiale Google Sheets false
+ * (1Ej0Ej0... / AIzaSyDummyKeyForTesting), deci API-ul raspundea cu HTTP 400
+ * si nimeni nu se putea conecta niciodata. Sistemul functional este cel din
+ * index.html (Discord OAuth + Google Sheets + Cloudflare Worker), asa ca
+ * aceasta pagina doar redirectioneaza.
+ *
+ * Pastreaza tokenul OAuth daca vine pe vechea adresa.
+ */
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repartizare Zone - Spitalul Judetean Eclipse Medical Tower</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏥</text></svg>">
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fbfd 0%, #f0f7fb 50%, #e8f3f9 100%);
+            background-attachment: fixed;
+            color: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 32px;
+            box-shadow: 0 4px 32px #bbb;
+            padding: 40px 48px;
+            text-align: center;
+            max-width: 480px;
+            margin: 24px;
+        }
+
+        .card h1 {
+            color: #245ab1;
+            font-size: 1.6rem;
+            margin: 0 0 0.4em 0;
+        }
+
+        .card p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 0.98rem;
+        }
+
+        .spinner {
+            width: 42px;
+            height: 42px;
+            margin: 0 auto 20px auto;
+            border: 4px solid #e0e7ff;
+            border-top-color: #245ab1;
+            border-radius: 50%;
+            animation: rp-spin 0.9s linear infinite;
+        }
+
+        @keyframes rp-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 12px;
+            background: #245ab1;
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #1a4080;
+        }
+    </style>
+    <script>
+        // Redirectionam catre sistemul real de repartizare din index.html.
+        (function () {
+            var target = 'index.html?section=repartizare-zone';
+            // Pastram un eventual token OAuth venit pe vechea adresa.
+            if (window.location.hash && window.location.hash.indexOf('access_token') !== -1) {
+                target = 'index.html' + window.location.hash;
+            }
+            try {
+                var back = document.referrer || '';
+                if (back && back.indexOf('repartizare.html') === -1) {
+                    var m = back.match(/[?&#]section=([\w-]+)/);
+                    if (m) target = 'index.html?section=' + m[1];
+                }
+            } catch (e) { }
+            window.location.replace(target);
+        })();
+    </script>
+</head>
+
+<body>
+    <div class="card">
+        <div class="spinner"></div>
+        <h1>Repartizare Zone</h1>
+        <p>Te redirectionam catre sistemul de repartizare…</p>
+        <a class="btn" href="index.html?section=repartizare-zone">Daca nu se incarca, apasa aici</a>
+    </div>
+    <noscript>
+        <div class="card">
+            <h1>Repartizare Zone</h1>
+            <p>Activeaza JavaScript sau deschide direct sectiunea de repartizare.</p>
+            <a class="btn" href="index.html?section=repartizare-zone">Deschide repartizarea</a>
+        </div>
+    </noscript>
+</body>
+
+</html>
