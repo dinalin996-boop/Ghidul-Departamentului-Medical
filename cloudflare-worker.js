@@ -46,7 +46,9 @@ export default {  async fetch(request, env, ctx) {
         if (!result.ok) return jsonResponse({ error: result.error }, result.status || 400);
         if (WEBHOOK_REPARTIZARE) ctx.waitUntil(updateRepartizareEmbed(WEBHOOK_REPARTIZARE, result.state, env));
         const opAction = data.op.log;
-        if (WEBHOOK_LOGURI && opAction) ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, opAction));
+        // Trimite logul ÎNTÂI, ca ieșirea din zonă și notificarea pe Discord să fie mereu sincronizate.
+        // Dacă WEBHOOK_LOGURI lipsește, logul nu se pierde — rămâne în coada clientului.
+        if (opAction) ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, opAction));
         return jsonResponse({ success: true, state: result.state, message: 'Operațiune aplicată.' });
       }
 
@@ -168,6 +170,11 @@ async function applyOperation(env, op = {}) {
         return true;
       });
     });
+    // Dacă nu am găsit niciun membru, refuzăm operația: altfel clientul ar șterge local
+    // și ar crede că a reușit, iar poll-ul i-ar readuce din starea serverului.
+    if (!removedMember) {
+      return { ok: false, error: 'Membrul nu a fost găsit în repartizare', status: 404 };
+    }
     next.rev = current.rev + 1;
     next.updatedAt = Date.now();
     if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(next));

@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro">
 
 <head>
@@ -856,7 +856,6 @@
                 transform: translateY(0) scale(1);
             }
         }
-
         #rpAdminModal {
             display: none;
             position: fixed;
@@ -1183,21 +1182,864 @@
             filter: brightness(1.2);
         }
 
-        #rp-smuls {
+        #rp-smuls,
+        #rp-smuls *,
+        #rp-teren,
+        #rp-teren *,
+        #rp-cert-moto,
+        #rp-cert-moto *,
+        #cert-pilot,
+        #cert-pilot *,
+        #cert-parasutism,
+        #cert-parasutism *,
+        #rezidentiat,
+        #rezidentiat * {
             user-select: none;
             -webkit-user-select: none;
             -ms-user-select: none;
         }
+
+        /* ======= INTERFAȚĂ GENERALĂ ======= */
+        :root {
+            --app-bg: #080f1b;
+            --app-panel: #0e1929;
+            --app-panel-raised: #142238;
+            --app-border: #22324a;
+            --app-text: #e7edf7;
+            --app-muted: #97a7bf;
+            --app-blue: #3b82f6;
+        }
+
+        body.dark-mode {
+            background: var(--app-bg) !important;
+            color: var(--app-text) !important;
+        }
+
+        body.dark-mode .sidebar {
+            width: 252px;
+            padding: 18px 12px 24px;
+            background: #091322 !important;
+            border-right: 1px solid #1b2a40;
+            box-shadow: none !important;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 2px 5px 22px;
+            color: var(--app-text);
+        }
+
+        .sidebar-brand img {
+            width: 38px !important;
+            height: 38px;
+            flex: 0 0 38px;
+            padding: 4px;
+            object-fit: contain;
+            background: #fff;
+            border-radius: 9px !important;
+        }
+
+        .sidebar-brand div { min-width: 0; }
+        .sidebar-brand strong { display: block; font-size: 13px; line-height: 1.25; }
+        .sidebar-brand span { display: block; margin-top: 3px; color: var(--app-muted); font-size: 11px; }
+
+        .sidebar-label {
+            padding: 0 8px 8px;
+            color: #6f86a5;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        body.dark-mode .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 36px;
+            margin: 2px 0;
+            padding: 8px 10px;
+            border: 1px solid transparent;
+            border-radius: 8px !important;
+            background: transparent !important;
+            color: #a8b5c9 !important;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.35;
+        }
+
+        body.dark-mode .nav-btn i { width: 15px; color: #7186a4; text-align: center; }
+        body.dark-mode .nav-btn.active,
+        body.dark-mode .nav-btn:hover {
+            background: #102846 !important;
+            border-color: #1a3c62;
+            color: #f4f8ff !important;
+        }
+        body.dark-mode .nav-btn.active { box-shadow: inset 2px 0 #3197ff; }
+        body.dark-mode .nav-btn.active i,
+        body.dark-mode .nav-btn:hover i { color: #6bb6ff; }
+
+        .content-wrapper { margin-left: 252px; min-height: 100vh; }
+
+        .app-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            display: grid;
+            grid-template-columns: minmax(180px, 1fr) minmax(220px, 360px) auto;
+            align-items: center;
+            gap: 18px;
+            min-height: 64px;
+            padding: 10px 24px;
+            border-bottom: 1px solid var(--app-border);
+            background: rgba(8, 15, 27, .94);
+            backdrop-filter: blur(14px);
+        }
+
+        .breadcrumb { display: flex; align-items: center; gap: 10px; min-width: 0; color: #8191a9; font-size: 11px; }
+        .breadcrumb [hidden] { display: none !important; }
+        .breadcrumb i { color: #4a5b74; font-size: 9px; }
+        .breadcrumb strong { overflow: hidden; color: #e7edf7; text-overflow: ellipsis; white-space: nowrap; }
+
+        .global-search {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            height: 36px;
+            padding: 0 10px;
+            border: 1px solid #20314a;
+            border-radius: 9px;
+            background: #0d1929;
+            color: #8292a9;
+        }
+
+        .global-search:focus-within { border-color: #397fc5; box-shadow: 0 0 0 3px #1d4f7a44; }
+        .global-search > i { font-size: 12px; }
+        .global-search input {
+            width: 100%;
+            min-width: 0;
+            padding: 0;
+            border: 0;
+            outline: 0;
+            background: transparent !important;
+            box-shadow: none !important;
+            color: #e8eef8 !important;
+            font: inherit;
+            font-size: 12px;
+        }
+        .global-search input::placeholder { color: #7f8ca1; }
+        .global-search kbd { flex: 0 0 auto; padding: 3px 5px; border: 1px solid #253650; border-radius: 4px; color: #8ca0bd; font: 10px 'Segoe UI', sans-serif; }
+
+        .search-results {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            left: 0;
+            z-index: 1200;
+            max-height: min(65vh, 480px);
+            overflow: auto;
+            padding: 5px;
+            border: 1px solid #263953;
+            border-radius: 10px;
+            background: #101c2d;
+            box-shadow: 0 18px 45px #0008;
+        }
+
+        .search-results[hidden] { display: none; }
+        .search-result {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--app-text);
+            text-align: left;
+            cursor: pointer;
+        }
+        .search-result:hover, .search-result:focus-visible { outline: 0; background: #192a40; }
+        .search-result strong, .search-result span { display: block; }
+        .search-result strong { margin-bottom: 4px; color: #eaf2ff; font-size: 12px; }
+        .search-result span { color: #9caac0; font-size: 11px; line-height: 1.45; }
+        .search-empty { padding: 14px 10px; color: #9caac0; font-size: 12px; }
+
+        #darkModeToggle {
+            position: static;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: 1px solid #24344b;
+            border-radius: 9px;
+            background: #101c2d !important;
+            color: #d4e4f7 !important;
+            box-shadow: none !important;
+            font-size: 13px;
+        }
+        #darkModeToggle:hover { background: #192a40 !important; transform: none; }
+
+        body.dark-mode .container-bg { max-width: none; min-height: calc(100vh - 64px); margin: 0; border-radius: 0; background: transparent !important; box-shadow: none; }
+        body.dark-mode .header-bar { display: none; }
+        body.dark-mode .main-card { margin: 0; padding: 16px 26px 42px; min-height: 0; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+        body.dark-mode .section { border-radius: 0 !important; background: transparent !important; box-shadow: none !important; color: var(--app-text); }
+        body.dark-mode .section.active { animation: section-reveal .2s ease-out both; }
+
+        body.dark-mode #introducere > div:first-child,
+        body.dark-mode #repartizare-zone > div:first-child {
+            max-width: 1100px !important;
+            border: 1px solid #223955 !important;
+            border-radius: 16px !important;
+            background: radial-gradient(ellipse at 88% 0%, #10364c 0%, #101e34 36%, #0d1929 78%) !important;
+            box-shadow: 0 16px 42px #0003 !important;
+        }
+
+        body.dark-mode [style*="background:#fff"],
+        body.dark-mode [style*="background: #fff"],
+        body.dark-mode [style*="background:#e0e0e0"],
+        body.dark-mode [style*="background: #e0e0e0"],
+        body.dark-mode [style*="background:rgba(255,255,255"],
+        body.dark-mode [style*="background: rgba(255,255,255"],
+        body.dark-mode [style*="background:linear-gradient"],
+        body.dark-mode [style*="background: linear-gradient"],
+        body.dark-mode [style*="background: radial-gradient"] {
+            border-color: #25364e !important;
+            border-radius: 12px !important;
+            background: #101c2d !important;
+            color: #dce5f2 !important;
+            box-shadow: 0 8px 22px #0003 !important;
+        }
+
+        body.dark-mode #introducere > div:first-child,
+        body.dark-mode #repartizare-zone > div:first-child {
+            background: radial-gradient(ellipse at 88% 0%, #10364c 0%, #101e34 36%, #0d1929 78%) !important;
+        }
+
+        body.dark-mode [style*="color:#222"], body.dark-mode [style*="color: #222"],
+        body.dark-mode [style*="color:#333"], body.dark-mode [style*="color: #333"],
+        body.dark-mode [style*="color:#444"], body.dark-mode [style*="color: #444"],
+        body.dark-mode [style*="color:#555"], body.dark-mode [style*="color: #555"],
+        body.dark-mode [style*="color:#666"], body.dark-mode [style*="color: #666"] { color: #bdc9da !important; }
+
+        body.dark-mode .main-card input, body.dark-mode .main-card select, body.dark-mode .main-card textarea {
+            border: 1px solid #334761 !important;
+            border-radius: 8px !important;
+            background: #0b1523 !important;
+            color: #e7edf7 !important;
+        }
+        body.dark-mode table { color: #dce5f2; }
+        body.dark-mode th { background: #17263a !important; color: #e5edf8 !important; }
+        body.dark-mode td { border-color: #26364c !important; color: #c7d2e1 !important; }
+        body.dark-mode .rp-zone-card, body.dark-mode #rpUserCard, body.dark-mode #rpAdminPanel { border-radius: 12px !important; }
+
+        body:not(.dark-mode) .sidebar { width: 252px; padding: 18px 12px 24px; }
+        body:not(.dark-mode) .sidebar-brand { color: #172033; }
+        body:not(.dark-mode) .sidebar-brand span { color: #64748b; }
+        body:not(.dark-mode) .sidebar-label { color: #64748b; }
+        body:not(.dark-mode) .app-topbar { border-color: #dbe3ee; background: rgba(248, 250, 252, .96); }
+        body:not(.dark-mode) .breadcrumb { color: #64748b; }
+        body:not(.dark-mode) .breadcrumb strong { color: #172033; }
+        body:not(.dark-mode) .global-search,
+        body:not(.dark-mode) .search-results { border-color: #d8e1ec; background: #fff; color: #475569; }
+        body:not(.dark-mode) .global-search input { color: #172033 !important; }
+        body:not(.dark-mode) .global-search kbd { border-color: #d8e1ec; color: #64748b; }
+        body:not(.dark-mode) .search-result strong { color: #172033; }
+        body:not(.dark-mode) .search-result span,
+        body:not(.dark-mode) .search-empty { color: #64748b; }
+        body:not(.dark-mode) .search-result:hover,
+        body:not(.dark-mode) .search-result:focus-visible { background: #eff6ff; }
+        body:not(.dark-mode) #darkModeToggle { border-color: #d8e1ec; background: #fff !important; color: #334155 !important; }
+
+        @media (max-width: 640px) {
+            body:not(.dark-mode) .sidebar { position: sticky; top: 0; width: 100%; height: auto; padding: 8px 10px; display: flex; align-items: center; gap: 8px; overflow-x: auto; }
+            body:not(.dark-mode) .sidebar-brand { flex: 0 0 auto; padding: 2px 2px 8px; }
+            body:not(.dark-mode) .sidebar-label { display: none; }
+            body:not(.dark-mode) .nav-btn { flex: 0 0 auto; width: auto; min-height: 34px; margin: 0; white-space: nowrap; }
+            body:not(.dark-mode) .content-wrapper { margin-left: 0; }
+            body:not(.dark-mode) .app-topbar { top: 108px; }
+        }
+
+        @keyframes section-reveal {
+            from { opacity: .65; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            body.dark-mode .sidebar { width: 220px; }
+            .content-wrapper { margin-left: 220px; }
+            .app-topbar { grid-template-columns: 1fr minmax(190px, 320px) auto; gap: 12px; padding-inline: 16px; }
+            body.dark-mode .main-card { padding-inline: 18px; }
+        }
+
+        @media (max-width: 640px) {
+            body.dark-mode .sidebar { position: sticky; top: 0; width: 100%; height: auto; padding: 8px 10px; border-right: 0; border-bottom: 1px solid #1b2a40; }
+            .sidebar-brand { padding: 2px 2px 8px; }
+            .sidebar-brand img { width: 30px !important; height: 30px; flex-basis: 30px; }
+            .sidebar-label { display: none; }
+            body.dark-mode .sidebar { display: flex; align-items: center; gap: 8px; overflow-x: auto; }
+            body.dark-mode .nav-btn { flex: 0 0 auto; width: auto; min-height: 34px; margin: 0; white-space: nowrap; }
+            .content-wrapper { margin-left: 0; }
+            .app-topbar { position: sticky; top: 108px; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; min-height: 58px; padding: 8px 12px; }
+            .breadcrumb { display: none; }
+            .global-search { grid-column: 1; grid-row: 1; }
+            #darkModeToggle { grid-column: 2; grid-row: 1; }
+            body.dark-mode .main-card { padding: 12px 12px 28px; }
+            body.dark-mode .container-bg { min-height: calc(100vh - 58px); }
+            body.dark-mode #introducere > div:first-child,
+            body.dark-mode #repartizare-zone > div:first-child { padding: 1.4em 1em !important; }
+            #introducere > div:first-child > div:first-child > img { display: none; }
+        }
+        /* ======= PALETĂ MEDICALĂ ROȘU / BLEUMARIN ======= */
+        :root {
+            --medical-red: #d7848b;
+            --medical-red-strong: #ad5661;
+            --medical-red-dark: #5b343e;
+            --medical-surface: #111d2d;
+            --medical-surface-warm: #211b25;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(125deg, #080f1b 0%, #111a28 48%, #1d171e 100%) fixed !important;
+        }
+
+        body.dark-mode .app-topbar {
+            background: linear-gradient(100deg, rgba(8, 15, 27, .97), rgba(25, 20, 28, .97));
+            border-bottom-color: #352832;
+        }
+
+        body.dark-mode .nav-btn.active,
+        body.dark-mode .nav-btn:hover {
+            background: #2a2029 !important;
+            border-color: #593640;
+            color: #fff4f3 !important;
+        }
+        body.dark-mode .nav-btn.active { box-shadow: inset 2px 0 var(--medical-red); }
+        body.dark-mode .nav-btn.active i,
+        body.dark-mode .nav-btn:hover i { color: var(--medical-red); }
+
+        body.dark-mode .jaf-btn {
+            border: 1px solid #44313b;
+            background: linear-gradient(135deg, #211f29, #302129) !important;
+            color: #e5d5d8 !important;
+            box-shadow: none;
+        }
+        body.dark-mode .jaf-btn:hover,
+        body.dark-mode .jaf-btn:focus,
+        body.dark-mode .jaf-btn.active {
+            border-color: #c2757f;
+            background: linear-gradient(135deg, #a95260, #773b49) !important;
+            color: #fff !important;
+            box-shadow: 0 5px 18px #8f455144;
+        }
+
+        body.dark-mode [style*="background:#232323"],
+        body.dark-mode [style*="background: #232323"],
+        body.dark-mode [style*="background:#2d2d2d"],
+        body.dark-mode [style*="background: #2d2d2d"],
+        body.dark-mode [style*="background:#333"],
+        body.dark-mode [style*="background: #333"],
+        body.dark-mode [style*="background:#888"],
+        body.dark-mode [style*="background: #888"],
+        body.dark-mode [style*="background:#f0f0ff"],
+        body.dark-mode [style*="background: #f0f0ff"],
+        body.dark-mode [style*="background:#f8f8f8"],
+        body.dark-mode [style*="background: #f8f8f8"],
+        body.dark-mode [style*="background:#f9f9ff"],
+        body.dark-mode [style*="background: #f9f9ff"] {
+            background: linear-gradient(125deg, #1b2533, #251d27) !important;
+            border-color: #48323c !important;
+            color: #e5eaf2 !important;
+        }
+
+        body.dark-mode [style*="background:#fff"],
+        body.dark-mode [style*="background: #fff"],
+        body.dark-mode [style*="background:rgba(255,255,255"],
+        body.dark-mode [style*="background: rgba(255,255,255"],
+        body.dark-mode [style*="background:linear-gradient"],
+        body.dark-mode [style*="background: linear-gradient"],
+        body.dark-mode [style*="background: radial-gradient"] {
+            background: linear-gradient(135deg, #111d2d 0%, #151e2c 72%, #241a22 100%) !important;
+            border-color: #3b303d !important;
+            color: #e5eaf2 !important;
+        }
+
+        body.dark-mode .jaf-content > div {
+            border: 1px solid #41313d !important;
+            border-radius: 12px !important;
+            background: linear-gradient(135deg, #111d2d, #171e2b 72%, #241a22) !important;
+            color: #e5eaf2 !important;
+            box-shadow: 0 8px 22px #0003 !important;
+        }
+
+        body:not(.dark-mode) #info-utile > div {
+            width: 100% !important;
+            max-width: 1100px !important;
+            margin: 0 auto 2.5em !important;
+            padding: clamp(18px, 3vw, 40px) !important;
+            border: 1px solid #dbe3ee !important;
+            border-radius: 16px !important;
+            background: #fff !important;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .08) !important;
+        }
+        body:not(.dark-mode) #info-utile h2 { margin: 0 0 1.4em !important; padding: 0 !important; }
+        body:not(.dark-mode) #info-utile h3 { margin: 1.5em 0 .8em !important; }
+
+        body.dark-mode #info-utile > div {
+            width: 100% !important;
+            max-width: 1100px !important;
+            margin: 0 auto 2.5em !important;
+            padding: clamp(18px, 3vw, 40px) !important;
+            border: 1px solid #593c46 !important;
+            border-radius: 16px !important;
+            background: linear-gradient(135deg, #111d2d 0%, #151d2b 68%, #291b22 100%) !important;
+            box-shadow: 0 16px 40px #0004 !important;
+        }
+
+        body.dark-mode #info-utile h2,
+        body.dark-mode #info-utile h3 { color: var(--medical-red) !important; }
+        body.dark-mode #info-utile h2 { margin: 0 0 1.4em !important; padding: 0 !important; }
+        body.dark-mode #info-utile h3 { margin: 1.5em 0 .8em !important; }
+        body.dark-mode #info-utile li[style*="background"] {
+            margin-bottom: 8px !important;
+            padding: 8px 12px !important;
+            border-left: 2px solid #a95561 !important;
+            border-radius: 6px !important;
+            background: linear-gradient(90deg, #1c2634, #251d27) !important;
+            color: #dce5f2 !important;
+        }
+        body.dark-mode #info-utile [style*="background:#f8f8f8"],
+        body.dark-mode #info-utile [style*="background:#f0f0ff"],
+        body.dark-mode #info-utile [style*="background:#DCE3F2"],
+        body.dark-mode #info-utile [style*="background:#C5D6E6"] {
+            border: 1px solid #46313b !important;
+            border-radius: 10px !important;
+            background: linear-gradient(135deg, #192434, #251d27) !important;
+            color: #e5eaf2 !important;
+        }
+        body.dark-mode #info-utile h4 { color: var(--medical-red) !important; }
+        body.dark-mode #info-utile thead tr,
+        body.dark-mode #info-utile thead th {
+            background: linear-gradient(100deg, #85424e, #a75460) !important;
+            color: #fff !important;
+        }
+        body.dark-mode #info-utile tbody tr { background: #182333 !important; }
+
+        body.dark-mode #coduri-radio > div {
+            max-width: 1100px !important;
+            margin: 0 auto 2.5em !important;
+            padding: clamp(18px, 3vw, 40px) !important;
+            border: 1px solid #593c46 !important;
+            border-radius: 16px !important;
+            background: linear-gradient(135deg, #111d2d 0%, #151d2b 68%, #291b22 100%) !important;
+            box-shadow: 0 16px 40px #0004 !important;
+        }
+        body.dark-mode #coduri-radio h2,
+        body.dark-mode #coduri-radio h3 { color: var(--medical-red) !important; }
+        body.dark-mode #coduri-radio table { border-radius: 10px !important; overflow: hidden; }
+        body.dark-mode #coduri-radio thead tr,
+        body.dark-mode #coduri-radio thead th {
+            background: linear-gradient(100deg, #85424e, #a75460) !important;
+            color: #fff !important;
+        }
+        body.dark-mode #coduri-radio tbody tr:nth-child(odd) { background: #192433 !important; }
+        body.dark-mode #coduri-radio tbody tr:nth-child(even) { background: #251d27 !important; }
+        body.dark-mode #coduri-radio tbody td { color: #e1e7f0 !important; }
+        body.dark-mode #rp-smuls tr[style*="background:#ffeaea"] {
+            background: linear-gradient(100deg, #75404a, #593640) !important;
+            color: #fff1f1 !important;
+        }
+        body.dark-mode #coduri-radio [style*="background:#e3f2fd"] {
+            border: 1px solid #9d5964 !important;
+            border-radius: 7px !important;
+            background: linear-gradient(120deg, #633842, #472d37) !important;
+            color: #fff1f1 !important;
+        }
+
+        body.dark-mode .global-search input,
+        body.dark-mode .app-topbar .global-search input {
+            background: transparent !important;
+            color: #f0e8eb !important;
+        }
+        body.dark-mode .header-title {
+            background: linear-gradient(120deg, #211c27, #30212a) !important;
+            color: var(--medical-red) !important;
+        }
+
+        body.dark-mode #rpUserCard,
+        body.dark-mode .rp-zone-toolbar {
+            border-color: #593c46 !important;
+            background: linear-gradient(135deg, #111d2d, #191d2b 72%, #291b22) !important;
+            color: #e5eaf2 !important;
+        }
+        body.dark-mode #rpUserCard #rpProfileRank,
+        body.dark-mode #rpUserCard #rpBadgeZone {
+            border: 1px solid #6a414b !important;
+            background: #392832 !important;
+            color: #f0cbd0 !important;
+        }
+        body.dark-mode .rp-zone-toolbar select {
+            border-color: #60404b !important;
+            background: #211d27 !important;
+            color: #f0e8eb !important;
+        }
+        body.dark-mode .rp-zone-toolbar select option { background: #211d27 !important; color: #f0e8eb !important; }
+        body.dark-mode .rp-zone-filters .rp-zone-filter {
+            border-color: #55404a !important;
+            background: linear-gradient(135deg, #201e28, #30212a) !important;
+            color: #eadde0 !important;
+        }
+        body.dark-mode .rp-zone-filters .rp-zone-filter.active {
+            border-color: #c2757f !important;
+            background: linear-gradient(135deg, #a95260, #773b49) !important;
+            color: #fff !important;
+        }
+        body.dark-mode #rpZonesGrid .rp-zone-card {
+            border-color: #503943 !important;
+            background: linear-gradient(135deg, #111d2d, #191e2b 72%, #291b22) !important;
+            color: #e5eaf2 !important;
+            box-shadow: 0 8px 22px #0004 !important;
+        }
+        body.dark-mode #rpZonesGrid .rp-zone-header { border-bottom-color: #4a3540 !important; }
+        body.dark-mode #rpZonesGrid .rp-member-row {
+            border-color: #4d3741 !important;
+            background: linear-gradient(110deg, #1a2432, #261d27) !important;
+            color: #e4e9f1 !important;
+        }
+        body.dark-mode #rpZonesGrid .rp-zone-card.rp-zone-busy {
+            border-color: #bc8454 !important;
+            background: linear-gradient(145deg, #493423, #1b2230 58%, #291b22) !important;
+        }
+        body.dark-mode #rpZonesGrid .rp-zone-card.rp-zone-crowded {
+            border-color: #b95763 !important;
+            background: linear-gradient(145deg, #4b2932, #1b2230 58%, #291b22) !important;
+        }
+        body.dark-mode #rpZonesGrid .rp-zone-count {
+            border-color: #70434d !important;
+            background: #392832 !important;
+            color: #f0cbd0 !important;
+        }
+
+        @media (max-width: 640px) {
+            body.dark-mode #info-utile > div,
+            body.dark-mode #coduri-radio > div { padding: 16px !important; border-radius: 12px !important; }
+            body.dark-mode #info-utile [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+        }
+        /* ======= NAV CENTRAT + CONTRAST MEDICAL ======= */
+        :root {
+            --medical-red: #ec5353;
+            --medical-red-strong: #ec5353;
+            --medical-red-dark: #742b35;
+            --medical-surface: #111d2d;
+            --medical-surface-warm: #241a22;
+            --medical-frame: #58cbd0;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(115deg, #080f1b 0%, #111a28 54%, #261519 100%) fixed !important;
+        }
+
+        body.dark-mode .sidebar {
+            position: relative !important;
+            inset: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            overflow: visible !important;
+            padding: 10px 18px 14px !important;
+            border: 0;
+            border-bottom: 1px solid #3a292e;
+            background: linear-gradient(100deg, #091322, #17151f 70%, #29181c) !important;
+            box-shadow: 0 8px 24px #0003 !important;
+        }
+
+        .sidebar-brand {
+            flex: 0 0 100%;
+            justify-content: center;
+            padding: 0 0 4px;
+            margin: 0 !important;
+        }
+
+        .sidebar-brand img {
+            width: 34px !important;
+            height: 34px;
+            flex-basis: 34px;
+            border-radius: 8px !important;
+        }
+
+        .sidebar-brand strong { color: #f3edf0; }
+        .sidebar-brand span { color: #bdabb1; }
+        .sidebar-label { flex: 0 0 100%; padding: 0 0 3px; text-align: center; color: #997c84; }
+
+        body.dark-mode .nav-btn {
+            flex: 0 0 auto;
+            width: auto !important;
+            min-height: 34px;
+            margin: 0;
+            padding: 7px 10px;
+            border-radius: 7px !important;
+            color: #c8d2df !important;
+        }
+
+        body.dark-mode .nav-btn.active,
+        body.dark-mode .nav-btn:hover {
+            border-color: #ec5353 !important;
+            background: linear-gradient(125deg, #7e303b, #ec5353) !important;
+            color: #fff !important;
+            box-shadow: 0 3px 14px #ec535344 !important;
+        }
+
+        body.dark-mode .content-wrapper { margin-left: 0 !important; min-height: 100vh; }
+        body.dark-mode .app-topbar {
+            position: sticky;
+            top: 0;
+            grid-template-columns: minmax(0, 1fr) minmax(260px, 380px);
+            min-height: 58px;
+            padding: 8px 22px;
+            background: rgba(8, 15, 27, .96);
+            border-bottom-color: #3a292e;
+        }
+        body.dark-mode #darkModeToggle { display: none !important; }
+        body.dark-mode .global-search:focus-within { border-color: #ec5353; box-shadow: 0 0 0 3px #ec535333; }
+
+        body.dark-mode button[onclick^="showSection"]:hover { background: #ec5353 !important; }
+        body.dark-mode .jaf-btn {
+            border-color: #5b343e !important;
+            background: linear-gradient(135deg, #201e28, #302027) !important;
+        }
+        body.dark-mode .jaf-btn:hover,
+        body.dark-mode .jaf-btn:focus,
+        body.dark-mode .jaf-btn.active {
+            border-color: #ff9292 !important;
+            background: linear-gradient(120deg, #a8313d, #ec5353) !important;
+            box-shadow: 0 5px 18px #ec535344 !important;
+        }
+
+        body.dark-mode [style*="color:#245ab1"],
+        body.dark-mode [style*="color: #245ab1"],
+        body.dark-mode [style*="color:#1565c0"],
+        body.dark-mode [style*="color: #1565c0"] { color: #ff6b6b !important; }
+
+        body.dark-mode .section.active > div,
+        body.dark-mode .section.active div[style*="background:#fff"],
+        body.dark-mode .section.active div[style*="background: #fff"],
+        body.dark-mode .section.active div[style*="background:rgba(255,255,255"],
+        body.dark-mode .section.active div[style*="background: rgba(255,255,255"],
+        body.dark-mode .section.active div[style*="border-radius:24px"],
+        body.dark-mode .section.active div[style*="border-radius: 24px"],
+        body.dark-mode .section.active div[style*="border-radius:32px"],
+        body.dark-mode .section.active div[style*="border-radius: 32px"] {
+            border-color: #386166 !important;
+            box-shadow: 0 0 0 1px #58cbd044, 0 0 18px #58cbd02e !important;
+        }
+
+        body.dark-mode #animatii-utile [style*="background"] {
+            border-color: #386166 !important;
+            border-radius: 10px !important;
+            background: linear-gradient(135deg, #111d2d, #1b202c 72%, #281a22) !important;
+            color: #eef2f7 !important;
+        }
+        body.dark-mode #animatii-utile [style*="background:#e8f4fd"],
+        body.dark-mode #animatii-utile [style*="background: #e8f4fd"] {
+            border: 1px solid #70404a !important;
+            border-radius: 8px !important;
+            background: linear-gradient(120deg, #34212a, #49232a) !important;
+            color: #fff1f1 !important;
+            box-shadow: 0 0 12px #ec535326 !important;
+        }
+        body.dark-mode #animatii-utile h2,
+        body.dark-mode #animatii-utile h3 { color: #ff6666 !important; }
+        body.dark-mode #animatii-utile [style*="color:#555"],
+        body.dark-mode #animatii-utile [style*="color: #555"],
+        body.dark-mode #animatii-utile [style*="color:#444"],
+        body.dark-mode #animatii-utile [style*="color: #444"] { color: #f1e9ec !important; }
+
+        body.dark-mode #coduri-radio table {
+            width: 100% !important;
+            table-layout: fixed !important;
+            white-space: normal !important;
+        }
+        body.dark-mode #coduri-radio th,
+        body.dark-mode #coduri-radio td {
+            padding: 10px 9px !important;
+            white-space: normal !important;
+            overflow-wrap: anywhere;
+            vertical-align: top;
+        }
+        body.dark-mode #coduri-radio .scroll-x { max-width: 100%; overflow-x: auto; }
+        body.dark-mode #coduri-radio .scroll-x td:first-child { width: 72px; white-space: nowrap !important; }
+        body.dark-mode #coduri-radio [style*="background:#e3f2fd"] {
+            display: inline-block;
+            max-width: 100%;
+            margin-top: 4px;
+            white-space: normal !important;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 900px) {
+            body.dark-mode .sidebar { padding-inline: 12px !important; }
+            body.dark-mode .app-topbar { grid-template-columns: minmax(0, 1fr) minmax(230px, 340px); padding-inline: 16px; }
+        }
+
+        @media (max-width: 640px) {
+            body.dark-mode .sidebar { padding: 8px 8px 12px !important; }
+            body.dark-mode .sidebar-label { display: none; }
+            body.dark-mode .nav-btn { min-height: 32px; padding: 6px 8px; font-size: 11px; }
+            body.dark-mode .app-topbar {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-rows: auto auto;
+                gap: 8px;
+                padding: 8px 12px;
+            }
+            body.dark-mode .breadcrumb { display: flex; grid-column: 1; grid-row: 1; min-width: 0; }
+            body.dark-mode .global-search { grid-column: 1; grid-row: 2; }
+            body.dark-mode .main-card { padding: 12px 12px 28px; }
+        }
+        /* Ajustări finale ale navigației și contrastului */
+        body.dark-mode .sidebar {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            display: flex !important;
+            flex-flow: row wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px 14px !important;
+            border: 0 !important;
+            border-bottom: 1px solid #3a292e !important;
+            background: linear-gradient(100deg, #091322, #17151f 70%, #29181c) !important;
+            box-shadow: none !important;
+        }
+        body.dark-mode .sidebar-brand { flex: 0 0 100%; justify-content: center; padding: 0 0 4px; margin: 0 !important; }
+        body.dark-mode .sidebar-label { flex: 0 0 100%; display: block; padding: 0 0 3px; text-align: center; color: #997c84; }
+        body.dark-mode .sidebar-links {
+            display: flex;
+            flex: 1 1 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            min-width: 0;
+        }
+        body.dark-mode .nav-btn { width: auto !important; flex: 0 0 auto; min-height: 34px; margin: 0; padding: 7px 10px; }
+        body.dark-mode .content-wrapper { margin: 0 !important; min-height: 100vh; }
+        body.dark-mode .app-topbar { grid-template-columns: minmax(0, 1fr) minmax(260px, 380px); }
+        body.dark-mode #darkModeToggle { display: none !important; }
+
+        body.dark-mode {
+            background: linear-gradient(118deg, #080f1b 0%, #111a28 54%, #261519 100%) fixed !important;
+        }
+        body.dark-mode .nav-btn.active,
+        body.dark-mode .nav-btn:hover {
+            border-color: #ec5353 !important;
+            background: linear-gradient(120deg, #a8313d, #ec5353) !important;
+            box-shadow: 0 3px 14px #ec535344 !important;
+        }
+        body.dark-mode .jaf-btn.active,
+        body.dark-mode .jaf-btn:hover,
+        body.dark-mode .jaf-btn:focus {
+            border-color: #ff9292 !important;
+            background: linear-gradient(120deg, #a8313d, #ec5353) !important;
+            box-shadow: 0 5px 18px #ec535344 !important;
+        }
+        body.dark-mode .rp-zone-filter.active {
+            border-color: #ff9292 !important;
+            background: linear-gradient(120deg, #a8313d, #ec5353) !important;
+        }
+        body.dark-mode #info-utile thead tr,
+        body.dark-mode #info-utile thead th,
+        body.dark-mode #coduri-radio thead tr,
+        body.dark-mode #coduri-radio thead th {
+            background: linear-gradient(110deg, #a8313d, #ec5353) !important;
+        }
+        body.dark-mode #info-utile > div,
+        body.dark-mode #coduri-radio > div {
+            border-color: #4c555b !important;
+            box-shadow: 0 0 0 1px #58cbd044, 0 0 22px #58cbd033 !important;
+        }
+        body.dark-mode .section.active > div,
+        body.dark-mode .section.active div[style*="background:#fff"],
+        body.dark-mode .section.active div[style*="background: #fff"],
+        body.dark-mode .section.active div[style*="background:rgba(255,255,255"],
+        body.dark-mode .section.active div[style*="background: rgba(255,255,255"],
+        body.dark-mode .section.active div[style*="border-radius:24px"],
+        body.dark-mode .section.active div[style*="border-radius: 24px"],
+        body.dark-mode .section.active div[style*="border-radius:32px"],
+        body.dark-mode .section.active div[style*="border-radius: 32px"] {
+            border-color: #4c555b !important;
+            box-shadow: 0 0 0 1px #58cbd044, 0 0 18px #58cbd02e !important;
+        }
+
+        body.dark-mode #animatii-utile [style*="background"] {
+            border-color: #4c555b !important;
+            background: linear-gradient(135deg, #111d2d, #1b202c 72%, #281a22) !important;
+            color: #f1f4f8 !important;
+        }
+        body.dark-mode #animatii-utile [style*="background:#e8f4fd"],
+        body.dark-mode #animatii-utile [style*="background: #e8f4fd"] {
+            border-color: #75424a !important;
+            background: linear-gradient(120deg, #34212a, #49232a) !important;
+            color: #fff1f1 !important;
+        }
+        body.dark-mode #animatii-utile h2,
+        body.dark-mode #animatii-utile h3 { color: #ec5353 !important; }
+
+        body.dark-mode #coduri-radio table { white-space: normal !important; table-layout: fixed !important; }
+        body.dark-mode #coduri-radio th,
+        body.dark-mode #coduri-radio td {
+            white-space: normal !important;
+            overflow-wrap: anywhere;
+            vertical-align: top;
+        }
+        body.dark-mode #coduri-radio .scroll-x { max-width: 100%; overflow-x: auto; }
+        body.dark-mode #coduri-radio .scroll-x td:first-child { width: 72px; white-space: nowrap !important; }
+        body.dark-mode #coduri-radio [style*="background:#e3f2fd"] {
+            display: inline-block;
+            max-width: 100%;
+            margin-top: 4px;
+            white-space: normal !important;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 900px) {
+            body.dark-mode .sidebar { padding-inline: 12px !important; }
+            body.dark-mode .app-topbar { grid-template-columns: minmax(0, 1fr) minmax(230px, 340px); padding-inline: 16px; }
+        }
+        @media (max-width: 640px) {
+            body.dark-mode .sidebar { padding: 8px 8px 12px !important; }
+            body.dark-mode .sidebar-label { display: none; }
+            body.dark-mode .sidebar-links { flex: 1 1 100%; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: none; }
+            body.dark-mode .sidebar-links::-webkit-scrollbar { display: none; }
+            body.dark-mode .nav-btn { min-height: 32px; padding: 6px 8px; font-size: 11px; }
+            body.dark-mode .app-topbar { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; gap: 8px; padding: 8px 12px; }
+            body.dark-mode .breadcrumb { display: flex; grid-column: 1; grid-row: 1; min-width: 0; }
+            body.dark-mode .global-search { grid-column: 1; grid-row: 2; }
+        }
     </style>
 </head>
 
-<body>
+<body class="dark-mode">
     <div id="rpToastStack" aria-live="polite" aria-atomic="true"></div>
     <!-- SIDEBAR -->
     <div class="sidebar">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <img src="sigla_spital_noua.png" style="width: 100%; max-width: 200px; border-radius: 16px;" alt="Logo">
+        <div class="sidebar-brand">
+            <img src="sigla_spital_noua.png" alt="Logo">
+            <div><strong>Departamentul Medical · FPlayT</strong><span>Ghidul departamentului</span></div>
         </div>
+        <div class="sidebar-label">Ghidul departamentului</div>
+        <nav class="sidebar-links" aria-label="Secțiuni ghid">
         <button class="nav-btn active" onclick="showSection('introducere')">
             <i class="fa-solid fa-house-medical"></i> Introducere
         </button>
@@ -1252,15 +2094,22 @@
         <button class="nav-btn" onclick="showSection('isuls')">
             <i class="fa-solid fa-fire-extinguisher"></i> I.S.U.L.S.
         </button>
+        </nav>
     </div>
     <!-- END SIDEBAR -->
 
-    <button onclick="toggleDarkMode()" id="darkModeToggle">
-        🌙
-    </button>
-
     <!-- CONTENT WRAPPER -->
     <div class="content-wrapper">
+        <header class="app-topbar">
+            <div class="breadcrumb"><span>Ghidul departamentului</span><i class="fa-solid fa-chevron-right"></i><strong id="activeSectionLabel">Introducere</strong><i id="activeSubsectionChevron" class="fa-solid fa-chevron-right" hidden></i><strong id="activeSubsectionLabel" hidden></strong></div>
+            <div class="global-search" role="search">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input id="globalSearchInput" type="search" placeholder="Caută în ghid..." autocomplete="off" aria-label="Caută în toate secțiunile">
+                <kbd>Ctrl K</kbd>
+                <div id="globalSearchResults" class="search-results" role="listbox" aria-label="Rezultate căutare" hidden></div>
+            </div>
+            <button onclick="toggleDarkMode()" id="darkModeToggle" type="button" aria-label="Schimbă tema" title="Schimbă tema"><i class="fa-solid fa-sun"></i></button>
+        </header>
         <div class="container-bg">
             <div class="header-bar">
                 <div class="header-center">
@@ -7345,12 +8194,16 @@
 
         <script>
             // Navigare între secțiuni
-            function showSection(id) {
+            // Hash-ul paginii (window.location.hash) reflectă secțiunea curentă, astfel
+            // încât orice buton (din sidebar, din ghid sau din altă pagină care trimite
+            // către ghid) să deschidă exact aceeași secțiune, chiar și după un refresh
+            // sau la încărcarea directă a link-ului.
+            function showSection(id, updateLocation = true) {
                 document.querySelectorAll('.section').forEach(section => {
                     section.classList.remove('active');
                 });
                 const targetSection = document.getElementById(id);
-                if (!targetSection) return;
+                if (!targetSection || !targetSection.classList.contains('section')) return;
                 targetSection.classList.add('active');
                 localStorage.setItem('activeSection', id);
 
@@ -7359,35 +8212,181 @@
                 });
                 const navBtn = document.querySelector('.nav-btn[onclick*="' + id + '"]');
                 if (navBtn) navBtn.classList.add('active');
+                const label = document.getElementById('activeSectionLabel');
+                if (label) label.textContent = navBtn ? navBtn.textContent.trim() : targetSection.querySelector('h1, h2, h3')?.textContent.trim() || id;
+                const subsection = document.getElementById('activeSubsectionLabel');
+                const subsectionChevron = document.getElementById('activeSubsectionChevron');
+                if (id === 'ghid-jaf') {
+                    setJafTab('jaf-general', false);
+                } else {
+                    if (subsection) subsection.hidden = true;
+                    if (subsectionChevron) subsectionChevron.hidden = true;
+                }
+
+                // Actualizăm hashul fără a reîncărca pagină. Legat: dacă ghidul
+                // trimite către #rp-smuls / #coduri-radio etc., același browser
+                // rămâne pe aceeași pagină (index.html) și deschide secțiunea.
+                if (updateLocation && window.location.hash !== '#' + id) {
+                    try { window.history.pushState({ section: id }, '', '#' + id); } catch (e) { }
+                }
+            }
+
+            function rpShowSection(id) { return showSection(id); }
+
+            function setJafTab(tabId, updateLocation = true) {
+                const button = document.querySelector(`#ghid-jaf .jaf-btn[data-jaf="${tabId}"]`);
+                const content = document.querySelector(`#ghid-jaf .jaf-content.${tabId}`);
+                if (!button || !content) return false;
+                document.querySelectorAll('#ghid-jaf .jaf-btn').forEach(tab => tab.classList.toggle('active', tab === button));
+                document.querySelectorAll('#ghid-jaf .jaf-content').forEach(panel => {
+                    panel.style.display = panel === content ? 'block' : 'none';
+                });
+                const subsection = document.getElementById('activeSubsectionLabel');
+                const chevron = document.getElementById('activeSubsectionChevron');
+                if (subsection) {
+                    subsection.textContent = button.textContent.trim();
+                    subsection.hidden = false;
+                }
+                if (chevron) chevron.hidden = false;
+                if (updateLocation) {
+                    const hash = `#ghid-jaf/${tabId}`;
+                    if (window.location.hash !== hash) {
+                        try { window.history.pushState({ section: 'ghid-jaf', tab: tabId }, '', hash); } catch (e) { }
+                    }
+                }
+                return true;
+            }
+
+            function openJafTab(tabId) {
+                showSection('ghid-jaf', false);
+                return setJafTab(tabId, true);
+            }
+
+            function sectionFromHash() {
+                const id = decodeURIComponent(window.location.hash.slice(1));
+                if (!id || id.includes('access_token')) return;
+                const path = id.split('/');
+                const tabId = path[0] === 'ghid-jaf' ? path[1] : path[0].startsWith('jaf-') ? path[0] : '';
+                if (tabId) {
+                    openJafTab(tabId);
+                    return;
+                }
+                const section = document.getElementById(id);
+                if (section && section.classList.contains('section')) showSection(id, false);
+            }
+
+            window.addEventListener('hashchange', sectionFromHash);
+            window.addEventListener('popstate', sectionFromHash);
+
+            function initGlobalSearch() {
+                const input = document.getElementById('globalSearchInput');
+                const results = document.getElementById('globalSearchResults');
+                if (!input || !results) return;
+                const labels = new Map();
+                document.querySelectorAll('.nav-btn[onclick]').forEach(button => {
+                    const match = button.getAttribute('onclick').match(/showSection\('([^']+)'\)/);
+                    if (match) labels.set(match[1], button.textContent.trim());
+                });
+                const normalize = value => value.toLocaleLowerCase('ro').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                const closeResults = () => { results.hidden = true; results.replaceChildren(); };
+                const search = () => {
+                    const query = normalize(input.value.trim());
+                    results.replaceChildren();
+                    if (query.length < 2) { results.hidden = true; return; }
+                    const sectionMatches = Array.from(document.querySelectorAll('.section')).filter(section => section.id !== 'ghid-jaf').map(section => {
+                        const label = labels.get(section.id) || section.querySelector('h1, h2, h3')?.textContent.trim() || section.id;
+                        const text = section.textContent.replace(/\s+/g, ' ').trim();
+                        const normalizedText = normalize(text);
+                        const index = normalize(`${label} ${text}`).indexOf(query);
+                        return { section, label, text, normalizedText, index };
+                    });
+                    const jafMatches = Array.from(document.querySelectorAll('#ghid-jaf .jaf-btn')).map(button => {
+                        const section = document.getElementById('ghid-jaf');
+                        const text = document.querySelector(`#ghid-jaf .jaf-content.${button.dataset.jaf}`)?.textContent.replace(/\s+/g, ' ').trim() || '';
+                        const label = `Ghid Jaf > ${button.textContent.trim()}`;
+                        const normalizedText = normalize(text);
+                        const index = normalize(`${label} ${text}`).indexOf(query);
+                        return { section, jafId: button.dataset.jaf, label, text, normalizedText, index };
+                    });
+                    const matches = [...sectionMatches, ...jafMatches].filter(item => item.index !== -1).slice(0, 10);
+                    if (!matches.length) {
+                        const empty = document.createElement('div');
+                        empty.className = 'search-empty';
+                        empty.textContent = 'Niciun rezultat găsit.';
+                        results.append(empty);
+                    } else {
+                        matches.forEach(item => {
+                            const button = document.createElement('button');
+                            button.type = 'button';
+                            button.className = 'search-result';
+                            button.setAttribute('role', 'option');
+                            const title = document.createElement('strong');
+                            title.textContent = item.label;
+                            const excerpt = document.createElement('span');
+                            const textIndex = item.normalizedText.indexOf(query);
+                            const start = textIndex < 0 ? 0 : Math.max(0, textIndex - 40);
+                            excerpt.textContent = `${start ? '…' : ''}${item.text.slice(start, start + 130)}${start + 130 < item.text.length ? '…' : ''}`;
+                            button.append(title, excerpt);
+                            button.addEventListener('click', () => {
+                                if (item.jafId) openJafTab(item.jafId);
+                                else showSection(item.section.id);
+                                input.value = '';
+                                closeResults();
+                            });
+                            results.append(button);
+                        });
+                    }
+                    results.hidden = false;
+                };
+                input.addEventListener('input', search);
+                input.addEventListener('keydown', event => {
+                    if (event.key === 'Escape') closeResults();
+                    if (event.key === 'Enter') results.querySelector('.search-result')?.click();
+                    if (event.key === 'ArrowDown') results.querySelector('.search-result')?.focus();
+                });
+                document.addEventListener('click', event => {
+                    if (!event.target.closest('.global-search')) closeResults();
+                });
+                document.addEventListener('keydown', event => {
+                    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                        event.preventDefault();
+                        input.focus();
+                        input.select();
+                    }
+                });
             }
 
             // Tabs pentru Ghid Jaf
             document.addEventListener('DOMContentLoaded', function () {
                 // Tabs jaf
                 const jafBtns = document.querySelectorAll('.jaf-btn');
-                const jafContents = document.querySelectorAll('.jaf-content');
                 jafBtns.forEach(btn => {
                     btn.addEventListener('click', () => {
-                        jafBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        jafContents.forEach(content => {
-                            content.style.display = content.classList.contains(btn.dataset.jaf) ? 'block' : 'none';
+                        if (btn.closest('#ghid-jaf')) {
+                            openJafTab(btn.dataset.jaf);
+                            return;
+                        }
+                        const scope = btn.closest('.section') || document;
+                        scope.querySelectorAll('.jaf-btn').forEach(tab => tab.classList.toggle('active', tab === btn));
+                        scope.querySelectorAll('.jaf-content').forEach(panel => {
+                            panel.style.display = panel.classList.contains(btn.dataset.jaf) ? 'block' : 'none';
                         });
                     });
                 });
+                document.querySelectorAll('.section').forEach(scope => {
+                    const activeTab = scope.querySelector('.jaf-btn.active');
+                    if (!activeTab) return;
+                    scope.querySelectorAll('.jaf-content').forEach(panel => {
+                        panel.style.display = panel.classList.contains(activeTab.dataset.jaf) ? 'block' : 'none';
+                    });
+                });
 
-                // Dark mode la încărcare (light implicit)
-                const darkSaved = localStorage.getItem('darkMode');
+                // Tema întunecată rămâne activă temporar; stilurile luminoase sunt păstrate pentru restaurare.
                 const logo = document.getElementById('logo-img');
-                if (darkSaved === 'enabled') {
-                    document.body.classList.add('dark-mode');
-                    if (logo) logo.src = '28107a50-57aa-4dee-828b-f5c4cbbdfe0d.png';
-                    if (document.getElementById('darkModeToggle')) document.getElementById('darkModeToggle').innerHTML = '☀️';
-                } else {
-                    document.body.classList.remove('dark-mode');
-                    if (logo) logo.src = 'logo_spital_nou_full_rosu.png';
-                    if (document.getElementById('darkModeToggle')) document.getElementById('darkModeToggle').innerHTML = '🌙';
-                }
+                document.body.classList.add('dark-mode');
+                if (logo) logo.src = '28107a50-57aa-4dee-828b-f5c4cbbdfe0d.png';
+                initGlobalSearch();
+                sectionFromHash();
 
                 // Hover logo mijloc
                 if (logo) {
@@ -7409,14 +8408,38 @@
                 localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
                 if (logo) logo.src = isDark ? '28107a50-57aa-4dee-828b-f5c4cbbdfe0d.png' : 'logo_spital_nou_full_rosu.png';
                 if (document.getElementById('darkModeToggle')) {
-                    document.getElementById('darkModeToggle').innerHTML = isDark ? '☀️' : '🌙';
+                    document.getElementById('darkModeToggle').innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
                 }
             }
         </script>
         <script>
-            document.getElementById('rp-smuls').addEventListener('contextmenu', function (e) {
-                e.preventDefault();
-            });
+            const protectedStudySelector = '#rp-smuls, #rp-teren, #rp-cert-moto, #cert-pilot, #cert-parasutism, #rezidentiat';
+            const isProtectedStudyNode = node => {
+                const element = node && node.nodeType === Node.ELEMENT_NODE ? node : node && node.parentElement;
+                return Boolean(element && element.closest(protectedStudySelector));
+            };
+            const selectionIncludesStudyText = () => {
+                const selection = window.getSelection();
+                return Boolean(selection && (isProtectedStudyNode(selection.anchorNode) || isProtectedStudyNode(selection.focusNode)));
+            };
+
+            document.addEventListener('selectstart', event => {
+                if (isProtectedStudyNode(event.target)) event.preventDefault();
+            }, true);
+            document.addEventListener('copy', event => {
+                if (selectionIncludesStudyText()) event.preventDefault();
+            }, true);
+            document.addEventListener('cut', event => {
+                if (selectionIncludesStudyText()) event.preventDefault();
+            }, true);
+            document.addEventListener('contextmenu', event => {
+                if (isProtectedStudyNode(event.target)) event.preventDefault();
+            }, true);
+            document.addEventListener('keydown', event => {
+                if ((event.ctrlKey || event.metaKey) && ['c', 'x'].includes(event.key.toLowerCase()) && selectionIncludesStudyText()) {
+                    event.preventDefault();
+                }
+            }, true);
         </script>
 
 
@@ -7451,6 +8474,7 @@
             // o stare mai nouă cu una locală învechită.
             let rpServerRev = 0;
             let rpRealtimeSyncFailed = false;
+            let rpRealtimeSyncFailures = 0;
             let rpUser = null;
             let rpState = { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], 'Spital': [] };
 
@@ -7608,6 +8632,8 @@
             // Trimite o operațiune atomică (remove/add/clear) către worker.
             // Serverul modifică DOAR membrul vizat peste starea lui curentă,
             // deci un client cu date vechi nu mai poate readuce pe nimeni pe zonă.
+            // Dacă serverul refuză (membrul nu e găsit, zonă invalidă), restabim
+            // starea locală din server, ca utilizatorul să nu „dispară” fără motiv.
             async function rpApplyOperation(op) {
                 if (!RP_CONFIG.WORKER_URL || !op) return null;
                 rpStateRevision++;
@@ -7619,12 +8645,25 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ type: 'op', op })
                     });
-                    if (!res.ok) throw new Error(`Server status ${res.status}`);
                     const result = await res.json().catch(() => ({}));
+                    if (res.ok && result && result.state) {
+                        rpApplyServerState(result.state);
+                        return result;
+                    }
+                    if (!res.ok || result.ok === false) {
+                        // Eșec: serverul nu a modificat nimic. Reîncărcăm starea
+                        // curentă de pe server ca să corectăm orice divergență locală.
+                        await rpLoadRemoteState();
+                        rpRenderGrid();
+                        rpNotify(result.error || 'Operațiunea a eșuat. Starea a fost reîncărcată.', 'error');
+                        return result;
+                    }
                     if (result && result.state) rpApplyServerState(result.state);
                     return result;
                 } catch (e) {
                     console.error('Eroare la operațiunea atomică:', e);
+                    await rpLoadRemoteState();
+                    rpRenderGrid();
                     return null;
                 } finally {
                     setTimeout(() => { rpIsSaving = false; }, 1500);
@@ -8431,17 +9470,19 @@
 
                     if (!res.ok) {
                         console.warn(`Sincronizarea în timp real a eșuat cu statusul ${res.status}.`);
-                        if (!rpRealtimeSyncFailed) {
+                        rpRealtimeSyncFailures++;
+                        if (rpRealtimeSyncFailures >= 3 && !rpRealtimeSyncFailed) {
                             rpRealtimeSyncFailed = true;
-                            rpNotify('Sincronizarea a eșuat. Verifică conexiunea și încearcă din nou.', 'error');
+                            rpNotify('Actualizarea repartizării este temporar indisponibilă. Datele locale rămân afișate.', 'error');
                         }
                         return;
                     }
 
                     const serverState = await res.json();
+                    rpRealtimeSyncFailures = 0;
                     if (rpRealtimeSyncFailed) {
                         rpRealtimeSyncFailed = false;
-                        rpNotify('Sincronizarea a fost restabilită.', 'success');
+                        rpNotify('Actualizarea repartizării funcționează din nou.', 'success');
                     }
 
                     // Ignora un raspuns cerut inainte de resetare sau alta salvare.
@@ -8464,9 +9505,10 @@
                     }
                 } catch (e) {
                     console.warn('Eroare la sincronizarea în timp real:', e);
-                    if (!rpRealtimeSyncFailed) {
+                    rpRealtimeSyncFailures++;
+                    if (rpRealtimeSyncFailures >= 3 && !rpRealtimeSyncFailed) {
                         rpRealtimeSyncFailed = true;
-                        rpNotify('Sincronizarea a eșuat. Verifică conexiunea și încearcă din nou.', 'error');
+                        rpNotify('Actualizarea repartizării este temporar indisponibilă. Datele locale rămân afișate.', 'error');
                     }
                 } finally {
                     rpRealtimeSyncInFlight = false;
@@ -8523,9 +9565,26 @@
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const savedSection = localStorage.getItem('activeSection') || 'introducere';
-                const sectionToRestore = urlParams.get('section') || savedSection;
+                // Hash-ul are prioritate asupra localStorage: un link trimis către
+                // #rp-smuls deschide chiar acea secțiune, chiar dacă utilizatorul
+                // avase altă secțiune salvată.
+                let sectionToRestore = urlParams.get('section') || savedSection;
+                const hash = window.location.hash.replace(/^#/, '');
+                const hashParts = hash.split('/');
+                if (hash) {
+                    const hashSection = document.getElementById(hashParts[0]);
+                    if (hashSection) sectionToRestore = hashParts[0];
+                }
                 if (typeof showSection === 'function') {
-                    showSection(sectionToRestore);
+                    if (hashParts[0] === 'ghid-jaf' && hashParts[1]) {
+                        showSection('ghid-jaf', false);
+                        setJafTab(hashParts[1], false);
+                    } else if (hashParts[0].startsWith('jaf-')) {
+                        showSection('ghid-jaf', false);
+                        setJafTab(hashParts[0], false);
+                    } else {
+                        showSection(sectionToRestore);
+                    }
                 }
 
             });
