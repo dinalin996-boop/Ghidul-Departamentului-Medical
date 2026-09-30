@@ -1,101 +1,144 @@
-export default {  async fetch(request, env, ctx) {
-    const allowedOrigins = [
-      'https://ghidul-departamentului-medical-eight.vercel.app',
-      'http://localhost:3000',
-      'http://localhost:5500',
-      'http://127.0.0.1:5500'
-    ];
-    const requestOrigin = request.headers.get('Origin');
-    const configuredOrigin = env.ALLOWED_ORIGIN;
-    const allowedOrigin = allowedOrigins.includes(requestOrigin)
-      ? requestOrigin
-      : configuredOrigin && allowedOrigins.includes(configuredOrigin)
-        ? configuredOrigin
-        : allowedOrigins[0];
+const SUPPORTED_ZONES = ['Zona 1', 'Zona 2', 'Zona 3', 'Zona 4', 'Spital'];
+const STATE_KEY = 'state_v3';
+const LIVE_MESSAGE_KEY = 'discord_live_msg_id';
+const DEFAULT_ORIGINS = [
+  'https://ghidul-departamentului-medical-eight.vercel.app',
+  'https://ghid-smurd.vercel.app',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500'
+];
+
+export default {
+  async fetch(request, env) {
+    const origin = request.headers.get('Origin');
+    const allowedOrigins = [...DEFAULT_ORIGINS, env.ALLOWED_ORIGIN].filter(Boolean);
+    const originAllowed = !origin || allowedOrigins.includes(origin);
     const headers = {
-      'Access-Control-Allow-Origin': allowedOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Content-Type': 'application/json',
+      'Access-Control-Allow-Headers': 'Content-Type',
       'Cache-Control': 'no-store',
+      'Content-Type': 'application/json',
       'Vary': 'Origin'
     };
-    const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), { status, headers });
+    if (origin && originAllowed) headers['Access-Control-Allow-Origin'] = origin;
+    const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers });
 
-    if (request.method === 'OPTIONS') return new Response(null, { headers });
+    if (!originAllowed) return json({ error: 'Origin not allowed' }, 403);
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
 
     try {
-      if (request.method === 'GET') {
-        const state = await readState(env);
-        return jsonResponse(state);
-      }
+      if (request.method === 'GET') return json(await readState(env));
+      if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
-      if (request.method !== 'POST') return jsonResponse({ error: 'Metodă netratată' }, 405);
       let data;
-      try { data = await request.json(); } catch (e) { return jsonResponse({ error: 'Invalid JSON body' }, 400); }
+      try { data = await request.json(); } catch { return json({ error: 'Invalid JSON body' }, 400); }
+      const repartitionWebhook = env.WEBHOOK_REPARTIZARE || '';
+      const logsWebhook = env.WEBHOOK_LOGURI || '';
 
-      const { type, action, state, logData } = data;
-      const WEBHOOK_REPARTIZARE = env.WEBHOOK_REPARTIZARE || '';
-      const WEBHOOK_LOGURI = env.WEBHOOK_LOGURI || '';
-
-      // OPERAȚIE ATOMICĂ: modifică DOAR membrul vizat peste starea curentă din KV.
-      // Astfel un client cu o stare locală veche nu mai poate „readuce” pe zonă
-      // un medic care a fost scos de altcineva.
-      if (type === 'op' && data.op) {
+      if (data.type === 'op' && data.op) {
         const result = await applyOperation(env, data.op);
-        if (!result.ok) return jsonResponse({ error: result.error }, result.status || 400);
-        if (WEBHOOK_REPARTIZARE) ctx.waitUntil(updateRepartizareEmbed(WEBHOOK_REPARTIZARE, result.state, env));
-        const opAction = data.op.log;
-        // Trimite logul ÎNTÂI, ca ieșirea din zonă și notificarea pe Discord să fie mereu sincronizate.
-        // Dacă WEBHOOK_LOGURI lipsește, logul nu se pierde — rămâne în coada clientului.
-        if (opAction) ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, opAction));
-        return jsonResponse({ success: true, state: result.state, message: 'Operațiune aplicată.' });
+        if (!result.ok) return json({ error: result.error }, result.status || 400);
+        await updateLiveEmbed(env, repartitionWebhook, result.state);
+        if (data.op.log) await sendSeparateLog(env, logsWebhook, data.op.log);
+        return json({ success: true, state: result.state, message: 'Operațiune aplicată.' });
       }
 
-      if (type === 'assign' && state !== undefined) {
-        if (!isValidState(state)) {
-          return jsonResponse({ error: 'Invalid state shape' }, 400);
-        }
-        // Protecție anti-suprascriere: dacă serverul are deja o stare MAI NOUĂ decât
-        // cea pe care se bazează clientul, refuzăm scrierea integrală învechită.
+      if (data.type === 'assign' && data.state !== undefined) {
+        if (!isValidState(data.state)) return json({ error: 'Invalid state shape' }, 400);
         const current = await readState(env);
         const baseRev = Number(data.baseRev) || 0;
         if (baseRev && baseRev < current.rev) {
-          return jsonResponse({ success: false, stale: true, state: current, message: 'Starea serverului este mai nouă.' });
+          return json({ success: false, stale: true, state: current, message: 'Starea Upstash este mai nouă.' });
         }
-        const payload = stripMeta(state);
-        payload.rev = current.rev + 1;
-        payload.updatedAt = Date.now();
-        if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(payload));
-        if (WEBHOOK_REPARTIZARE) ctx.waitUntil(updateRepartizareEmbed(WEBHOOK_REPARTIZARE, payload, env));
-        return jsonResponse({ success: true, rev: payload.rev, message: 'Starea a fost sincronizată.' });
+        const next = stripMeta(data.state);
+        next.rev = current.rev + 1;
+        next.updatedAt = Date.now();
+        await writeState(env, next);
+        await updateLiveEmbed(env, repartitionWebhook, next);
+        return json({ success: true, rev: next.rev, message: 'Starea a fost sincronizată.' });
       }
 
-      const activeAction = action || logData;
-      if (WEBHOOK_LOGURI && type === 'log_batch' && Array.isArray(data.logs)) {
-        data.logs.forEach(log => ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, log)));
-      } else if (WEBHOOK_LOGURI && activeAction) {
-        ctx.waitUntil(sendSeparateLog(WEBHOOK_LOGURI, activeAction));
+      if (data.type === 'log_batch' && Array.isArray(data.logs)) {
+        await Promise.all(data.logs.map(log => sendSeparateLog(env, logsWebhook, log)));
+      } else {
+        const action = data.action || data.logData;
+        if (action) await sendSeparateLog(env, logsWebhook, action);
       }
 
-      if (state !== undefined) {
-        if (!isValidState(state)) {
-          return jsonResponse({ error: 'Invalid state shape' }, 400);
-        }
-        const payload = stripMeta(state);
+      if (data.state !== undefined) {
+        if (!isValidState(data.state)) return json({ error: 'Invalid state shape' }, 400);
         const current = await readState(env);
-        payload.rev = current.rev + 1;
-        payload.updatedAt = Date.now();
-        if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(payload));
+        const next = stripMeta(data.state);
+        next.rev = current.rev + 1;
+        next.updatedAt = Date.now();
+        await writeState(env, next);
       }
-      return jsonResponse({ success: true, message: 'Procesat cu succes.' });
+      return json({ success: true, message: 'Processed successfully.' });
     } catch (error) {
-      return jsonResponse({ error: 'Eroare Worker: ' + error.message }, 500);
+      console.error('Repartizare API error:', error);
+      const status = Number(error.status) || 500;
+      return json({ error: status === 503 ? error.message : 'Serviciul repartizării este momentan indisponibil.' }, status);
     }
   }
 };
 
-const SUPPORTED_ZONES = ['Zona 1', 'Zona 2', 'Zona 3', 'Zona 4', 'Spital'];
+function redisConfig(env) {
+  const url = (env.UPSTASH_REDIS_REST_URL || '').trim().replace(/\/+$/, '');
+  const token = (env.UPSTASH_REDIS_REST_TOKEN || '').trim();
+  if (!url || !token) {
+    const error = new Error('Configurează UPSTASH_REDIS_REST_URL și UPSTASH_REDIS_REST_TOKEN.');
+    error.status = 503;
+    throw error;
+  }
+  return { url, token };
+}
+
+async function redisCommand(env, command) {
+  const { url, token } = redisConfig(env);
+  const response = await fetch(`${url}/pipeline`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify([command])
+  });
+  if (!response.ok) throw new Error(`Upstash a răspuns cu statusul ${response.status}.`);
+  const results = await response.json();
+  const result = Array.isArray(results) ? results[0] : null;
+  if (!result || result.error) throw new Error(result?.error || 'Răspuns Upstash invalid.');
+  return result.result ?? null;
+}
+
+async function readState(env) {
+  const stored = await redisCommand(env, ['GET', STATE_KEY]);
+  if (stored !== null && stored !== undefined) return normalizeState(stored);
+
+  if (env.LEGACY_STATE_URL) {
+    const response = await fetch(env.LEGACY_STATE_URL, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Importul Worker-ului vechi a eșuat (${response.status}).`);
+    const legacy = await response.json();
+    if (!isValidState(legacy)) throw new Error('Worker-ul vechi a returnat o stare invalidă.');
+    const imported = stripMeta(legacy);
+    imported.rev = Number(legacy.rev) || 0;
+    imported.updatedAt = Number(legacy.updatedAt) || Date.now();
+    await writeState(env, imported);
+    return imported;
+  }
+  return emptyState();
+}
+
+function normalizeState(value) {
+  let parsed;
+  try { parsed = typeof value === 'string' ? JSON.parse(value) : value; }
+  catch { throw new Error('Starea Upstash nu este JSON valid.'); }
+  if (!isValidState(parsed)) throw new Error('Starea Upstash are o structură invalidă.');
+  const normalized = stripMeta(parsed);
+  normalized.rev = Number(parsed.rev) || 0;
+  normalized.updatedAt = Number(parsed.updatedAt) || 0;
+  return normalized;
+}
+
+async function writeState(env, state) {
+  await redisCommand(env, ['SET', STATE_KEY, JSON.stringify(state)]);
+}
 
 function emptyState() {
   return { 'Zona 1': [], 'Zona 2': [], 'Zona 3': [], 'Zona 4': [], Spital: [], rev: 0, updatedAt: 0 };
@@ -107,50 +150,24 @@ function isValidState(state) {
     && SUPPORTED_ZONES.every(zone => Array.isArray(state[zone]));
 }
 
-// Elimină metadatele (rev/updatedAt) când trimitem starea către client/embed.
 function stripMeta(state) {
-  const out = {};
-  SUPPORTED_ZONES.forEach(z => { out[z] = Array.isArray(state[z]) ? state[z] : []; });
-  return out;
+  const result = {};
+  SUPPORTED_ZONES.forEach(zone => { result[zone] = Array.isArray(state[zone]) ? state[zone] : []; });
+  return result;
 }
 
-// Citește starea completă din KV, normalizată, cu metadate de versiune.
-async function readState(env) {
-  const fallback = emptyState();
-  if (!env.RP_KV) return fallback;
-  const stored = await env.RP_KV.get('state_v3');
-  if (!stored) return fallback;
-  let parsed;
-  try {
-    parsed = JSON.parse(stored);
-  } catch (parseError) {
-    console.error('Corrupted stored state:', parseError);
-    return fallback;
-  }
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return fallback;
-  const normalised = stripMeta(parsed);
-  normalised.rev = Number(parsed.rev) || 0;
-  normalised.updatedAt = Number(parsed.updatedAt) || 0;
-  return normalised;
-}
-
-// Compară membrii după discordId (preferat) sau callsign, ca ieșirea să fie
-// consistentă indiferent cum e identificat medicul.
 function memberKey(member = {}) {
   const discordId = (member.discordId || '').toString().trim();
-  if (discordId) return 'd:' + discordId;
+  if (discordId) return `d:${discordId}`;
   const callSign = (member.callSign || member.badge || '').toString().trim().toUpperCase();
-  return 'c:' + callSign;
+  return `c:${callSign}`;
 }
 
-// Aplică o operațiune atomică peste starea din KV.
-// op = { kind: 'remove'|'add', target: { discordId, callSign }, member, zone }
 async function applyOperation(env, op = {}) {
   const current = await readState(env);
   const next = stripMeta(current);
-  const kind = op.kind;
 
-  if (kind === 'remove') {
+  if (op.kind === 'remove') {
     const target = op.target || {};
     const targetKey = memberKey(target);
     const targetCallsign = (target.callSign || '').toString().trim().toUpperCase();
@@ -162,106 +179,120 @@ async function applyOperation(env, op = {}) {
           && member.name.trim().toLowerCase() === target.name.trim().toLowerCase())
           || (targetKey && memberKey(member) === targetKey)
           || (targetCallsign && (member.callSign || '').toString().trim().toUpperCase() === targetCallsign);
-        if (matches) {
-          removedZone = zone;
-          removedMember = member;
-          return false;
-        }
-        return true;
+        if (!matches) return true;
+        removedZone = zone;
+        removedMember = member;
+        return false;
       });
     });
-    // Dacă nu am găsit niciun membru, refuzăm operația: altfel clientul ar șterge local
-    // și ar crede că a reușit, iar poll-ul i-ar readuce din starea serverului.
-    if (!removedMember) {
-      return { ok: false, error: 'Membrul nu a fost găsit în repartizare', status: 404 };
-    }
+    if (!removedMember) return { ok: false, error: 'Membrul nu a fost găsit în repartizare', status: 404 };
     next.rev = current.rev + 1;
     next.updatedAt = Date.now();
-    if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(next));
+    await writeState(env, next);
     return { ok: true, state: next, removed: removedMember, removedZone };
   }
 
-  if (kind === 'add') {
-    const member = op.member;
-    const zone = op.zone;
-    if (!member || !SUPPORTED_ZONES.includes(zone)) {
-      return { ok: false, error: 'Zonă sau membru invalid', status: 400 };
-    }
-    // Elimină membrul de oriunde altundeva (evită duplicate), apoi îl adaugă.
-    const key = memberKey(member);
-    SUPPORTED_ZONES.forEach(z => {
-      next[z] = next[z].filter(m => memberKey(m) !== key);
-    });
-    next[zone].push(member);
+  if (op.kind === 'add') {
+    if (!op.member || !SUPPORTED_ZONES.includes(op.zone)) return { ok: false, error: 'Zonă sau membru invalid', status: 400 };
+    const key = memberKey(op.member);
+    SUPPORTED_ZONES.forEach(zone => { next[zone] = next[zone].filter(member => memberKey(member) !== key); });
+    next[op.zone].push(op.member);
     next.rev = current.rev + 1;
     next.updatedAt = Date.now();
-    if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(next));
+    await writeState(env, next);
     return { ok: true, state: next };
   }
 
-  if (kind === 'clear') {
+  if (op.kind === 'clear') {
     const cleared = emptyState();
     cleared.rev = current.rev + 1;
     cleared.updatedAt = Date.now();
-    if (env.RP_KV) await env.RP_KV.put('state_v3', JSON.stringify(cleared));
+    await writeState(env, cleared);
     return { ok: true, state: cleared };
   }
-
   return { ok: false, error: 'Operațiune necunoscută', status: 400 };
 }
 
-async function sendSeparateLog(webhookUrl, act = {}) {
-  const actionType = act.action || act.type;
-  const config = {
+async function sendSeparateLog(env, webhookUrl, action = {}) {
+  if (!webhookUrl) return;
+  const type = action.action || action.type;
+  const configs = {
     join: ['🟢 Intrare pe tură', 0x10B981, 'Un medic s-a arondat pe o zonă/spital.'],
     move: ['🔁 Schimbare Zonă', 0x7C3AED, 'Un medic și-a schimbat zona.'],
-    admin_add: ['🔵 Adăugare în Repartizare', 0x2563EB, `Un medic a fost adăugat de către **${act.by || 'un superior'}**`],
+    admin_add: ['🔵 Adăugare în Repartizare', 0x2563EB, `Un medic a fost adăugat de către **${action.by || 'un superior'}**`],
     leave: ['🔴 Ieșire de pe tură', 0xEF4444, 'Un medic a părăsit zona.'],
-    kick: ['⚠️ Kick de pe tură', 0xF59E0B, `Un medic a fost scos de către **${act.by || 'un superior'}**`],
-    removed: ['⚠️ Kick de pe tură', 0xF59E0B, `Un medic a fost scos de către **${act.by || 'un superior'}**`],
-    clear_all: ['🔄 Resetare Tură', 0xEF4444, `Toti medicii au fost scosi de către **${act.by || 'Admin'}**`],
-    reset: ['🔄 Resetare Tură', 0xEF4444, `Toti medicii au fost scosi de către **${act.by || 'Admin'}**`]
+    kick: ['⚠️ Kick de pe tură', 0xF59E0B, `Un medic a fost scos de către **${action.by || 'un superior'}**`],
+    removed: ['⚠️ Kick de pe tură', 0xF59E0B, `Un medic a fost scos de către **${action.by || 'un superior'}**`],
+    clear_all: ['🔄 Resetare Tură', 0xEF4444, `Toti medicii au fost scosi de către **${action.by || 'Admin'}**`],
+    reset: ['🔄 Resetare Tură', 0xEF4444, `Toti medicii au fost scosi de către **${action.by || 'Admin'}**`]
   };
-  const [title, color, description] = config[actionType] || ['📋 Acțiune Repartizare', 0x245AB1, 'A fost înregistrată o acțiune în repartizare.'];
+  const [title, color, description] = configs[type] || ['📋 Acțiune Repartizare', 0x245AB1, 'A fost înregistrată o acțiune de repartizare.'];
   const fields = [];
-  if (actionType !== 'clear_all' && actionType !== 'reset') {
-    fields.push({ name: '🥼 Medic', value: `**${act.callSign || act.badge || 'M-???'}** (${act.name || 'Necunoscut'})`, inline: false });
-    if (act.discordId) fields.push({ name: '🤖Discord', value: `<@${act.discordId}>`, inline: false });
-    fields.push({ name: '📍 Zonă', value: `**${act.zone || 'Nespecificată'}**`, inline: false });
-    if (actionType === 'move' && act.fromZone) fields.push({ name: '↔️ Zona anterioară', value: `**${act.fromZone}**`, inline: false });
-    if (act.partner) fields.push({ name: '🤝 Partener', value: `\`${act.partner}\``, inline: false });
-    if (act.by) fields.push({ name: '🛡️ Modificare facuta de', value: `**${act.by}**`, inline: false });
-  } else fields.push({ name: '⚙️ Efectuat de', value: `**${act.by || 'Admin'}**`, inline: false });
-  await fetch(webhookUrl, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      username: 'Loguri ZONE',
-      avatar_url: 'https://imgur.com/a/JRWgtRs',
-      content: act.discordId ? `<@${act.discordId}>` : undefined,
-      allowed_mentions: { parse: [] },
-      embeds: [{ title, description, color, fields, timestamp: new Date().toISOString() }]
-    })
-  });
+  if (type !== 'clear_all' && type !== 'reset') {
+    fields.push({ name: '🥼 Medic', value: `**${action.callSign || action.badge || 'M-???'}** (${action.name || 'Necunoscut'})`, inline: false });
+    if (action.discordId) fields.push({ name: '🤖 Discord', value: `<@${action.discordId}>`, inline: false });
+    fields.push({ name: '📍 Zonă', value: `**${action.zone || 'Nespecificată'}**`, inline: false });
+    if (type === 'move' && action.fromZone) fields.push({ name: '↔️ Zona anterioară', value: `**${action.fromZone}**`, inline: false });
+    if (action.partner) fields.push({ name: '🤝 Partener', value: `\`${action.partner}\``, inline: false });
+    if (action.by) fields.push({ name: '🛡️ Modificare făcută de', value: `**${action.by}**`, inline: false });
+  } else {
+    fields.push({ name: '⚙️ Efectuat de', value: `**${action.by || 'Admin'}**`, inline: false });
+  }
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: 'Loguri ZONE',
+        avatar_url: `${env.PUBLIC_APP_ORIGIN || 'https://ghidul-departamentului-medical-eight.vercel.app'}/hr.png`,
+        content: action.discordId ? `<@${action.discordId}>` : undefined,
+        allowed_mentions: { parse: [] },
+        embeds: [{ title, description, color, fields, timestamp: new Date().toISOString() }]
+      })
+    });
+    if (!response.ok) console.error('Discord log webhook failed:', response.status);
+  } catch (error) {
+    console.error('Discord log webhook request failed:', error);
+  }
 }
 
-async function updateRepartizareEmbed(webhookUrl, state, env) {
+async function updateLiveEmbed(env, webhookUrl, state) {
+  if (!webhookUrl) return;
   const fields = [];
-  let totalMedici = 0;
+  let total = 0;
   SUPPORTED_ZONES.forEach(zone => {
     const members = Array.isArray(state[zone]) ? state[zone] : [];
-    totalMedici += members.length;
-    fields.push({ name: `📍 ${zone} (${members.length})`, value: members.length ? members.map(m => `• **${m.callSign || m.badge || 'M-???'}** ${m.name || 'Necunoscut'}${m.partner ? ` *(cu ${m.partner})*` : ''}`).join('\n') : '_Niciun medic arondat_', inline: false });
+    total += members.length;
+    fields.push({
+      name: `📍 ${zone} (${members.length})`,
+      value: members.length ? members.map(member => `• **${member.callSign || member.badge || 'M-???'}** ${member.name || 'Necunoscut'}${member.partner ? ` *(cu ${member.partner})*` : ''}`).join('\n') : '_Niciun medic arondat_',
+      inline: false
+    });
   });
-  fields.push({ name: '🥼 Total medici pe teren', value: `**${totalMedici}** cadre medicale active`, inline: false });
-  const payload = { username: 'Repartizare LIVE', avatar_url: 'https://imgur.com/a/JRWgtRs', embeds: [{ title: '🩺Medicii repartizați pe zone.', description: 'Mai jos este lista cu medicii pe tura.', color: 0x245AB1, fields, timestamp: new Date().toISOString() }] };
-  const messageId = env.RP_KV ? await env.RP_KV.get('discord_live_msg_id') : null;
-  if (messageId) {
-    const editRes = await fetch(`${webhookUrl}/messages/${messageId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    if (editRes.ok) return;
-  }
-  const sendRes = await fetch(`${webhookUrl}?wait=true`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-  if (sendRes.ok && env.RP_KV) {
-    const result = await sendRes.json();
-    if (result.id) await env.RP_KV.put('discord_live_msg_id', result.id);
+  fields.push({ name: '🥼 Total medici pe teren', value: `**${total}** cadre medicale active`, inline: false });
+  const payload = {
+    username: 'Repartizare LIVE',
+    avatar_url: `${env.PUBLIC_APP_ORIGIN || 'https://ghidul-departamentului-medical-eight.vercel.app'}/hr.png`,
+    embeds: [{ title: '🩺 Medicii repartizați pe zone.', description: 'Mai jos este lista cu medicii pe tură.', color: 0x245AB1, fields, timestamp: new Date().toISOString() }]
+  };
+  try {
+    const messageId = await redisCommand(env, ['GET', LIVE_MESSAGE_KEY]);
+    if (messageId) {
+      const edit = await fetch(`${webhookUrl}/messages/${messageId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      if (edit.ok) return;
+    }
+    const sent = await fetch(`${webhookUrl}?wait=true`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    });
+    if (sent.ok) {
+      const result = await sent.json();
+      if (result.id) await redisCommand(env, ['SET', LIVE_MESSAGE_KEY, result.id]);
+    } else {
+      console.error('Discord live webhook failed:', sent.status);
+    }
+  } catch (error) {
+    console.error('Discord live webhook request failed:', error);
   }
 }

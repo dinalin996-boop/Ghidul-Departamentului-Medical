@@ -10,7 +10,7 @@ Salut! Am terminat sistemul de repartizare pe zone pentru tine!
 
 ✅ FIȘIERE PRINCIPALE:
    - repartizare.html (Pagina de repartizare - PRINCIPAL)
-   - cloudflare-worker.js (Webhook relay - OPTIONAL)
+   - cloudflare-worker.js (API proxy; datele sunt stocate în Upstash Redis)
 
 ✅ DOCUMENTE (8 fișiere):
    - START.md (Citește PRIMA)
@@ -28,11 +28,11 @@ Salut! Am terminat sistemul de repartizare pe zone pentru tine!
 ================================================================================
 
 ✅ Fără npm, fără Node.js
-✅ Fără backend
+✅ Backend serverless pe Vercel
 ✅ Fără costuri de server
 ✅ Google Sheets API
 ✅ Discord Webhooks (optional)
-✅ Cloudflare Worker (optional)
+✅ Upstash Redis + webhook-uri Discord prin Worker proxy
 ✅ Responsive design
 ✅ Logică restricții grad
 ✅ Calculare medie persoane
@@ -105,23 +105,17 @@ T (19)  │ Discord ID ⭐ IMPORTANT
                           WEBHOOK DISCORD
 ================================================================================
 
-OPTIONAL - Dacă vrei notificări pe Discord:
+Configurează în Cloudflare Worker Settings → Variables and Secrets:
+   - UPSTASH_REDIS_REST_URL
+   - UPSTASH_REDIS_REST_TOKEN
+   - WEBHOOK_REPARTIZARE
+   - WEBHOOK_LOGURI
+   - ALLOWED_ORIGIN (domeniul site-ului)
 
-1. Creează Cloudflare Worker (5 min)
-   - Copiază codul din cloudflare-worker.js
-   - Creează pe https://dash.cloudflare.com/
-   - Deploy
-
-2. Creează Discord Webhooks (5 min)
-   - Webhook 1: Repartizare Zone
-   - Webhook 2: Loguri Arondare
-
-3. Adaugă URLs în Cloudflare Worker
-   - Înlocuiește WEBHOOK_REPARTIZARE
-   - Înlocuiește WEBHOOK_LOGURI
-
-4. Salvează Worker URL în localStorage
-   - localStorage.setItem('workerUrl', 'https://...')
+Pentru păstrarea datelor, creează temporar un Worker separat cu LEGACY_STATE_URL
+setat la URL-ul Worker-ului vechi. Fă un GET către workerul temporar ca să importe
+starea în Upstash, apoi redeployează scriptul pe URL-ul Worker-ului principal fără
+LEGACY_STATE_URL și șterge Worker-ul temporar. Nu pune secretele în cod sau chat.
 
 ================================================================================
                           ORDINEA RECOMANDATĂ
@@ -188,7 +182,7 @@ Datele nu se încarcă
 ☐ repartizare.html actualizat
 ☐ Deschis repartizare.html în browser
 ☐ Testat cu Discord ID-ul tău
-☐ (Optional) Cloudflare Worker creat
+☐ Upstash și secretele Worker configurate
 ☐ (Optional) Discord Webhooks configurate
 ☐ (Optional) Fișiere vechi șterse
 

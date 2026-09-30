@@ -10,7 +10,7 @@
 
 Ce ai primit:
 - ✅ Pagina repartizare.html (Frontend pur)
-- ✅ Cloudflare Worker (Webhook relay - optional)
+- ✅ Cloudflare Worker ca API proxy + Upstash Redis ca bază de date
 - ✅ 6 documente de setup și FAQ
 - ✅ Fără backend, fără npm, fără costuri
 
@@ -34,11 +34,10 @@ Cum funcționează:
    - Logică restricții grad
    - Calculare medie persoane
 
-2. cloudflare-worker.js 🤖 OPTIONAL
-   - Relay pentru webhook-uri Discord
-   - Trimite notificări pe Discord
-   - Trimite loguri arondare
-   - Serverless (fără costuri)
+2. cloudflare-worker.js 🤖 API proxy
+   - Citește și scrie starea exclusiv în Upstash Redis
+   - Trimite notificări și loguri prin webhook-urile Discord
+   - Poate importa starea veche prin LEGACY_STATE_URL temporar
 
 ================================================================================
                           DOCUMENTE DE SETUP
@@ -154,23 +153,17 @@ T (19)  │ Discord ID ⭐ IMPORTANT
                           WEBHOOK DISCORD
 ================================================================================
 
-Dacă vrei notificări pe Discord:
+Configurează în Cloudflare Worker Settings → Variables and Secrets:
+- UPSTASH_REDIS_REST_URL
+- UPSTASH_REDIS_REST_TOKEN
+- WEBHOOK_REPARTIZARE
+- WEBHOOK_LOGURI
+- ALLOWED_ORIGIN (domeniul site-ului)
 
-1. Creează Cloudflare Worker (5 min)
-   - Copiază codul din cloudflare-worker.js
-   - Creează pe https://dash.cloudflare.com/
-   - Deploy
-
-2. Creează Discord Webhooks (5 min)
-   - Webhook 1: Repartizare Zone
-   - Webhook 2: Loguri Arondare
-
-3. Adaugă URLs în Cloudflare Worker
-   - Înlocuiește WEBHOOK_REPARTIZARE
-   - Înlocuiește WEBHOOK_LOGURI
-
-4. Salvează Worker URL în localStorage
-   - localStorage.setItem('workerUrl', 'https://...')
+Pentru migrare, folosește temporar un Worker separat cu LEGACY_STATE_URL către
+Worker-ul vechi. Fă un GET pentru a importa starea în Upstash, apoi redeployează
+scriptul pe Worker-ul principal fără LEGACY_STATE_URL și șterge workerul temporar.
+Nu pune tokenurile sau webhookurile în cod ori în localStorage.
 
 ================================================================================
                           VERIFICARE SETUP
@@ -234,7 +227,7 @@ Poți șterge (sunt vechi):
 ☐ repartizare.html actualizat
 ☐ Deschis repartizare.html în browser
 ☐ Testat cu Discord ID-ul tău
-☐ (Optional) Cloudflare Worker creat
+☐ Worker proxy și Upstash configurate
 ☐ (Optional) Discord Webhooks configurate
 
 ✅ GATA! Sistemul e live!
@@ -258,7 +251,7 @@ Costuri: 0$ (Gratuit!)
 ✅ Fără costuri de server
 ✅ Google Sheets API
 ✅ Discord Webhooks (optional)
-✅ Cloudflare Worker (optional)
+✅ Upstash Redis prin API serverless Vercel
 ✅ Responsive design
 ✅ Logică restricții grad
 ✅ Calculare medie persoane
