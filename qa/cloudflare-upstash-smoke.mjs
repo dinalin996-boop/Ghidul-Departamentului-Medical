@@ -19,8 +19,8 @@ const env = {
   UPSTASH_REDIS_REST_URL: 'https://upstash.test',
   UPSTASH_REDIS_REST_TOKEN: 'test-token',
   LEGACY_STATE_URL: 'https://legacy.test/state',
-  WEBHOOK_REPARTIZARE: 'https://discord.test/live',
-  WEBHOOK_LOGURI: 'https://discord.test/logs',
+  WEBHOOK_REPARTIZARE: 'https://discord.test/logs',
+  WEBHOOK_LOGURI: 'https://discord.test/live',
   ALLOWED_ORIGIN: 'https://site.test',
   PUBLIC_APP_ORIGIN: 'https://site.test'
 };
@@ -96,6 +96,8 @@ try {
   assert.deepEqual(webhookCalls.map(call => call.body.username).sort(), [
     'Loguri ZONE', 'Loguri ZONE', 'Loguri ZONE', 'Repartizare LIVE'
   ]);
+  assert.equal(new URL(webhookCalls.find(call => call.body.username === 'Repartizare LIVE').url).origin + new URL(webhookCalls.find(call => call.body.username === 'Repartizare LIVE').url).pathname, env.WEBHOOK_LOGURI);
+  assert(webhookCalls.filter(call => call.body.username === 'Loguri ZONE').every(call => call.url === env.WEBHOOK_REPARTIZARE));
   console.log('Cloudflare Worker → Upstash smoke test passed.');
 } finally {
   globalThis.fetch = savedFetch;

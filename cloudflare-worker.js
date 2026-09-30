@@ -32,8 +32,8 @@ export default {
 
       let data;
       try { data = await request.json(); } catch { return json({ error: 'Invalid JSON body' }, 400); }
-      const repartitionWebhook = env.WEBHOOK_REPARTIZARE || '';
-      const logsWebhook = env.WEBHOOK_LOGURI || '';
+      const repartitionWebhook = env.WEBHOOK_LOGURI || '';
+      const logsWebhook = env.WEBHOOK_REPARTIZARE || '';
 
       if (data.type === 'op' && data.op) {
         const result = await applyOperation(env, data.op);
